@@ -80,29 +80,29 @@ namespace trng {
       typedef return_type ret_t;
       typedef typename prng_t::result_type result_type;
 
-      BOOST_STATIC_ASSERT(prng_t::min >= 0 and prng_t::max > prng_t::min); // min and/or max out of spec?
+      BOOST_STATIC_ASSERT(prng_t::min>=0 and prng_t::max>prng_t::min); // min and/or max out of spec?
       BOOST_STATIC_ASSERT((prng_t::max-prng_t::min) <= ~0ULL); // Bits, Holes incorrect otherwise
-      BOOST_STATIC_ASSERT(!math::numeric_limits<return_type>::is_integer);
+      BOOST_STATIC_ASSERT(not math::numeric_limits<return_type>::is_integer);
 
       // Casting up from "simpler" types may yield better low level code sequences.
-      static const result_type domain_max0 = prng_t::max - prng_t::min;
-      static const unsigned int domain_bits = Bits<domain_max0>::result;
-      static const unsigned int domain_full_bits = domain_bits - (Holes<domain_max0>::result > 0);
-      static const bool int_ok = domain_bits < math::numeric_limits<unsigned int>::digits;
-      static const bool long_ok = domain_bits < math::numeric_limits<unsigned long>::digits;
-      static const bool long_long_ok = domain_bits < math::numeric_limits<unsigned long long>::digits;
+      static const result_type domain_max0=prng_t::max - prng_t::min;
+      static const unsigned int domain_bits=Bits<domain_max0>::result;
+      static const unsigned int domain_full_bits=domain_bits - (Holes<domain_max0>::result > 0);
+      static const bool int_ok=domain_bits < static_cast<unsigned int>(math::numeric_limits<unsigned int>::digits);
+      static const bool long_ok=domain_bits < static_cast<unsigned int>(math::numeric_limits<unsigned long>::digits);
+      static const bool long_long_ok=domain_bits < static_cast<unsigned int>(math::numeric_limits<unsigned long long>::digits);
 
-      static const unsigned int ret_bits = math::numeric_limits<ret_t>::digits;
-      static const unsigned int bits0 = (requested_bits < ret_bits) ? requested_bits : ret_bits;
-      static const unsigned int bits = (bits0 < 1) ? 1 : bits0;
-      static const std::size_t calls_needed = (bits/domain_full_bits) + ((bits % domain_full_bits) != 0);
+      static const unsigned int ret_bits=math::numeric_limits<ret_t>::digits;
+      static const unsigned int bits0=(requested_bits < ret_bits) ? requested_bits : ret_bits;
+      static const unsigned int bits=(bits0 < 1) ? 1 : bits0;
+      static const std::size_t calls_needed=(bits/domain_full_bits) + ((bits % domain_full_bits) != 0);
       BOOST_STATIC_ASSERT(calls_needed > 0 and calls_needed <= bits);
 
       // a ((long long)(val >> 1)) cast may give us better performance (~4X using lcg on Core2 x86-64)
       // the lost bit will not usually be missed as it is ~30dB down typically (53 bit mantissa from
       // a 63 rather than 64 bit integer variate)
-      static const bool use_ll_of_shifted = not long_long_ok and (domain_max0 >> 1)==(~0ULL >> 1) and bits<domain_bits;
-      static const result_type domain_max = use_ll_of_shifted ? (domain_max0 >> 1) : domain_max0;
+      static const bool use_ll_of_shifted=not long_long_ok and (domain_max0 >> 1)==(~0ULL >> 1) and bits<domain_bits;
+      static const result_type domain_max=use_ll_of_shifted ? (domain_max0 >> 1) : domain_max0;
 
       static ret_t addin(const prng_t &r) {
 	result_type x=r()-prng_t::min;

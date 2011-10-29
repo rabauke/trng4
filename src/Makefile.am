@@ -19,8 +19,9 @@ pkginclude_HEADERS = config.hpp utility.hpp uniformxx.hpp \
                      yarn2.hpp yarn3.hpp yarn3s.hpp yarn4.hpp yarn5.hpp yarn5s.hpp \
 		     lagfib2xor.hpp lagfib4xor.hpp lagfib2plus.hpp lagfib4plus.hpp \
                      uniform_dist.hpp uniform01_dist.hpp uniform_int_dist.hpp \
-                     exponential_dist.hpp normal_dist.hpp correlated_normal_dist.hpp cauchy_dist.hpp \
-		     logistic_dist.hpp lognormal_dist.hpp pareto_dist.hpp \
+                     exponential_dist.hpp twosided_exponential_dist.hpp \
+		     normal_dist.hpp truncated_normal_dist.hpp correlated_normal_dist.hpp \
+		     cauchy_dist.hpp logistic_dist.hpp lognormal_dist.hpp pareto_dist.hpp \
                      powerlaw_dist.hpp tent_dist.hpp weibull_dist.hpp \
                      extreme_value_dist.hpp gamma_dist.hpp chi_square_dist.hpp student_t_dist.hpp snedecor_f_dist.hpp\
                      rayleigh_dist.hpp \
