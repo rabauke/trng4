@@ -1,7 +1,5 @@
 Implement:
 
-* F-distribution
-
 * Beta distribution
 
 * Kolmogorov-Smirnov distribution
@@ -21,5 +19,5 @@ Implement:
 
 * and other distributions
 
-
-undefine VERSERON macro in config.hpp
+* ISAAC generator
+  http://burtleburtle.net/bob/rand/isaacafa.html

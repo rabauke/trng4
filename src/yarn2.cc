@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2010 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -94,16 +94,11 @@ namespace trng {
   void yarn2::split(unsigned int s, unsigned int n) {
     if (s<1 or n>=s)
       throw std::invalid_argument("invalid argument for trng::yarn2::split");
-    long q0, q1, q2, q3;
     if (s>1) {
-      for (unsigned int i(0); i<=n; ++i) step();
-      q0=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q1=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q2=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q3=S.r1;
+      jump(n+1);  long q0=S.r1;
+      jump(s);    long q1=S.r1;
+      jump(s);    long q2=S.r1;
+      jump(s);    long q3=S.r1;
       std::vector<long> a(2), b(4);
       a[0]=q2;  b[0]=q1;  b[1]=q0;
       a[1]=q3;  b[2]=q2;  b[3]=q1;
@@ -135,16 +130,21 @@ namespace trng {
   }
 
   void yarn2::jump(unsigned long long s) {
-    unsigned int i(0);
-    while (s>0) {
-      if (s%2==1)
-	jump2(i);
-      ++i;
-      s>>=1;
+    if (s<16) {
+      for (unsigned int i(0); i<s; ++i) 
+	step();
+    } else {
+      unsigned int i(0);
+      while (s>0) {
+	if (s%2==1)
+	  jump2(i);
+	++i;
+	s>>=1;
+      }
     }
   }
 
-  // Other usefull methods
+  // Other useful methods
   const char * const yarn2::name_str="yarn2";
   
   const char * yarn2::name() {

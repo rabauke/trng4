@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2010 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -20,7 +20,7 @@
 namespace trng {
 
   // Parameter and status classes
-  
+
   // Uniform random number generator concept
 
   // Equality comparable concept
@@ -31,41 +31,41 @@ namespace trng {
 
   bool operator!=(const minstd::status_type &S1, 
 		  const minstd::status_type &S2) {
-    return !(S1==S2);
+    return not (S1==S2);
   }
-  
+
   // Random number engine concept
   minstd::minstd() : S() { }
 
   minstd::minstd(unsigned long s) : S() { 
     seed(s);
   }
-  
+
   void minstd::seed() {
     (*this)=minstd();
   }
- 
+
   void minstd::seed(minstd::result_type s) {
     S.r=s%2147483647ul;
     if (S.r==0)
       S.r=1;
   }
-  
+
   // Equality comparable concept
   bool operator==(const minstd &R1, const minstd &R2) {
     return R1.S==R2.S;
   }
 
   bool operator!=(const minstd &R1, const minstd &R2) {
-    return !(R1==R2);
+    return not (R1==R2);
   }
-  
-  // Other usefull methods
+
+  // Other useful methods
   const char * const minstd::name_str="minstd";
-  
+
   const char * minstd::name() {
     return name_str;
   }
-  
+
 }
 

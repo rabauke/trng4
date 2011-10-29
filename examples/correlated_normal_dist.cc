@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Heiko Bauke <heiko.bauke@physics.ox.ac.uk>
+// Copyright (C) 2010 Heiko Bauke <heiko.bauke@physics.ox.ac.uk>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -40,9 +40,9 @@ int main() {
 		       {-0.5,  3.0, -0.3,  0.3},
 		       { 0.3, -0.3,  1.0, -0.3},
 		       {-0.3,  0.3, -0.3,  1.0} };
-  trng::correlated_normal_dist<> D(&sig[0][0], &sig[d-1][d-1]+1); 
+  trng::correlated_normal_dist<> D(&sig[0][0], &sig[d-1][d-1]+1);
   trng::lcg64 R;
-  
+
   std::vector<double> x1, x2, x3, x4;
   // generate 4-tuples of correlated normal variables
   for (int i=0; i<1000000; ++i) {

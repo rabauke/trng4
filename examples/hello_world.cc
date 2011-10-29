@@ -1,4 +1,4 @@
-// Copyright (C) 2001-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2001-2010 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -25,7 +25,7 @@ int main() {
   // random number engine
   trng::yarn2 R;
   // normal distribution with mean 6 and standard deviation 2
-  trng::normal_dist<> normal(6.0, 2.0);   
+  trng::normal_dist<> normal(6.0, 2.0);
   // generate 1000 normal distributed random numbers
   for (int i=0; i<1000; ++i)
     std::cout << normal(R) << '\n';

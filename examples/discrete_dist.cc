@@ -1,4 +1,4 @@
-// Copyright (C) 2001-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2001-2010 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -35,7 +35,7 @@ int main() {
   trng::discrete_dist dist(p.begin(), p.end());
   // random number generator
   trng::lcg64 r;
-  // draw some random numbers 
+  // draw some random numbers
   std::vector<int> count(p.size(), 0);
   const int samples=10000;
   for (int i=0; i<samples; ++i) {

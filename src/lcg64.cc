@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2010 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -31,7 +31,7 @@ namespace trng {
 
   bool operator!=(const lcg64::parameter_type &P1, 
 		  const lcg64::parameter_type &P2) {
-    return !(P1==P2);
+    return not (P1==P2);
   }
   
   // Equality comparable concept
@@ -42,7 +42,7 @@ namespace trng {
 
   bool operator!=(const lcg64::status_type &S1, 
 		  const lcg64::status_type &S2) {
-    return !(S1==S2);
+    return not (S1==S2);
   }
   
   const lcg64::parameter_type
@@ -84,7 +84,7 @@ namespace trng {
   }
 
   bool operator!=(const lcg64 &R1, const lcg64 &R2) {
-    return !(R1==R2);
+    return not (R1==R2);
   }
 
   // Parallel random number generator concept
@@ -92,9 +92,8 @@ namespace trng {
     if (s<1 or n>=s)
       throw std::invalid_argument("invalid argument for trng::lcg64::split");
     if (s>1) {
+      jump(n+1);
       lcg64::result_type t1(1ull), t2(0ull);
-      for (unsigned int i(0); i<=n; ++i)
-	step();
       for (unsigned int i(0); i<s; ++i) {
 	t2+=t1;
 	t1*=P.a;
@@ -119,16 +118,21 @@ namespace trng {
   }
 
   void lcg64::jump(unsigned long long s) {
-    unsigned int i(0);
-    while (s>0) {
-      if (s%2u==1u)
-	jump2(i);
-      ++i;
-      s>>=1;
+    if (s<16) {
+      for (unsigned int i(0); i<s; ++i) 
+	step();
+    } else {
+      unsigned int i(0);
+      while (s>0) {
+	if (s%2==1)
+	  jump2(i);
+	++i;
+	s>>=1;
+      }
     }
   }
   
-  // Other usefull methods
+  // Other useful methods
   const char * const lcg64::name_str="lcg64";
   
   const char * lcg64::name() {

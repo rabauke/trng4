@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2010 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -108,28 +108,17 @@ namespace trng {
   void mrg5s::split(unsigned int s, unsigned int n) {
     if (s<1 or n>=s)
       throw std::invalid_argument("invalid argument for trng::mrg5s::split");
-    long q0, q1, q2, q3, q4, q5, q6, q7, q8, q9;
     if (s>1) {
-      for (unsigned int i(0); i<=n; ++i) step();
-      q0=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q1=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q2=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q3=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q4=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q5=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q6=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q7=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q8=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q9=S.r1;
+      jump(n+1);  long q0=S.r1;
+      jump(s);    long q1=S.r1;
+      jump(s);    long q2=S.r1;
+      jump(s);    long q3=S.r1;
+      jump(s);    long q4=S.r1;
+      jump(s);    long q5=S.r1;
+      jump(s);    long q6=S.r1;
+      jump(s);    long q7=S.r1;
+      jump(s);    long q8=S.r1;
+      jump(s);    long q9=S.r1;
       std::vector<long> a(5), b(25);
       a[ 0]=q5;  b[ 0]=q4;  b[ 1]=q3;  b[ 2]=q2;  b[ 3]=q1;  b[ 4]=q0;
       a[ 1]=q6;  b[ 5]=q5;  b[ 6]=q4;  b[ 7]=q3;  b[ 8]=q2;  b[ 9]=q1;
@@ -170,16 +159,21 @@ namespace trng {
   }
 
   void mrg5s::jump(unsigned long long s) {
-    unsigned int i(0);
-    while (s>0) {
-      if (s%2==1)
-	jump2(i);
-      ++i;
-      s>>=1;
+    if (s<16) {
+      for (unsigned int i(0); i<s; ++i) 
+	step();
+    } else {
+      unsigned int i(0);
+      while (s>0) {
+	if (s%2==1)
+	  jump2(i);
+	++i;
+	s>>=1;
+      }
     }
   }
 
-  // other usefull methods
+  // other useful methods
   const char * const mrg5s::name_str="mrg5s";
   
   const char * mrg5s::name() {

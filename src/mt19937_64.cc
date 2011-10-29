@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2010 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -45,7 +45,7 @@ namespace trng {
 
   bool operator!=(const mt19937_64::status_type &S1, 
 		  const mt19937_64::status_type &S2) {
-    return !(S1==S2);
+    return not (S1==S2);
   }
   
   // Random number engine concept
@@ -79,10 +79,10 @@ namespace trng {
   }
 
   bool operator!=(const mt19937_64 &R1, const mt19937_64 &R2) {
-    return !(R1==R2);
+    return not (R1==R2);
   }
 
-  // Other usefull methods
+  // Other useful methods
   const char * const mt19937_64::name_str="mt19937_64";
   
   const char * mt19937_64::name() {

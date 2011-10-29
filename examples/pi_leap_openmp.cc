@@ -1,4 +1,4 @@
-// Copyright (C) 2001-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2001-2010 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
   const long samples=1000000l;          // total number of points in square
   long in=0l;                           // no points in circle
   // distribute workload over all processes
-#pragma omp parallel 
+#pragma omp parallel
   {
     trng::yarn2 rx, ry;                 // random number engines for x- and y-coordinates
     int size=omp_get_num_threads();     // get total number of processes

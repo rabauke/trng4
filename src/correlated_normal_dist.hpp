@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2010 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -117,7 +117,7 @@ namespace trng {
       friend std::basic_istream<char_t, traits_t> &
       operator>>(std::basic_istream<char_t, traits_t> &in,
 		 param_type &p) {
-	std::vector<result_type> H, normal;
+	std::vector<result_type> H;
 	unsigned int d;
 	std::ios_base::fmtflags flags(in.flags());
 	in.flags(std::ios_base::dec | std::ios_base::fixed |
@@ -150,7 +150,9 @@ namespace trng {
     explicit correlated_normal_dist(const param_type &p) : p(p) {
     }
     // reset internal state
-    void reset() { normal.clear(); }
+    void reset() { 
+      normal.clear();
+    }
     // random numbers
     template<typename R>
     result_type operator()(R &r) {

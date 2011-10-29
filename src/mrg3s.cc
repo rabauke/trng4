@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2010 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -99,20 +99,13 @@ namespace trng {
   void mrg3s::split(unsigned int s, unsigned int n) {
     if (s<1 or n>=s)
       throw std::invalid_argument("invalid argument for trng::mrg3s::split");
-    long q0, q1, q2, q3, q4, q5;
     if (s>1) {
-      for (unsigned int i(0); i<=n; ++i) step();
-      q0=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q1=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q2=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q3=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q4=S.r1;
-      for (unsigned int i(0); i<s; ++i) step();
-      q5=S.r1;
+      jump(n+1);  long q0=S.r1;
+      jump(s);    long q1=S.r1;
+      jump(s);    long q2=S.r1;
+      jump(s);    long q3=S.r1;
+      jump(s);    long q4=S.r1;
+      jump(s);    long q5=S.r1;
       std::vector<long> a(3), b(9);
       a[0]=q3;  b[0]=q2;  b[1]=q1;  b[2]=q0;
       a[1]=q4;  b[3]=q3;  b[4]=q2;  b[5]=q1;
@@ -147,16 +140,21 @@ namespace trng {
   }
 
   void mrg3s::jump(unsigned long long s) {
-    unsigned int i(0);
-    while (s>0) {
-      if (s%2==1)
-	jump2(i);
-      ++i;
-      s>>=1;
+    if (s<16) {
+      for (unsigned int i(0); i<s; ++i) 
+	step();
+    } else {
+      unsigned int i(0);
+      while (s>0) {
+	if (s%2==1)
+	  jump2(i);
+	++i;
+	s>>=1;
+      }
     }
   }
 
-  // other usefull methods
+  // other useful methods
   const char * const mrg3s::name_str="mrg3s";
   
   const char * mrg3s::name() {

@@ -48,7 +48,7 @@
 
 
 // integration by Simpson rule
-// 
+//
 template<typename iter>
 typename std::iterator_traits<iter>::value_type
 simpson_int(iter first, iter last) {
@@ -92,7 +92,7 @@ template<typename dist>
 void continous_dist_test(dist &d, const char *name) {
   typedef typename dist::result_type result_type;
   bool ok=true;
-  
+
   int samples=1024*1024;
   result_type x_min=d.icdf(0.05), x_max=d.icdf(0.95), dx=(x_max-x_min)/samples;
   std::vector<result_type> y;
@@ -204,15 +204,15 @@ int main() {
   {
     trng::normal_dist<> d(5.0, 2.0);
     continous_test(d, "normal distribution");
-  } 
+  }
   {
     trng::cauchy_dist<> d(5.0, 2.0);
     continous_test(d, "cauchy distribution");
-  } 
+  }
   {
     trng::logistic_dist<> d(5.0, 2.0);
     continous_test(d, "logistic distribution");
-  } 
+  }
   {
     trng::lognormal_dist<> d(5.0, 2.0);
     continous_test(d, "lognormal distribution");
