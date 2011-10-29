@@ -39,7 +39,8 @@ EXTRA_PROGRAMS = hello_world$(EXEEXT) test$(EXEEXT) time$(EXEEXT) \
 	pi$(EXEEXT) pi_block_mpi$(EXEEXT) pi_block_openmp$(EXEEXT) \
 	pi_leap_mpi$(EXEEXT) pi_leap_openmp$(EXEEXT) \
 	stl_container$(EXEEXT) distributions$(EXEEXT) \
-	implementation_test$(EXEEXT) Ising_model$(EXEEXT)
+	implementation_test$(EXEEXT) Ising_model$(EXEEXT) \
+	correlated_normal_dist$(EXEEXT)
 subdir = examples
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -54,6 +55,10 @@ am_Ising_model_OBJECTS = Ising_model.$(OBJEXT)
 Ising_model_OBJECTS = $(am_Ising_model_OBJECTS)
 Ising_model_LDADD = $(LDADD)
 Ising_model_DEPENDENCIES = ../src/.libs/libtrng4.a
+am_correlated_normal_dist_OBJECTS = correlated_normal_dist.$(OBJEXT)
+correlated_normal_dist_OBJECTS = $(am_correlated_normal_dist_OBJECTS)
+correlated_normal_dist_LDADD = $(LDADD)
+correlated_normal_dist_DEPENDENCIES = ../src/.libs/libtrng4.a
 am_distributions_OBJECTS = distributions.$(OBJEXT)
 distributions_OBJECTS = $(am_distributions_OBJECTS)
 distributions_LDADD = $(LDADD)
@@ -109,13 +114,14 @@ LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(Ising_model_SOURCES) $(distributions_SOURCES) \
-	$(hello_world_SOURCES) $(implementation_test_SOURCES) \
-	$(pi_SOURCES) $(pi_block_mpi_SOURCES) \
-	$(pi_block_openmp_SOURCES) $(pi_leap_mpi_SOURCES) \
-	$(pi_leap_openmp_SOURCES) $(stl_container_SOURCES) \
-	$(test_SOURCES) $(time_SOURCES)
-DIST_SOURCES = $(Ising_model_SOURCES) $(distributions_SOURCES) \
+SOURCES = $(Ising_model_SOURCES) $(correlated_normal_dist_SOURCES) \
+	$(distributions_SOURCES) $(hello_world_SOURCES) \
+	$(implementation_test_SOURCES) $(pi_SOURCES) \
+	$(pi_block_mpi_SOURCES) $(pi_block_openmp_SOURCES) \
+	$(pi_leap_mpi_SOURCES) $(pi_leap_openmp_SOURCES) \
+	$(stl_container_SOURCES) $(test_SOURCES) $(time_SOURCES)
+DIST_SOURCES = $(Ising_model_SOURCES) \
+	$(correlated_normal_dist_SOURCES) $(distributions_SOURCES) \
 	$(hello_world_SOURCES) $(implementation_test_SOURCES) \
 	$(pi_SOURCES) $(pi_block_mpi_SOURCES) \
 	$(pi_block_openmp_SOURCES) $(pi_leap_mpi_SOURCES) \
@@ -243,6 +249,7 @@ stl_container_SOURCES = stl_container.cc
 distributions_SOURCES = distributions.cc
 implementation_test_SOURCES = implementation_test.cc
 Ising_model_SOURCES = Ising_model.cc
+correlated_normal_dist_SOURCES = correlated_normal_dist.cc
 all: all-am
 
 .SUFFIXES:
@@ -279,6 +286,9 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 Ising_model$(EXEEXT): $(Ising_model_OBJECTS) $(Ising_model_DEPENDENCIES) 
 	@rm -f Ising_model$(EXEEXT)
 	$(CXXLINK) $(Ising_model_LDFLAGS) $(Ising_model_OBJECTS) $(Ising_model_LDADD) $(LIBS)
+correlated_normal_dist$(EXEEXT): $(correlated_normal_dist_OBJECTS) $(correlated_normal_dist_DEPENDENCIES) 
+	@rm -f correlated_normal_dist$(EXEEXT)
+	$(CXXLINK) $(correlated_normal_dist_LDFLAGS) $(correlated_normal_dist_OBJECTS) $(correlated_normal_dist_LDADD) $(LIBS)
 distributions$(EXEEXT): $(distributions_OBJECTS) $(distributions_DEPENDENCIES) 
 	@rm -f distributions$(EXEEXT)
 	$(CXXLINK) $(distributions_LDFLAGS) $(distributions_OBJECTS) $(distributions_LDADD) $(LIBS)
@@ -308,6 +318,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Ising_model.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/correlated_normal_dist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributions.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hello_world.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/implementation_test.Po@am__quote@

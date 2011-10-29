@@ -49,6 +49,8 @@ namespace trng {
   }
 
   const mrg5s::parameter_type
+  mrg5s::trng0=parameter_type(1053223373l, 1530818118l,	1612122482l, 133497989l, 573245311l);
+  const mrg5s::parameter_type
   mrg5s::trng1=parameter_type(2068619238l, 2138332912l, 671754166l, 1442240992l, 1526958817l);
   
   // Random number engine concept

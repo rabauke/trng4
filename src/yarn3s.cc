@@ -49,6 +49,9 @@ namespace trng {
   }
 
   const yarn3s::parameter_type
+  yarn3s::trng0=parameter_type(2025213985l, 1112953677l, 2038969601l,
+			       1616076847l);
+  const yarn3s::parameter_type
   yarn3s::trng1=parameter_type(1287767370l, 1045931779l, 58150106l,
 			       1616076847l);
   

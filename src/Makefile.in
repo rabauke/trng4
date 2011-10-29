@@ -193,10 +193,11 @@ pkginclude_HEADERS = config.hpp utility.hpp generate_canonical.hpp minstd.hpp li
                      yarn2.hpp yarn3.hpp yarn3s.hpp yarn4.hpp yarn5.hpp yarn5s.hpp \
 		     lagfib2xor.hpp lagfib4xor.hpp lagfib2plus.hpp lagfib4plus.hpp \
                      uniform_dist.hpp uniform01_dist.hpp uniform_int_dist.hpp \
-                     exponential_dist.hpp normal_dist.hpp cauchy_dist.hpp \
+                     exponential_dist.hpp normal_dist.hpp correlated_normal_dist.hpp cauchy_dist.hpp \
 		     logistic_dist.hpp lognormal_dist.hpp pareto_dist.hpp \
                      powerlaw_dist.hpp tent_dist.hpp weibull_dist.hpp \
                      extreme_value_dist.hpp gamma_dist.hpp chi_square_dist.hpp \
+                     rayleigh_dist.hpp \
                      bernoulli_dist.hpp binomial_dist.hpp geometric_dist.hpp \
                      poisson_dist.hpp discrete_dist.hpp
 

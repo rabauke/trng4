@@ -146,13 +146,14 @@ namespace trng {
 
     };
       
+    static const parameter_type trng0;
     static const parameter_type trng1;
     
     // Random number engine concept
-    explicit yarn3s(parameter_type=trng1);
-    explicit yarn3s(unsigned long, parameter_type=trng1);
+    explicit yarn3s(parameter_type=trng0);
+    explicit yarn3s(unsigned long, parameter_type=trng0);
     template<typename gen>
-    explicit yarn3s(gen &g, parameter_type P=trng1) : P(P), S() {
+    explicit yarn3s(gen &g, parameter_type P=trng0) : P(P), S() {
       seed(g);
     }
 

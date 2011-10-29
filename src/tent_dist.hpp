@@ -133,7 +133,7 @@ namespace trng {
     out.flags(std::ios_base::dec | std::ios_base::fixed |
 	      std::ios_base::left);
     out << '('
-	<< std::setprecision(16) << p.m() << ' ' << p.d()
+	<< std::setprecision(17) << p.m() << ' ' << p.d()
 	<< ')';
     out.flags(flags);
     return out;

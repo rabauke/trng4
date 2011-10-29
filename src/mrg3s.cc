@@ -49,6 +49,8 @@ namespace trng {
   }
 
   const mrg3s::parameter_type
+  mrg3s::trng0=parameter_type(2025213985l, 1112953677l, 2038969601l);
+  const mrg3s::parameter_type
   mrg3s::trng1=parameter_type(1287767370l, 1045931779l, 58150106l);
   
   // Random number engine concept

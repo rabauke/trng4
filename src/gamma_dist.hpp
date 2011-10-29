@@ -152,7 +152,7 @@ namespace trng {
     out.flags(std::ios_base::dec | std::ios_base::fixed |
 	      std::ios_base::left);
     out << '('
-	<< std::setprecision(16) << p.kappa() << ' ' << p.theta() 
+	<< std::setprecision(17) << p.kappa() << ' ' << p.theta() 
 	<< ')';
     out.flags(flags);
     return out;

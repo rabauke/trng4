@@ -33,6 +33,7 @@
 #include <trng/extreme_value_dist.hpp>
 #include <trng/gamma_dist.hpp>
 #include <trng/chi_square_dist.hpp>
+#include <trng/rayleigh_dist.hpp>
 #include <trng/bernoulli_dist.hpp>
 #include <trng/binomial_dist.hpp>
 #include <trng/geometric_dist.hpp>
@@ -131,6 +132,12 @@ void distribution_test() {
     trng::chi_square_dist g(10);
     std::cout << "Chi-square distribution\n" 
 	      << "-----------------------\n";
+    std::cout << "double    (10)\t" << g(R) << "\n\n";
+  }
+  {
+    trng::rayleigh_dist g(4);
+    std::cout << "Rayleigh distribution\n" 
+	      << "---------------------\n";
     std::cout << "double    (10)\t" << g(R) << "\n\n";
   }
   {

@@ -133,7 +133,7 @@ namespace trng {
 	      std::ios_base::left);
     out << '(' << P.P_.size() << ' ';
     for (std::vector<double>::size_type i=0; i<P.P_.size(); ++i) {
-      out << std::setprecision(16) << P.P_[i];
+      out << std::setprecision(17) << P.P_[i];
       if (i+1<P.P_.size())
 	out << ' ';
     }

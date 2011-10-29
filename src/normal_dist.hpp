@@ -44,7 +44,7 @@ namespace trng {
       void mu(double mu_new) { mu_=mu_new; }
       double sigma() const { return sigma_; }
       void sigma(double sigma_new) { sigma_=sigma_new; }
-      explicit param_type(double mu, double sigma) : mu_(mu), sigma_(sigma) {
+      param_type(double mu, double sigma) : mu_(mu), sigma_(sigma) {
       }
       friend class normal_dist;
     };
@@ -54,7 +54,7 @@ namespace trng {
    
   public:
     // constructor
-    explicit normal_dist(double mu, double sigma) : p(mu, sigma) {
+    normal_dist(double mu, double sigma) : p(mu, sigma) {
     }
     explicit normal_dist(const param_type &p) : p(p) {
     }
@@ -117,7 +117,7 @@ namespace trng {
     out.flags(std::ios_base::dec | std::ios_base::fixed |
 	      std::ios_base::left);
     out << '('
-	<< std::setprecision(16) << p.mu() << ' ' << p.sigma() 
+	<< std::setprecision(17) << p.mu() << ' ' << p.sigma() 
 	<< ')';
     out.flags(flags);
     return out;

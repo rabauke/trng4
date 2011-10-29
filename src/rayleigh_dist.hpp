@@ -1,4 +1,4 @@
-// Copyright (C) 2006 Heiko Bauke <heiko.bauke@physik.uni-magdeburg.de>
+// Copyright (C) 2007 Heiko Bauke <heiko.bauke@physik.uni-magdeburg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -15,9 +15,9 @@
 // 02111-1307, USA.
 //  
 
-#if !(defined TRNG_BINOMIAL_DIST_HPP)
+#if !(defined TRNG_RAYLEIGH_DIST_HPP)
 
-#define TRNG_BINOMIAL_DIST_HPP
+#define TRNG_RAYLEIGH_DIST_HPP
 
 #include <trng/limits.hpp>
 #include <trng/utility.hpp>
@@ -25,108 +25,83 @@
 #include <ostream>
 #include <istream>
 #include <iomanip>
-#include <vector>
+#include <cerrno>
 
 namespace trng {
 
-  // non-uniform random number generator class
-  class binomial_dist {
+  // uniform random number generator class
+  class rayleigh_dist {
   public:
-    typedef int result_type;
+    typedef double result_type;
     class param_type;
     
     class param_type {
     private:
-      double p_;
-      int n_;
-      std::vector<double> P_;
-      
-      void calc_probabilities() {
-	P_=std::vector<double>();
-	double binom=1.0;
-	for (int i=0; i<=n_; ++i) {
-	  P_.push_back(binom*
-		       math::pow(p_    , static_cast<double>(i   ))*
-		       math::pow(1.0-p_, static_cast<double>(n_-i)));
-	  binom*=n_-i;
-	  binom/=i+1;
-	}
-	// build list with cumulative density function
-	for (std::vector<double>::size_type i(1); i<P_.size(); ++i)
-	  P_[i]+=P_[i-1];
-	for (std::vector<double>::size_type i(0); i<P_.size(); ++i)
-	  P_[i]/=P_.back();
-      }
-      
+      double nu_;
     public:
-      double p() const { return p_; }
-      void p(double p_new) { p_=p_new;  calc_probabilities(); }
-      int n() const { return n_; }
-      void n(int n_new) { n_=n_new;  calc_probabilities(); }
-      explicit param_type(double p, int n) :
-	p_(p), n_(n) {
-	calc_probabilities();
+      double nu() const { return nu_; }
+      void nu(double nu_new) { nu_=nu_new; }
+      explicit param_type(double nu) : nu_(nu) {
       }
-      friend class binomial_dist;
+      friend class rayleigh_dist;
     };
     
   private:
-    param_type P;
-    
+    param_type p;
+   
   public:
     // constructor
-    explicit binomial_dist(double p, int n) : P(p, n) {
+    explicit rayleigh_dist(double nu) : p(nu) {
     }
-    explicit binomial_dist(const param_type &P) : P(P) {
+    explicit rayleigh_dist(const param_type &p) : p(p) {
     }
     // reset internal state
     void reset() { }
     // random numbers
     template<typename R>
-    int operator()(R &r) {
-      return utility::discrete(utility::uniformco(r), P.P_.begin(), P.P_.end());
+    double operator()(R &r) {
+      return icdf(utility::uniformoo(r));
     }
     template<typename R>
-    int operator()(R &r, const param_type &p) {
-      binomial_dist g(p);
+    double operator()(R &r, const param_type &p) {
+      rayleigh_dist g(p);
       return g(r);
     }
     // property methods
-    int min() const { return 0; }
-    int max() const { return P.n(); }
-    param_type param() const { return P; }
-    void param(const param_type &P_new) { P=P_new; }
-    double p() const { return P.p(); }
-    void p(double p_new) { P.p(p_new); }
-    int n() const { return P.n(); }
-    void n(int n_new) { P.n(n_new); }
+    double min() const { return 0.0; }
+    double max() const { return math::numeric_limits<double>::infinity(); }
+    param_type param() const { return p; }
+    void param(const param_type &p_new) { p=p_new; }
+    double nu() const { return p.nu(); }
+    void nu(double nu_new) { p.nu(nu_new); }
     // probability density function  
-    double pdf(int x) const {
-      if (x<0 || x>P.n())
-        return 0.0;
-      if (x==0)
-        return P.P_[0];
-      return P.P_[x]-P.P_[x-1];
+    double pdf(double x) const {
+      if (x<=0.0)
+	return 0.0;
+      double t=x/(p.nu()*p.nu());
+      return t*math::exp(-0.5*t*x);
     }
     // cumulative density function 
-    double cdf(int x) const {
-      if (x<0)
-        return 0.0;
-      if (x<=P.n())
-        return P.P_[x];
-      return 1.0;
+    double cdf(double x) const {
+      if (x<=0.0)
+	return 0.0;
+      return 1.0-math::exp(-0.5*x*x/(p.nu()*p.nu()));
+    }
+    // inverse cumulative density function 
+    double icdf(double x) const {
+      return p.nu()*math::sqrt(-2.0*math::ln(1.0-x));
     }
   };
-
+    
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const binomial_dist::param_type &p1, 
-			 const binomial_dist::param_type &p2) {
-    return p1.p()==p2.p() && p1.n()==p2.n();
+  inline bool operator==(const rayleigh_dist::param_type &p1, 
+			 const rayleigh_dist::param_type &p2) {
+    return p1.nu()==p2.nu();
   }
-  inline bool operator!=(const binomial_dist::param_type &p1, 
-			 const binomial_dist::param_type &p2) {
+  inline bool operator!=(const rayleigh_dist::param_type &p1, 
+			 const rayleigh_dist::param_type &p2) {
     return !(p1==p2);
   }
   
@@ -134,12 +109,12 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_ostream<char_t, traits_t> &
   operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const binomial_dist::param_type &P) {
+	     const rayleigh_dist::param_type &p) {
     std::ios_base::fmtflags flags(out.flags());
     out.flags(std::ios_base::dec | std::ios_base::fixed |
 	      std::ios_base::left);
     out << '('
-	<< std::setprecision(17) << P.p() << ' ' << P.n()
+	<< std::setprecision(17) << p.nu()
 	<< ')';
     out.flags(flags);
     return out;
@@ -148,17 +123,15 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_istream<char_t, traits_t> &
   operator>>(std::basic_istream<char_t, traits_t> &in,
-	     binomial_dist::param_type &P) {
-    double p;
-    int n;
+	     rayleigh_dist::param_type &p) {
+    double nu;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed |
 	     std::ios_base::left);
     in >> utility::delim('(')
-       >> p >> utility::delim(' ')
-       >> n >> utility::delim(')');
+       >> nu >> utility::delim(')');
     if (in)
-      P=binomial_dist::param_type(p, n);
+      p=rayleigh_dist::param_type(nu);
     in.flags(flags);
     return in;
   }
@@ -166,12 +139,12 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const binomial_dist &g1, 
-			 const binomial_dist &g2) {
+  inline bool operator==(const rayleigh_dist &g1, 
+			 const rayleigh_dist &g2) {
     return g1.param()==g2.param();
   }
-  inline bool operator!=(const binomial_dist &g1, 
-			 const binomial_dist &g2) {
+  inline bool operator!=(const rayleigh_dist &g1, 
+			 const rayleigh_dist &g2) {
     return g1.param()!=g2.param();
   }
   
@@ -179,11 +152,11 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_ostream<char_t, traits_t> &
   operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const binomial_dist &g) {
+	     const rayleigh_dist &g) {
     std::ios_base::fmtflags flags(out.flags());
     out.flags(std::ios_base::dec | std::ios_base::fixed |
 	      std::ios_base::left);
-    out << "[binomial " << g.param() << ']';
+    out << "[rayleigh " << g.param() << ']';
     out.flags(flags);
     return out;
   }
@@ -191,13 +164,13 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_istream<char_t, traits_t> &
   operator>>(std::basic_istream<char_t, traits_t> &in,
-	     binomial_dist &g) {
-    binomial_dist::param_type p;
+	     rayleigh_dist &g) {
+    rayleigh_dist::param_type p;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed |
 	     std::ios_base::left);
     in >> utility::ignore_spaces()
-       >> utility::delim("[binomial ") >> p >> utility::delim(']');
+       >> utility::delim("[rayleigh ") >> p >> utility::delim(']');
     if (in)
       g.param(p);
     in.flags(flags);
@@ -207,4 +180,3 @@ namespace trng {
 }
 
 #endif
-
