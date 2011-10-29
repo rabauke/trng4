@@ -1,0 +1,37 @@
+AC_INIT([trng],[4.0])
+AM_INIT_AUTOMAKE(trng,4.0)
+
+AC_LANG_CPLUSPLUS
+AC_LANG(C)
+
+dnl Checks for programs.
+AC_PROG_CXX
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+AC_PROG_LIBTOOL
+
+AC_CXX_LONG_LONG(,)
+AC_PATH_BOOST(1.30.0, 
+              AC_DEFINE(HAVE_BOOST,1,[Define to 1 if you have BOOST library.]),
+	      )
+AC_SUBST(BOOST_CXXFLAGS)
+AC_LANG_CPLUSPLUS
+ACX_MPI(AC_DEFINE(HAVE_MPI,1,[Define to 1 if you have a MPI library.]))
+AX_OPENMP
+AC_SUBST(OPENMP_CXXFLAGS)
+AC_CHECK_FUNCS(erff)
+AC_CHECK_FUNCS(erf)
+AC_CHECK_FUNCS(erfl)
+AC_CHECK_FUNCS(erfcf)
+AC_CHECK_FUNCS(erfc)
+AC_CHECK_FUNCS(erfcl)
+AC_CHECK_FUNCS(tgammaf)
+AC_CHECK_FUNCS(tgamma)
+AC_CHECK_FUNCS(tgammal)
+AC_CHECK_FUNCS(lgammaf)
+AC_CHECK_FUNCS(lgamma)
+AC_CHECK_FUNCS(lgammal)
+
+AM_CONFIG_HEADER(src/config.hpp)
+
+AC_OUTPUT(Makefile trng/Makefile src/Makefile examples/Makefile)
