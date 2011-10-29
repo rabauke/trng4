@@ -222,6 +222,7 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = gnu
 lib_LTLIBRARIES = libtrng4.la
 AM_CPPFLAGS = -I$(top_builddir)
+AM_CXXFLAGS = @BOOST_CXXFLAGS@
 libtrng4_la_SOURCES = minstd.cc \
                       lcg64.cc lcg64_shift.cc \
 		      mt19937.cc mt19937_64.cc \
@@ -587,8 +588,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES uninstall-local \
-	uninstall-pkgincludeHEADERS
+uninstall-am: uninstall-libLTLIBRARIES uninstall-pkgincludeHEADERS
 
 .MAKE: all install-am install-strip
 
@@ -605,12 +605,9 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-local \
 	installdirs maintainer-clean maintainer-clean-generic \
 	mostlyclean mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-libLTLIBRARIES uninstall-local \
+	uninstall-am uninstall-libLTLIBRARIES \
 	uninstall-pkgincludeHEADERS
 
-
-uninstall-local: uninstall-am 
-	-rmdir ${includedir}/trng
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

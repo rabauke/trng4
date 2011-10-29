@@ -3,6 +3,7 @@ AUTOMAKE_OPTIONS = gnu
 lib_LTLIBRARIES = libtrng4.la
 
 AM_CPPFLAGS = -I$(top_builddir)
+AM_CXXFLAGS = @BOOST_CXXFLAGS@
 
 libtrng4_la_SOURCES = minstd.cc \
                       lcg64.cc lcg64_shift.cc \
@@ -30,5 +31,3 @@ pkginclude_HEADERS = config.hpp cuda.hpp utility.hpp uniformxx.hpp \
 
 libtrng4_la_LDFLAGS = -version-info 0:0:0
 
-uninstall-local: uninstall-am 
-	-rmdir ${includedir}/trng

@@ -3,6 +3,7 @@ AUTOMAKE_OPTIONS = gnu
 AM_CPPFLAGS = -I$(top_builddir)
 AM_LDFLAGS = -L../src/.libs -ltrng4 -static
 AM_MPILDFLAGS = -L../src/.libs -ltrng4
+AM_CXXFLAGS = @BOOST_CXXFLAGS@
 
 EXTRA_PROGRAMS = hello_world sample_output time pi pi_block_mpi pi_block_openmp pi_block_tbb pi_leap_mpi pi_leap_openmp stl_container distributions plausibility_test Ising_model correlated_normal_dist discrete_dist discrete_dist_c_style bernoulli_dist
 

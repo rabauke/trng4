@@ -92,7 +92,7 @@ namespace trng {
 	    else
 	      G.push_back(i);
 	  }
-	  while (not S.empty()) {
+	  while ((not S.empty()) and (not G.empty())) {
 	    int k=G.back(), j=S.back();
 	    L[j]=k;
 	    F[k]-=1.0-F[j];

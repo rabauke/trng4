@@ -17,6 +17,9 @@ Implement:
   * and other distributions, see
     http://en.wikipedia.org/wiki/List_of_probability_distributions
 
+  * multinomial distribution, see
+    - http://en.wikipedia.org/wiki/Multinomial_distribution
+
 * ISAAC generator
   http://burtleburtle.net/bob/rand/isaacafa.html
 

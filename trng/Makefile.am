@@ -6,7 +6,7 @@ header-links: remove-links
 	done
 
 remove-links: 
-	rm -f *.h
+	rm -f *.hpp
 
 all: all-am header-links
 

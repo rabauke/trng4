@@ -260,6 +260,7 @@ AUTOMAKE_OPTIONS = gnu
 AM_CPPFLAGS = -I$(top_builddir)
 AM_LDFLAGS = -L../src/.libs -ltrng4 -static
 AM_MPILDFLAGS = -L../src/.libs -ltrng4
+AM_CXXFLAGS = @BOOST_CXXFLAGS@
 EXTRA_DIST = pi_block_cuda.cu pi_leap_cuda.cu
 MPICXXCOMPILE = $(MPICXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 MPICXXLD = $(MPICXX)

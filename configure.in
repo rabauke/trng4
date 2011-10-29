@@ -1,7 +1,7 @@
-AC_INIT([trng], [4.11], [heiko.bauke@mpi-hd.mpg.de])
+AC_INIT([trng], [4.12], [heiko.bauke@mpi-hd.mpg.de])
 AM_INIT_AUTOMAKE()
 
-AC_DEFINE([TRNG_VERSION], [4.11], [TRNG version number.])
+AC_DEFINE([TRNG_VERSION], [4.12], [TRNG version number.])
 
 AC_LANG_CPLUSPLUS
 AC_LANG(C)
