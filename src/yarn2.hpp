@@ -150,12 +150,7 @@ namespace trng {
     explicit yarn2(unsigned long, parameter_type=LEcuyer1);
     template<typename gen>
     explicit yarn2(gen &g, parameter_type P=LEcuyer1) : P(P), S() {
-      result_type r1=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      result_type r2=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      S.r1=r1;
-      S.r2=r2;
+      seed(g);
     }
 
     void seed();

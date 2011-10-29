@@ -156,21 +156,7 @@ namespace trng {
     explicit mrg5s(unsigned long, parameter_type=trng1);
     template<typename gen>
     explicit mrg5s(gen &g, parameter_type P=trng1) : P(P), S() {
-      result_type r1=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      result_type r2=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      result_type r3=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      result_type r4=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      result_type r5=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      S.r1=r1;
-      S.r2=r2;
-      S.r3=r3;
-      S.r4=r4;
-      S.r5=r5;
+      seed(g);
     }
 
     void seed();

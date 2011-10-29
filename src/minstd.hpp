@@ -15,9 +15,9 @@
 // 02111-1307, USA.
 //  
 
-#if !(defined TRNG_LCG64_HPP)
+#if !(defined TRNG_MINSTD_HPP)
 
-#define TRNG_LCG64_HPP
+#define TRNG_MINSTD_HPP
 
 #include <trng/limits.hpp>
 #include <climits>
@@ -28,76 +28,27 @@
 
 namespace trng {
   
-  class lcg64;
+  class minstd;
   
-  class lcg64 {
+  class minstd {
   public:
 
     // Uniform random number generator concept
-    typedef unsigned long long result_type;
+    typedef unsigned long result_type;
     result_type operator()() const;  
     static const result_type min;
     static const result_type max;
 
     // Parameter and status classes
-    class parameter_type;
     class status_type;
-
-    class parameter_type {
-      result_type a, b;
-    public:
-      parameter_type() :
-	a(0), b(0) { };
-      parameter_type(result_type a, result_type b) :
-	a(a), b(b) { };
-
-      friend class lcg64;
-
-      // Equality comparable concept
-      friend bool operator==(const parameter_type &, const parameter_type &);
-      friend bool operator!=(const parameter_type &, const parameter_type &);
-
-      // Streamable concept
-      template<typename char_t, typename traits_t>
-      friend std::basic_ostream<char_t, traits_t> & 
-      operator<<(std::basic_ostream<char_t, traits_t> &out, 
-		 const parameter_type &P) {
-	std::ios_base::fmtflags flags(out.flags());
-	out.flags(std::ios_base::dec | std::ios_base::fixed | 
-		  std::ios_base::left);
-	out << '(' 
-	    << P.a << ' ' << P.b 
-	    << ')';
-	out.flags(flags);
-	return out;
-      }
-
-      template<typename char_t, typename traits_t>
-      friend std::basic_istream<char_t, traits_t> & 
-      operator>>(std::basic_istream<char_t, traits_t> &in, 
-		 parameter_type &P) {
-	parameter_type P_new;
-	std::ios_base::fmtflags flags(in.flags());
-	in.flags(std::ios_base::dec | std::ios_base::fixed | 
-		 std::ios_base::left);
-	in >> utility::delim('(')
-	   >> P_new.a >> utility::delim(' ')
-	   >> P_new.b >> utility::delim(')');
-	if (in)
-	  P=P_new;
-	in.flags(flags);
-	return in;
-      }
-      
-    };
     
     class status_type {
       result_type r;
     public:
-      status_type() : r(0) { };
+      status_type() : r(1) { };
       explicit status_type(result_type r) : r(r) { };
       
-      friend class lcg64;
+      friend class minstd;
 
       // Equality comparable concept
       friend bool operator==(const status_type &, const status_type &);
@@ -136,75 +87,59 @@ namespace trng {
 
     };
     
-    static const parameter_type Default;
-    static const parameter_type LEcuyer1;
-    static const parameter_type LEcuyer2;
-    static const parameter_type LEcuyer3;
-
     // Random number engine concept
-    explicit lcg64(parameter_type=Default); 
-    explicit lcg64(unsigned long, parameter_type=Default); 
+    explicit minstd(); 
+    explicit minstd(unsigned long); 
     
     template<typename gen>
-    explicit lcg64(gen &g, parameter_type P=Default) : P(P), S() {
+    explicit minstd(gen &g) : S() {
       seed(g);
     }
     
     void seed(); 
-    void seed(unsigned long); 
+    void seed(result_type); 
     template<typename gen>
     void seed(gen &g) {
-      result_type r=0;
-      for (int i=0; i<2; ++i) {
-	r<<=32;
-	r+=g();
-      }
-      S.r=r;
+      do {
+	S.r=g()%2147483647l;
+	if (S.r<0)
+	  S.r+=2147483647l;
+      } while (S.r==0);
     }
-    void seed(result_type); 
     
     // Equality comparable concept
-    friend bool operator==(const lcg64 &, const lcg64 &);
-    friend bool operator!=(const lcg64 &, const lcg64 &);
+    friend bool operator==(const minstd &, const minstd &);
+    friend bool operator!=(const minstd &, const minstd &);
 
     // Streamable concept
     template<typename char_t, typename traits_t>
     friend std::basic_ostream<char_t, traits_t> & 
-    operator<<(std::basic_ostream<char_t, traits_t> &out, const lcg64 &R) {
+    operator<<(std::basic_ostream<char_t, traits_t> &out, const minstd &R) {
       std::ios_base::fmtflags flags(out.flags());
       out.flags(std::ios_base::dec | std::ios_base::fixed | 
 		std::ios_base::left);
-      out << '[' << lcg64::name() << ' ' << R.P << ' ' << R.S << ']';
+      out << '[' << minstd::name() << ' ' << R.S << ']';
       out.flags(flags);
       return out;
     }
 
     template<typename char_t, typename traits_t>
     friend std::basic_istream<char_t, traits_t> & 
-    operator>>(std::basic_istream<char_t, traits_t> &in, lcg64 &R) {
-      lcg64::parameter_type P_new;
-      lcg64::status_type S_new;
+    operator>>(std::basic_istream<char_t, traits_t> &in, minstd &R) {
+      minstd::status_type S_new;
       std::ios_base::fmtflags flags(in.flags());
       in.flags(std::ios_base::dec | std::ios_base::fixed | 
 	       std::ios_base::left);
       in >> utility::ignore_spaces();
       in >> utility::delim('[')
-	 >> utility::delim(lcg64::name()) >> utility::delim(' ')
-	 >> P_new >> utility::delim(' ')
+	 >> utility::delim(minstd::name()) >> utility::delim(' ')
 	 >> S_new >> utility::delim(']');
-      if (in) { 
-	R.P=P_new;
+      if (in) 
 	R.S=S_new;
-      }
       in.flags(flags);
       return in;
     }
-    
-    // Parallel random number generator concept
-    void split(unsigned int, unsigned int);
-    void jump2(unsigned int);
-    void jump(unsigned long long);
-    
+        
     // Other useful methods
     static const char * name();
     long operator()(long) const;
@@ -220,79 +155,78 @@ namespace trng {
 //     double uniformcc(double, double) const;
     
   private:
-    parameter_type P;
     mutable status_type S;
     static const char * const name_str;
     
-    void backward();
     void step() const;
   };
   
   // Inline and template methods
   
-  inline void lcg64::step() const {
-    S.r=P.a*S.r+P.b;
-#if ULONG_LONG_MAX>18446744073709551615ull
-    S.r&=0xfffffffffffffffful;
-#endif
-    }
-    
-  inline lcg64::result_type lcg64::operator()() const {
+  inline void minstd::step() const {
+    unsigned long long t=S.r*16807;
+     t=(t&0x7fffffffull)+(t>>31);
+     if (t>=2147483647ull)
+       t-=2147483647ull;
+     S.r=static_cast<long>(t);
+  }
+  
+  inline minstd::result_type minstd::operator()() const {
     step();
     return S.r;
   }
 
-  inline long lcg64::operator()(long x) const {
+  inline long minstd::operator()(long x) const {
     return static_cast<long>(utility::uniformco(*this)*x);
   }
 
-//   inline bool lcg64::boolean() const {
+//   inline bool minstd::boolean() const {
 //     step();
 //     return S.r<9223372036854775808ull;
 //   }
   
-//   inline bool lcg64::boolean(double p) const {
+//   inline bool minstd::boolean(double p) const {
 //     step();
 //     return S.r<18446744073709551616.0*p;
 //   }
   
-//   inline double lcg64::uniformco() const {
+//   inline double minstd::uniformco() const {
 //     step();
 //     double t(S.r/18446744073709551616.0);
 //     return t<1.0 ? t : 1.0-math::numeric_limits<double>::epsilon();
 //   }
   
-//   inline double lcg64::uniformco(double a, double b) const {
+//   inline double minstd::uniformco(double a, double b) const {
 //     return uniformco()*(b-a)+a;
 //     }
   
-//   inline double lcg64::uniformoc() const {
+//   inline double minstd::uniformoc() const {
 //     step();
 //     double t(S.r/18446744073709551616.0);
 //     return  t>0.0 ? t : math::numeric_limits<double>::epsilon();
 //     }
   
-//   inline double lcg64::uniformoc(double a, double b) const {
+//   inline double minstd::uniformoc(double a, double b) const {
 //     return uniformoc()*(b-a)+a;
 //   }
   
-//   inline double lcg64::uniformoo() const {
+//   inline double minstd::uniformoo() const {
 //     step();
 //     double t(S.r/18446744073709551616.0+
 // 	     math::numeric_limits<double>::epsilon());
 //     return t<1.0 ? t : 1.0-math::numeric_limits<double>::epsilon();
 //   }
   
-//   inline double lcg64::uniformoo(double a, double b) const {
+//   inline double minstd::uniformoo(double a, double b) const {
 //     return uniformoo()*(b-a)+a;
 //   }
   
-//   inline double lcg64::uniformcc() const {
+//   inline double minstd::uniformcc() const {
 //     step();
 //     return S.r/18446744073709551615.0;
 //   }
   
-//   inline double lcg64::uniformcc(double a, double b) const {
+//   inline double minstd::uniformcc(double a, double b) const {
 //     return uniformcc()*(b-a)+a;
 //   }
 

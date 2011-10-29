@@ -150,15 +150,7 @@ namespace trng {
     explicit mrg3s(unsigned long, parameter_type=trng1);
     template<typename gen>
     explicit mrg3s(gen &g, parameter_type P=trng1) : P(P), S() {
-      result_type r1=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      result_type r2=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      result_type r3=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      S.r1=r1;
-      S.r2=r2;
-      S.r3=r3;
+      seed(g);
     }
 
     void seed();

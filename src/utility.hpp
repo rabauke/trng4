@@ -220,6 +220,28 @@ namespace trng {
     
     // -----------------------------------------------------------------
 
+    template <unsigned int x> 
+    struct ceil2 {
+      enum { result=2*ceil2<(x+1)/2>::result };
+    };
+    
+    template <>
+    struct ceil2<0> {
+      enum { result=0 };
+    };
+    
+    template <>
+    struct ceil2<1> {
+      enum { result=1 };
+    };
+    
+    template <unsigned int x> 
+    struct mask {
+      enum { result=ceil2<x+1>::result-1 };
+    };
+
+    // -----------------------------------------------------------------
+
     // random number
     template<typename iter>
     inline int discrete(double x, iter first, iter last) {

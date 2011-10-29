@@ -36,6 +36,8 @@
 #include <trng/yarn4.hpp>
 #include <trng/yarn5.hpp>
 #include <trng/yarn5s.hpp>
+#include <trng/lagfib2xor.hpp>
+#include <trng/lagfib4xor.hpp>
 #include <trng/uniform_int_dist.hpp>
 #include <trng/bernoulli_dist.hpp>
 
@@ -271,14 +273,45 @@ void output(std::vector<double> &Ea, std::vector<double> &ca,
 
 
 template<class RNG_type>
-void wolff_main(RNG_type &R, long runs, long split) {
-  const int L=16;
-  const double E_exact=-1.453064854; // 16x16
-  const double c_exact= 1.498704952; // 16x16
-  // const double E_exact=-1.465960817; // 12x12
-  // const double c_exact= 1.352950680; // 12x12
-  // const double E_exact=-1.491589107;  // 8x8
-  // const double c_exact= 1.145559238;  // 8x8
+void wolff_main(RNG_type &R, long runs, long split, long L) {
+  double E_exact, c_exact;
+  switch (L) {
+    case 8: 
+      E_exact=-1.4915891074397066;  c_exact=1.1455592398944086;  break;
+    case 12:
+      E_exact=-1.4659608164862789;  c_exact=1.3529506829072697;  break;
+    case 16:
+      E_exact=-1.4530648528134771;  c_exact=1.4987049594000261;  break;
+    case 20:
+      E_exact=-1.4453094678058525;  c_exact=1.6111614949041113;  break;
+    case 24:
+      E_exact=-1.4401334960573388;  c_exact=1.7027336877232671;  break;
+    case 28:
+      E_exact=-1.4364340850836483;  c_exact=1.7799744882644384;  break;
+    case 32:
+      E_exact=-1.4336584661462483;  c_exact=1.8467675900395589;  break;
+    case 36:
+      E_exact=-1.4314991053179871;  c_exact=1.9056050418011437;  break;
+    case 40:
+      E_exact=-1.4297713123073425;  c_exact=1.9581816502509387;  break;
+    case 44:
+      E_exact=-1.4283574829971357;  c_exact=2.0057024700476327;  break;
+    case 48:
+      E_exact=-1.4271791793855239;  c_exact=2.0490550151069595;  break;
+    case 52:
+      E_exact=-1.4261820801536625;  c_exact=2.0889118621693695;  break;
+    case 56:
+      E_exact=-1.4253273745116323;  c_exact=2.1257948956620735;  break;
+    case 60:
+      E_exact=-1.4245865955789106;  c_exact=2.1601172105639529;  break;
+    case 64:
+      E_exact=-1.4239383898330109;  c_exact=2.1922113931405711;  break;
+    default:
+      std::cerr << "invalid lattice size, try 8, 12, ..., 64\n";
+      std::exit(EXIT_FAILURE);
+  }
+  
+  // const double 
   const int simulations=10;
   int i, j;
   double T, E, E2, q, c;
@@ -290,7 +323,6 @@ void wolff_main(RNG_type &R, long runs, long split) {
   T=2.0/std::log(1.0+std::sqrt(2.0));
   lattice s(L);
   s.fill(-1);
-  R.split(split, 0);
   std::cout << "Generator : " << R.name() << '\n'
 	    << "Splitting level : " << split << '\n'
 	    << '\n'
@@ -322,33 +354,77 @@ void wolff_main(RNG_type &R, long runs, long split) {
 }
 
 int main (int argc, char *argv[]) {
-  long runs, split;
+  long runs=0, split=0, L=0;
   std::string generator;
-  if (argc!=4) {
+  int argi=1;
+  if (argc==1) {
     std::cerr << "Tina's Random Number Generator Library\n\n"
 	      << "(P) & (C) by Heiko Bauke, Magdeburg 2001-2006\n\n"
 	      << "two-domensional Ising model (Wolff algorithm)\n"
 	      << "---------------------------------------------\n\n"
 	      << "synopsis:\n"
-	      << "$ " << argv[0] << " generator runs split\n"
-	      << "usefull arguments: generator=lcg64; runs=100000; split=1\n";
-    exit(EXIT_FAILURE);
+	      << "$ " << argv[0] << " --gen generator --runs runs --split split --size size\n"
+	      << "try:\n"
+	      << "$ " << argv[0] << " --gen lcg64 --runs 100000 --split 1 --size 16\n";
+    std::exit(EXIT_FAILURE);
   }
-  generator=argv[1];
-  runs=atoi(argv[2]);
-  split=atoi(argv[3]);
-  { trng::lcg64 r;  if (generator==r.name()) wolff_main(r, runs, split); }
-  { trng::mrg2 r;   if (generator==r.name()) wolff_main(r, runs, split); }
-  { trng::mrg3 r;   if (generator==r.name()) wolff_main(r, runs, split); }
-  { trng::mrg3s r;  if (generator==r.name()) wolff_main(r, runs, split); }
-  { trng::mrg4 r;   if (generator==r.name()) wolff_main(r, runs, split); }
-  { trng::mrg5 r;   if (generator==r.name()) wolff_main(r, runs, split); }
-  { trng::mrg5s r;  if (generator==r.name()) wolff_main(r, runs, split); }
-  { trng::yarn2 r;  if (generator==r.name()) wolff_main(r, runs, split); }
-  { trng::yarn3 r;  if (generator==r.name()) wolff_main(r, runs, split); }
-  { trng::yarn3s r; if (generator==r.name()) wolff_main(r, runs, split); }
-  { trng::yarn4 r;  if (generator==r.name()) wolff_main(r, runs, split); }
-  { trng::yarn5 r;  if (generator==r.name()) wolff_main(r, runs, split); }
-  { trng::yarn5s r; if (generator==r.name()) wolff_main(r, runs, split); }
+  while (argi<argc) {
+    std::string arg(argv[argi]);
+    if (arg=="--gen") {
+      ++argi;
+      if (argi<argc) {
+	generator=argv[argi];
+	++argi;
+      } else {
+	std::cerr << "missung argument for parameter " << arg << '\n';
+	std::exit(EXIT_FAILURE);
+      }
+    } else if (arg=="--runs") {
+      ++argi;
+      if (argi<argc) {
+	runs=atoi(argv[argi]);
+	++argi;
+      } else {
+	std::cerr << "missung argument for parameter " << arg << '\n';
+	std::exit(EXIT_FAILURE);
+      }
+    } else if (arg=="--split") {
+      ++argi;
+      if (argi<argc) {
+	split=atoi(argv[argi]);
+	++argi;
+      } else {
+	std::cerr << "missung argument for parameter " << arg << '\n';
+	std::exit(EXIT_FAILURE);
+      }
+    } else if (arg=="--size") {
+      ++argi;
+      if (argi<argc) {
+	L=atoi(argv[argi]);
+	++argi;
+      } else {
+	std::cerr << "missung argument for parameter " << arg << '\n';
+	std::exit(EXIT_FAILURE);
+      }
+    } else {
+      std::cerr << "unknown argument " << arg << '\n';
+      std::exit(EXIT_FAILURE);
+    }
+  }
+  { trng::lcg64 r;    r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::mrg2 r;     r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::mrg3 r;     r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::mrg3s r;    r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::mrg4 r;     r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::mrg5 r;     r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::mrg5s r;    r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::yarn2 r;    r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::yarn3 r;    r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::yarn3s r;   r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::yarn4 r;    r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::yarn5 r;    r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::yarn5s r;   r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::r250_ul r;  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::Ziff_ul r;  if (generator==r.name()) wolff_main(r, runs, split, L); }
   return EXIT_SUCCESS;
 }

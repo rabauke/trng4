@@ -33,6 +33,7 @@
 #include <trng/yarn4.hpp>
 #include <trng/yarn5.hpp>
 #include <trng/yarn5s.hpp>
+#include <trng/lagfib4xor.hpp>
 
 #if defined HAVE_BOOST
 # include <boost/random/linear_congruential.hpp>
@@ -109,6 +110,7 @@ int main() {
     { trng::yarn4    r;  time_main(r, "trng::yarn4"); }
     { trng::yarn5    r;  time_main(r, "trng::yarn5"); }
     { trng::yarn5s   r;  time_main(r, "trng::yarn5s"); }
+    { trng::Ziff_ul  r;  time_main(r, "trng::Ziff_ul"); }
 #if defined HAVE_BOOST
     { boost::minstd_rand    r; time_main(r, "boost::minstd_rand"); }
     { boost::ecuyer1988     r; time_main(r, "boost::ecuyer1988"); }

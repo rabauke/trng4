@@ -32,6 +32,10 @@
 #include <trng/yarn4.hpp>
 #include <trng/yarn5.hpp>
 #include <trng/yarn5s.hpp>
+#include <trng/lagfib2xor.hpp>
+#include <trng/lagfib4xor.hpp>
+#include <trng/lagfib2plus.hpp>
+#include <trng/lagfib4plus.hpp>
 
 
 template<typename rng_type>
@@ -103,5 +107,9 @@ int main() {
   implemtation_test<trng::yarn4>();  
   implemtation_test<trng::yarn5>();  
   implemtation_test<trng::yarn5s>();  
+  implemtation_test<trng::lagfib2xor_521_ul>();  
+  implemtation_test<trng::lagfib4xor_521_ul>();  
+  implemtation_test<trng::lagfib2plus_521_ul>();  
+  implemtation_test<trng::lagfib4plus_521_ul>();  
   return EXIT_SUCCESS;
 }

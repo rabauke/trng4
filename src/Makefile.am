@@ -4,14 +4,15 @@ lib_LTLIBRARIES = libtrng4.la
 
 INCLUDES= -I$(top_builddir)
 
-libtrng4_la_SOURCES = utility.cc lcg64.cc \
+libtrng4_la_SOURCES = utility.cc minstd.cc lcg64.cc \
 		      mrg2.cc mrg3.cc mrg3s.cc mrg4.cc mrg5.cc mrg5s.cc \
                       yarn2.cc yarn3.cc yarn3s.cc yarn4.cc yarn5.cc yarn5s.cc
 
-pkginclude_HEADERS = config.hpp utility.hpp limits.hpp math.hpp special_functions.hpp constants.hpp \
+pkginclude_HEADERS = config.hpp utility.hpp generate_canonical.hpp minstd.hpp limits.hpp math.hpp special_functions.hpp constants.hpp \
 		     lcg64.hpp \
                      mrg2.hpp mrg3.hpp mrg3s.hpp mrg4.hpp mrg5.hpp mrg5s.hpp \
                      yarn2.hpp yarn3.hpp yarn3s.hpp yarn4.hpp yarn5.hpp yarn5s.hpp \
+		     lagfib2xor.hpp lagfib4xor.hpp lagfib2plus.hpp lagfib4plus.hpp \
                      uniform_dist.hpp uniform01_dist.hpp uniform_int_dist.hpp \
                      exponential_dist.hpp normal_dist.hpp cauchy_dist.hpp \
 		     logistic_dist.hpp lognormal_dist.hpp pareto_dist.hpp \
