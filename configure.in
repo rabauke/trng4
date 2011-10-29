@@ -1,5 +1,5 @@
-AC_INIT([trng],[4.1])
-AM_INIT_AUTOMAKE(trng,4.1)
+AC_INIT([trng],[4.2])
+AM_INIT_AUTOMAKE(trng,4.2)
 
 AC_LANG_CPLUSPLUS
 AC_LANG(C)

@@ -50,7 +50,7 @@ namespace trng {
     
     // Parameter and status classes
     class status_type;
-    
+
     class status_type {
       result_type r[utility::ceil2<B>::result];
       unsigned int index;
@@ -117,6 +117,10 @@ namespace trng {
     // Random number engine concept
     lagfib2xor() : S() {
       seed();
+    }
+    
+    explicit lagfib2xor(unsigned long s) : S() {
+      seed(s);
     }
     
     template<typename gen>

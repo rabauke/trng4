@@ -26,6 +26,7 @@
 #include <istream>
 #include <sstream>
 #include <trng/utility.hpp>
+#include <trng/minstd.hpp>
 
 namespace trng {
 
@@ -50,51 +51,7 @@ namespace trng {
     static const result_type max=min-1;  // an ugly hack
     
     // Parameter and status classes
-    class parameter_type;
     class status_type;
-
-    class parameter_type {
-    public:
-      parameter_type() { };
-
-      // Equality comparable concept
-      friend bool operator==(const parameter_type &, const parameter_type &) {
-	return true;
-      }
-      friend bool operator!=(const parameter_type &, const parameter_type &) { 
-	return false;
-      }
-
-      // Streamable concept
-      template<typename char_t, typename traits_t>
-      friend std::basic_ostream<char_t, traits_t> & 
-      operator<<(std::basic_ostream<char_t, traits_t> &out, 
-		 const parameter_type &P) {
-	std::ios_base::fmtflags flags(out.flags());
-	out.flags(std::ios_base::dec | std::ios_base::fixed | 
-		  std::ios_base::left);
-	out << '(' 
-	    << ')';
-	out.flags(flags);
-	return out;
-      }
-
-      template<typename char_t, typename traits_t>
-      friend std::basic_istream<char_t, traits_t> & 
-      operator>>(std::basic_istream<char_t, traits_t> &in, 
-		 parameter_type &P) {
-	parameter_type P_new;
-	std::ios_base::fmtflags flags(in.flags());
-	in.flags(std::ios_base::dec | std::ios_base::fixed | 
-		 std::ios_base::left);
-	in >> utility::delim('(') >> utility::delim(')');
-	if (in)
-	  P=P_new;
-	in.flags(flags);
-	return in;
-      }
-      
-    };
     
     class status_type {
       result_type r[utility::ceil2<D>::result];
@@ -160,12 +117,16 @@ namespace trng {
     };
     
     // Random number engine concept
-    lagfib4plus() : P(), S() {
+    lagfib4plus() : S() {
       seed();
     }
     
+    explicit lagfib4plus(unsigned long s) : S() {
+      seed(s);
+    }
+    
     template<typename gen>
-    explicit lagfib4plus(gen &g) : P(), S() {
+    explicit lagfib4plus(gen &g) : S() {
       seed(g);
     }
     
@@ -194,7 +155,7 @@ namespace trng {
     
     // Equality comparable concept
     friend bool operator==(const lagfib4plus &R1, const lagfib4plus &R2) {
-      return R1.P==R2.P && R1.S==R2.S;
+      return R1.S==R2.S;
     }
       
     friend bool operator!=(const lagfib4plus &R1, const lagfib4plus &R2) {
@@ -208,8 +169,7 @@ namespace trng {
       std::ios_base::fmtflags flags(out.flags());
       out.flags(std::ios_base::dec | std::ios_base::fixed | 
 		std::ios_base::left);
-      out << '[' << lagfib4plus::name() << ' ' << R.P << ' ' 
-	  << R.S << ']';
+      out << '[' << lagfib4plus::name() << ' ' << R.S << ']';
       out.flags(flags);
       return out;
     }
@@ -217,7 +177,6 @@ namespace trng {
     template<typename char_t, typename traits_t>
     friend std::basic_istream<char_t, traits_t> & 
     operator>>(std::basic_istream<char_t, traits_t> &in, lagfib4plus &R) {
-      typename lagfib4plus::parameter_type P_new;
       typename lagfib4plus::status_type S_new;
       std::ios_base::fmtflags flags(in.flags());
       in.flags(std::ios_base::dec | std::ios_base::fixed | 
@@ -225,12 +184,9 @@ namespace trng {
       in >> utility::ignore_spaces();
       in >> utility::delim('[')
 	 >> utility::delim(lagfib4plus::name()) >> utility::delim(' ')
-	 >> P_new >> utility::delim(' ')
 	 >> S_new >> utility::delim(']');
-      if (in) { 
-	R.P=P_new;
+      if (in) 
 	R.S=S_new;
-      }
       in.flags(flags);
       return in;
     }
@@ -267,7 +223,6 @@ namespace trng {
 //     double uniformcc(double, double) const;
     
   private:
-    parameter_type P;
     mutable status_type S;
     
     void step() const {

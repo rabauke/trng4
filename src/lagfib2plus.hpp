@@ -26,6 +26,7 @@
 #include <istream>
 #include <sstream>
 #include <trng/utility.hpp>
+#include <trng/minstd.hpp>
 
 namespace trng {
 
@@ -118,11 +119,14 @@ namespace trng {
       seed();
     }
     
+    explicit lagfib2plus(unsigned long s) : S() {
+      seed(s);
+    }
+    
     template<typename gen>
     explicit lagfib2plus(gen &g) : S() {
       seed(g);
     }
-    
     
     void seed() {
       seed(0);

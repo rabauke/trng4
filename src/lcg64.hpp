@@ -25,6 +25,7 @@
 #include <ostream>
 #include <istream>
 #include <trng/utility.hpp>
+#include <trng/generate_canonical.hpp>
 
 namespace trng {
   
@@ -218,7 +219,7 @@ namespace trng {
 //     double uniformoo(double, double) const;
 //     double uniformcc() const;
 //     double uniformcc(double, double) const;
-    
+
   private:
     parameter_type P;
     mutable status_type S;
