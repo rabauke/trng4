@@ -34,6 +34,7 @@
 
 #define TRNG_UNIFORM01_DIST_HPP
 
+#include <trng/cuda.hpp>
 #include <trng/limits.hpp>
 #include <trng/utility.hpp>
 #include <ostream>
@@ -51,6 +52,7 @@ namespace trng {
     
     class param_type {
     public:
+      TRNG_CUDA_ENABLE
       param_type() {
       }
 
@@ -90,34 +92,45 @@ namespace trng {
     
   public:
     // constructor
+    TRNG_CUDA_ENABLE
     uniform01_dist() {
     }
+    TRNG_CUDA_ENABLE
     explicit uniform01_dist(const param_type &p) {
     }
     // reset internal state
+    TRNG_CUDA_ENABLE
     void reset() { }
     // random numbers
     template<typename R>
+    TRNG_CUDA_ENABLE
     result_type operator()(R &r) {
       return utility::uniformco<result_type>(r);
     }
     template<typename R>
+    TRNG_CUDA_ENABLE
     result_type operator()(R &r, const param_type &p) {
       return utility::uniformco<result_type>(r);
     }
     // property methods
     // min / max
+    TRNG_CUDA_ENABLE
     result_type min() const { return 0; }
+    TRNG_CUDA_ENABLE
     result_type max() const { return 1; }
+    TRNG_CUDA_ENABLE
     param_type param() const { return p; }
+    TRNG_CUDA_ENABLE
     void param(const param_type &p_new) { }
     // probability density function  
+    TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
       if (x<0 or x>=1)
 	return 0;
       return 1;
     }
     // cumulative density function 
+    TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
       if (x<0)
 	return 0;
@@ -126,9 +139,12 @@ namespace trng {
       return x;
     }
     // inverse cumulative density function 
+    TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const {
       if (x<0 or x>1) {
+#if !(defined __CUDA_ARCH__)
 	errno=EDOM;
+#endif
 	return math::numeric_limits<result_type>::quiet_NaN();
       }
       return x; 
@@ -140,12 +156,14 @@ namespace trng {
 
   // Equality comparable concept
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator==(const typename uniform01_dist<float_t>::param_type &, 
 			 const typename uniform01_dist<float_t>::param_type &) {
     return true;
   }
 
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const typename uniform01_dist<float_t>::param_type &, 
 			 const typename uniform01_dist<float_t>::param_type &) {
     return false;
@@ -155,12 +173,14 @@ namespace trng {
   
   // Equality comparable concept
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator==(const uniform01_dist<float_t> &g1, 
 			 const uniform01_dist<float_t> &g2) {
     return g1.param()==g2.param();
   }
 
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const uniform01_dist<float_t> &g1, 
 			 const uniform01_dist<float_t> &g2) {
     return g1.param()!=g2.param();

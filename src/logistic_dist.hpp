@@ -34,6 +34,7 @@
 
 #define TRNG_LOGISTIC_DIST_HPP
 
+#include <trng/cuda.hpp>
 #include <trng/limits.hpp>
 #include <trng/utility.hpp>
 #include <trng/math.hpp>
@@ -55,12 +56,18 @@ namespace trng {
     private:
       result_type theta_, eta_;
     public:
+      TRNG_CUDA_ENABLE
       result_type theta() const { return theta_; }
+      TRNG_CUDA_ENABLE
       void theta(result_type theta_new) { theta_=theta_new; }
+      TRNG_CUDA_ENABLE
       result_type eta() const { return eta_; }
+      TRNG_CUDA_ENABLE
       void eta(result_type eta_new) { eta_=eta_new; }
+      TRNG_CUDA_ENABLE
       param_type() : theta_(1), eta_(0) {
       }
+      TRNG_CUDA_ENABLE
       param_type(result_type theta, result_type eta) : theta_(theta), eta_(eta) {
       }
 
@@ -105,52 +112,71 @@ namespace trng {
     param_type p;
     
     // inverse cumulative density function
+    TRNG_CUDA_ENABLE
     result_type icdf_(result_type x) const {
       return p.eta()-math::ln((1-x)/x)*p.theta();
     }
     
   public:
     // constructor
+    TRNG_CUDA_ENABLE
     logistic_dist(result_type theta, result_type eta) : p(theta, eta) {
     }
+    TRNG_CUDA_ENABLE
     explicit logistic_dist(const param_type &p) : p(p) {
     }
     // reset internal state
+    TRNG_CUDA_ENABLE
     void reset() { }
     // random numbers
     template<typename R>
+    TRNG_CUDA_ENABLE
     result_type operator()(R &r) {
       return icdf_(utility::uniformoo<result_type>(r));
     }
     template<typename R>
+    TRNG_CUDA_ENABLE
     result_type operator()(R &r, const param_type &p) {
       logistic_dist g(p);
       return g(r);
     }
     // property methods
+    TRNG_CUDA_ENABLE
     result_type min() const { return -math::numeric_limits<result_type>::infinity(); }
+    TRNG_CUDA_ENABLE
     result_type max() const { return math::numeric_limits<result_type>::infinity(); }
+    TRNG_CUDA_ENABLE
     param_type param() const { return p; }
+    TRNG_CUDA_ENABLE
     void param(const param_type &p_new) { p=p_new; }
+    TRNG_CUDA_ENABLE
     result_type theta() const { return p.theta(); }
+    TRNG_CUDA_ENABLE
     void theta(result_type theta_new) { p.theta(theta_new); }
+    TRNG_CUDA_ENABLE
     result_type eta() const { return p.eta(); }
+    TRNG_CUDA_ENABLE
     void eta(result_type eta_new) { p.eta(eta_new); }
     // probability density function  
+    TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
       result_type t1(math::exp(-math::abs((x-p.eta())/p.theta())));
       result_type t2(1+t1);
       return t1/(p.theta()*t2*t2);
     }
     // cumulative density function 
+    TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
       result_type t1(math::exp(-math::abs((x-p.eta())/p.theta())));
       return x>=p.eta() ? (1/(1+t1)) : (t1/(1+t1));
     }
     // inverse cumulative density function 
+    TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const {
       if (x<0 or x>1) {
+#if !(defined __CUDA_ARCH__)
         errno=EDOM;
+#endif
         return math::numeric_limits<result_type>::quiet_NaN();
       }
       if (x==0)
@@ -165,12 +191,14 @@ namespace trng {
 
   // EqualityComparable concept
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator==(const typename logistic_dist<float_t>::param_type &p1, 
 			 const typename logistic_dist<float_t>::param_type &p2) {
     return p1.theta()==p2.theta() and p1.eta()==p2.eta();
   }
 
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const typename logistic_dist<float_t>::param_type &p1, 
 			 const typename logistic_dist<float_t>::param_type &p2) {
     return not (p1==p2);
@@ -180,12 +208,14 @@ namespace trng {
 
   // EqualityComparable concept
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator==(const logistic_dist<float_t> &g1, 
 			 const logistic_dist<float_t> &g2) {
     return g1.param()==g2.param();
   }
 
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const logistic_dist<float_t> &g1, 
 			 const logistic_dist<float_t> &g2) {
     return g1.param()!=g2.param();

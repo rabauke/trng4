@@ -34,6 +34,7 @@
 
 #define TRNG_UNIFORM_INT_DIST_HPP
 
+#include <trng/cuda.hpp>
 #include <trng/limits.hpp>
 #include <trng/utility.hpp>
 #include <ostream>
@@ -50,16 +51,23 @@ namespace trng {
     class param_type {
     private:
       result_type a_, b_, d_;
+      TRNG_CUDA_ENABLE
       result_type d() const { return d_; }
     public:
+      TRNG_CUDA_ENABLE
       result_type a() const { return a_; }
+      TRNG_CUDA_ENABLE
       void a(result_type a_new) { a_=a_new; d_=b_-a_; }
+      TRNG_CUDA_ENABLE
       result_type b() const { return b_; }
+      TRNG_CUDA_ENABLE
       void b(result_type b_new) { b_=b_new; d_=b_-a_; }
-       param_type() :
+      TRNG_CUDA_ENABLE
+      param_type() :
 	a_(0), b_(1), d_(1) {
       }
-       param_type(result_type a, result_type b) :
+      TRNG_CUDA_ENABLE
+      param_type(result_type a, result_type b) :
 	a_(a), b_(b), d_(b-a) {
       }
 
@@ -72,38 +80,53 @@ namespace trng {
     
   public:
     // constructor
+    TRNG_CUDA_ENABLE
     uniform_int_dist(result_type a, result_type b) : p(a, b) {
     }
+    TRNG_CUDA_ENABLE
     explicit uniform_int_dist(const param_type &p) : p(p) {
     }
     // reset internal state
+    TRNG_CUDA_ENABLE
     void reset() { }
     // random numbers
     template<typename R>
+    TRNG_CUDA_ENABLE
     result_type operator()(R &r) {
       return static_cast<result_type>(p.d()*utility::uniformco<double>(r))+p.a();
     }
     template<typename R>
+    TRNG_CUDA_ENABLE
     result_type operator()(R &r, const param_type &p) {
       uniform_int_dist g(p);
       return g(r);
     }
     // property methods
+    TRNG_CUDA_ENABLE
     result_type min() const { return p.a(); }
+    TRNG_CUDA_ENABLE
     result_type max() const { return p.b()-1; }
+    TRNG_CUDA_ENABLE
     param_type param() const { return p; }
+    TRNG_CUDA_ENABLE
     void param(const param_type &p_new) { p=p_new; }
+    TRNG_CUDA_ENABLE
     result_type a() const { return p.a(); }
+    TRNG_CUDA_ENABLE
     void a(result_type a_new) { p.a(a_new); }
+    TRNG_CUDA_ENABLE
     result_type b() const { return p.b(); }
+    TRNG_CUDA_ENABLE
     void b(result_type b_new) { p.b(b_new); }
     // probability density function  
+    TRNG_CUDA_ENABLE
     double pdf(result_type x) const {
       if (x<p.a() or x>=p.b())
 	return 0.0;
       return 1.0/p.d();
     }
     // cumulative density function 
+    TRNG_CUDA_ENABLE
     double cdf(result_type x) const {
       if (x<p.a())
 	return 0;
@@ -117,10 +140,12 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
+  TRNG_CUDA_ENABLE
   inline bool operator==(const uniform_int_dist::param_type &p1, 
 			 const uniform_int_dist::param_type &p2) {
     return p1.a()==p2.a() and p1.b()==p2.b();
   }
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const uniform_int_dist::param_type &p1, 
 			 const uniform_int_dist::param_type &p2) {
     return not (p1==p2);
@@ -161,10 +186,12 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
+  TRNG_CUDA_ENABLE
   inline bool operator==(const uniform_int_dist &g1, 
 			 const uniform_int_dist &g2) {
     return g1.param()==g2.param();
   }
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const uniform_int_dist &g1, 
 			 const uniform_int_dist &g2) {
     return g1.param()!=g2.param();

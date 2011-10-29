@@ -303,7 +303,7 @@ bool test_jump2(bool genok) {
 template<typename R>
 bool test_split(bool genok) {
   // test split
-  for (long i=2l; i<=2l; ++i) {
+  for (long i=2l; i<=20l; ++i) {
     for (long j=0l; j<i; ++j) {
       R ra, rb;
       for (long k=0l; k<j; ++k)

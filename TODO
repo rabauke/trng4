@@ -14,7 +14,8 @@ Implement:
     - Levy distribution
       http://en.wikipedia.org/wiki/L%C3%A9vy_distribution
 
-  * and other distributions
+  * and other distributions, see
+    http://en.wikipedia.org/wiki/List_of_probability_distributions
 
 * ISAAC generator
   http://burtleburtle.net/bob/rand/isaacafa.html

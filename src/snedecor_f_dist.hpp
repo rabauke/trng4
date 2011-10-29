@@ -34,6 +34,7 @@
 
 #define TRNG_SNEDECOR_F_DIST_HPP
 
+#include <trng/cuda.hpp>
 #include <trng/limits.hpp>
 #include <trng/utility.hpp>
 #include <trng/math.hpp>
@@ -56,12 +57,18 @@ namespace trng {
     private:
       int n_, m_;
     public:
+      TRNG_CUDA_ENABLE
       int n() const { return n_; }
+      TRNG_CUDA_ENABLE
       void n(int n_new) { n_=n_new; }
+      TRNG_CUDA_ENABLE
       int m() const { return m_; }
+      TRNG_CUDA_ENABLE
       void m(int m_new) { m_=m_new; }
+      TRNG_CUDA_ENABLE
       param_type() : n_(1), m_(1) {
       }
+      TRNG_CUDA_ENABLE
       param_type(int n, int m) : n_(n), m_(m) {
       }
 
@@ -105,6 +112,7 @@ namespace trng {
     param_type p;
 
     // inverse cumulative density function
+    TRNG_CUDA_ENABLE
     result_type icdf_(result_type x) const {
       result_type t=math::inv_Beta_I(x, result_type(1)/result_type(2)*p.n(), result_type(1)/result_type(2)*p.m());
       return t/(1-t)*
@@ -113,32 +121,44 @@ namespace trng {
 
   public:
     // constructor
+    TRNG_CUDA_ENABLE
     snedecor_f_dist(int n, int m) : p(n, m) {
     }
+    TRNG_CUDA_ENABLE
     explicit snedecor_f_dist(const param_type &p) : p(p) {
     }
     // reset internal state
     void reset() { }
     // random numbers
     template<typename R>
+    TRNG_CUDA_ENABLE
     result_type operator()(R &r) {
       return icdf_(utility::uniformco<result_type>(r));
     }
     template<typename R>
+    TRNG_CUDA_ENABLE
     result_type operator()(R &r, const param_type &p) {
       snedecor_f_dist g(p);
       return g(r);
     }
     // property methods
     result_type min() const { return 0; }
+    TRNG_CUDA_ENABLE
     result_type max() const { return math::numeric_limits<result_type>::infinity(); }
+    TRNG_CUDA_ENABLE
     param_type param() const { return p; }
+    TRNG_CUDA_ENABLE
     void param(const param_type &p_new) { p=p_new; }
+    TRNG_CUDA_ENABLE
     int n() const { return p.n(); }
+    TRNG_CUDA_ENABLE
     void n(int n_new) { p.n(n_new); }
+    TRNG_CUDA_ENABLE
     int m() const { return p.m(); }
+    TRNG_CUDA_ENABLE
     void m(int m_new) { p.m(m_new); }
     // probability density function  
+    TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
       const result_type n=static_cast<result_type>(p.n()), m=static_cast<result_type>(p.m());
       // return math::exp(math::ln(n)*result_type(1)/result_type(2)*n + math::ln(m)*result_type(1)/result_type(2)*m - 
@@ -154,15 +174,19 @@ namespace trng {
 		       );
     }
     // cumulative density function 
+    TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
       const result_type n=static_cast<result_type>(p.n()), 
 	m=static_cast<result_type>(p.m());
       return math::Beta_I(n*x/(m+n*x), result_type(1)/result_type(2)*n, result_type(1)/result_type(2)*m);
     }
     // inverse cumulative density function 
+    TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const {
       if (x<=0 or x>=1) {
+#if !(defined __CUDA_ARCH__)
 	errno=EDOM;
+#endif
 	return math::numeric_limits<result_type>::quiet_NaN();
       }
       if (x==0)
@@ -177,12 +201,14 @@ namespace trng {
 
   // EqualityComparable concept
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator==(const typename snedecor_f_dist<float_t>::param_type &p1, 
 			 const typename snedecor_f_dist<float_t>::param_type &p2) {
     return p1.n()==p2.n() and p1.m()==p2.m();
   }
 
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const typename snedecor_f_dist<float_t>::param_type &p1, 
 			 const typename snedecor_f_dist<float_t>::param_type &p2) {
     return not (p1==p2);
@@ -192,12 +218,14 @@ namespace trng {
   
   // EqualityComparable concept
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator==(const snedecor_f_dist<float_t> &g1, 
 			 const snedecor_f_dist<float_t> &g2) {
     return g1.param()==g2.param();
   }
   
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const snedecor_f_dist<float_t> &g1, 
 			 const snedecor_f_dist<float_t> &g2) {
     return g1.param()!=g2.param();

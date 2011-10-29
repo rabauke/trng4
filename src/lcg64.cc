@@ -60,58 +60,6 @@ namespace trng {
     return not (S1==S2);
   }
   
-  // compute floor(log_2(x))
-  unsigned int lcg64::log2_floor(lcg64::result_type x) {
-    unsigned int y(0);
-    while (x>0) {
-      x>>=1;
-      ++y;
-    };
-    --y;
-    return y;
-  }
-
-  // compute pow(x, n)
-  lcg64::result_type lcg64::pow(lcg64::result_type x, lcg64::result_type n) {
-    lcg64::result_type result=1;
-    while (n>0) {
-      if ((n&1)>0)
-	result=result*x;
-      x=x*x;
-      n>>=1;
-    }
-    return result;
-  }
-
-  // compute prod(1+a^(2^i), i=0..l-1)
-  lcg64::result_type lcg64::g(unsigned int l, lcg64::result_type a) {
-    lcg64::result_type p=a, res=1;
-    for (unsigned i=0; i<l; ++i) {
-      res*=1+p;
-      p*=p;
-    }
-#if ULONG_LONG_MAX>18446744073709551615ull
-    return res & 0xfffffffffffffffful;
-#else
-    return res;
-#endif
-  }
-  
-  // compute sum(a^i, i=0..s-1)
-  lcg64::result_type lcg64::f(lcg64::result_type s, lcg64::result_type a) {
-    if (s==0)
-      return 0;
-    unsigned int l=log2_floor(s);
-    lcg64::result_type p=a;
-    for (unsigned i=0; i<l; ++i)
-      p*=p;
-#if ULONG_LONG_MAX>18446744073709551615ull
-    return ( g(l, a)+p*f(s-(1ull<<l), a) ) & 0xfffffffffffffffful;
-#else
-    return g(l, a)+p*f(s-(1ull<<l), a);
-#endif
-  }
-
   const lcg64::parameter_type
   lcg64::Default=parameter_type(18145460002477866997ull, 1ull);
   const lcg64::parameter_type 
@@ -155,38 +103,6 @@ namespace trng {
   }
 
   // Parallel random number generator concept
-  void lcg64::split(unsigned int s, unsigned int n) {
-    if (s<1 or n>=s)
-      throw std::invalid_argument("invalid argument for trng::lcg64::split");
-    if (s>1) {
-      jump(n+1);
-      P.b*=f(s, P.a);
-      P.a=pow(P.a, s);
-      backward();
-    }
-  }
-
-  void lcg64::jump2(unsigned int s) {
-    S.r=S.r*pow(P.a, 1ull<<s)+f(1ull<<s, P.a)*P.b;
-#if ULONG_LONG_MAX>18446744073709551615ull
-    S.r&=0xfffffffffffffffful;
-#endif
-  }
-
-  void lcg64::jump(unsigned long long s) {
-    if (s<16) {
-      for (unsigned int i(0); i<s; ++i) 
-	step();
-    } else {
-      unsigned int i(0);
-      while (s>0) {
-	if (s%2==1)
-	  jump2(i);
-	++i;
-	s>>=1;
-      }
-    }
-  }
   
   // Other useful methods
   const char * const lcg64::name_str="lcg64";
@@ -195,10 +111,5 @@ namespace trng {
     return name_str;
   }
   
-  void lcg64::backward() {
-    for (unsigned int i(0); i<64; ++i)
-      jump2(i);
-  }
-
 }
 

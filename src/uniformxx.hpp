@@ -35,7 +35,9 @@
 #define TRNG_UNIFORMXX_HPP
 
 #include <cstddef>
+#include <cfloat>
 #include <trng/config.hpp>
+#include <trng/cuda.hpp>
 #include <trng/limits.hpp>
 
 #if TRNG_HAVE_BOOST
@@ -72,6 +74,35 @@ namespace trng {
 
     //------------------------------------------------------------------
 
+    template<typename F>
+    struct epsilon;
+
+    template<>
+    struct epsilon<float> {
+      TRNG_CUDA_ENABLE
+      static float val() {
+	return FLT_EPSILON;
+      }
+    };
+
+    template<>
+    struct epsilon<double> {
+      TRNG_CUDA_ENABLE
+      static double val() {
+	return DBL_EPSILON;
+      }
+    };
+    
+    template<>
+    struct epsilon<long double> {
+      TRNG_CUDA_ENABLE
+      static long double val() {
+	return LDBL_EPSILON;
+      }
+    };    
+
+    //------------------------------------------------------------------
+
     // With basic optimizations enabled, modern C++ compilers can reduce
     // all the public routines herein down to small inline code sequences.
     // They should also collapse the size (sizeof(u01xx_traits<...>) to 1.
@@ -85,9 +116,9 @@ namespace trng {
       BOOST_STATIC_ASSERT(not math::numeric_limits<return_type>::is_integer);
 
       // Casting up from "simpler" types may yield better low level code sequences.
-      static const result_type domain_max0=prng_t::max - prng_t::min;
+      static const result_type domain_max0=prng_t::max-prng_t::min;
       static const unsigned int domain_bits=Bits<domain_max0>::result;
-      static const unsigned int domain_full_bits=domain_bits - (Holes<domain_max0>::result > 0);
+      static const unsigned int domain_full_bits=domain_bits-(Holes<domain_max0>::result > 0);
       static const bool int_ok=domain_bits < static_cast<unsigned int>(math::numeric_limits<unsigned int>::digits);
       static const bool long_ok=domain_bits < static_cast<unsigned int>(math::numeric_limits<unsigned long>::digits);
       static const bool long_long_ok=domain_bits < static_cast<unsigned int>(math::numeric_limits<unsigned long long>::digits);
@@ -104,6 +135,7 @@ namespace trng {
       static const bool use_ll_of_shifted=not long_long_ok and (domain_max0 >> 1)==(~0ULL >> 1) and bits<domain_bits;
       static const result_type domain_max=use_ll_of_shifted ? (domain_max0 >> 1) : domain_max0;
 
+      TRNG_CUDA_ENABLE
       static ret_t addin(const prng_t &r) {
 	result_type x=r()-prng_t::min;
 	if (int_ok) 
@@ -117,6 +149,7 @@ namespace trng {
 	else 
 	  return x;
       }
+      TRNG_CUDA_ENABLE
       static ret_t variate_max() {
 	const ret_t scale_per_step(ret_t(domain_max) + 1);
 	const ret_t max_addin(domain_max);
@@ -125,6 +158,7 @@ namespace trng {
 	  ret=ret*scale_per_step+max_addin;
 	return ret;
       }
+      TRNG_CUDA_ENABLE
       static ret_t variate(const prng_t &r) {
 	const ret_t scale_per_step(ret_t(domain_max) + 1);
 	ret_t ret(addin(r));
@@ -132,57 +166,70 @@ namespace trng {
 	  ret=ret*scale_per_step+addin(r);
 	return ret;
       }
+      TRNG_CUDA_ENABLE
       static ret_t eps() {
-        const ret_t native_eps(math::numeric_limits<ret_t>::epsilon());
+        const ret_t native_eps(epsilon<ret_t>::val());
         const ret_t domain_eps(ret_t(1)/domain_max);
 	return native_eps>=domain_eps or requested_bits!=1 ? native_eps : domain_eps;
       }
+      TRNG_CUDA_ENABLE
       static ret_t cc_norm() {
 	return ret_t(1)/variate_max();
       }
+      TRNG_CUDA_ENABLE
       static ret_t co_norm() {
 	return cc_norm()*(ret_t(1)-eps());
       }
+      TRNG_CUDA_ENABLE
       static ret_t oo_norm() {
 	return cc_norm()*(ret_t(1)-2*eps());
       }
     public:
+      TRNG_CUDA_ENABLE
       static return_type cc(const prng_t &r) {
         const bool division_required(variate_max()*cc_norm()!=1);
         return division_required ? variate(r)/variate_max() : variate(r)*cc_norm();
       }
+      TRNG_CUDA_ENABLE
       static return_type co(const prng_t &r) { 
 	return variate(r)*co_norm(); 
       }
+      TRNG_CUDA_ENABLE
       static return_type oc(const prng_t &r) { 
 	return ret_t(1)-co(r);	
       }
+      TRNG_CUDA_ENABLE
       static return_type oo(const prng_t &r) { 
 	return variate(r)*oo_norm()+eps(); 
       }
     };
 
     template<typename ReturnType, std::size_t bits, typename UniformRandomNumberGenerator>
+    TRNG_CUDA_ENABLE
     ReturnType generate_canonical(UniformRandomNumberGenerator &u) {
       return u01xx_traits<ReturnType, bits, UniformRandomNumberGenerator>::co(u);
     }
 
     template<typename ReturnType, typename PrngType>
+    TRNG_CUDA_ENABLE
     inline ReturnType uniformcc(const PrngType &r) { 
       return u01xx_traits<ReturnType, 1, PrngType>::cc(r); 
     }
 
     template<typename ReturnType, typename PrngType>
+    TRNG_CUDA_ENABLE
     inline ReturnType uniformco(const PrngType &r) { 
       return u01xx_traits<ReturnType, 1, PrngType>::co(r); 
     }
 
     template<typename ReturnType, typename PrngType>
+    TRNG_CUDA_ENABLE
     inline ReturnType uniformoc(const PrngType &r) { 
       return u01xx_traits<ReturnType, 1, PrngType>::oc(r); 
     }
 
     template<typename ReturnType, typename PrngType>
+    TRNG_CUDA_ENABLE
     inline ReturnType uniformoo(const PrngType &r) { 
       return u01xx_traits<ReturnType, 1, PrngType>::oo(r); 
     }

@@ -34,9 +34,10 @@
 
 #define TRNG_GEOMETRIC_DIST_HPP
 
-#include <trng/limits.hpp>
+#include <trng/cuda.hpp>
 #include <trng/utility.hpp>
 #include <trng/math.hpp>
+#include <climits>
 #include <ostream>
 #include <istream>
 #include <iomanip>
@@ -53,16 +54,21 @@ namespace trng {
     class param_type {
     private:
       double p_, q_, one_over_ln_q_;
-     
+
+      TRNG_CUDA_ENABLE
       double q() const {  return q_;  }
+      TRNG_CUDA_ENABLE
       double one_over_ln_q() const {  return one_over_ln_q_;  }
 
     public:
+      TRNG_CUDA_ENABLE
       double p() const { return p_; }
+      TRNG_CUDA_ENABLE
       void p(double p_new) { 
 	p_=p_new;  q_=1.0-p_;  one_over_ln_q_=1.0/math::ln(q_);
       }
-      explicit param_type(double p) :
+      TRNG_CUDA_ENABLE
+      explicit param_type(double p=0.5) :
 	p_(p), q_(1.0-p_), one_over_ln_q_(1.0/math::ln(q_)) {
       }
       friend class geometric_dist;
@@ -73,35 +79,48 @@ namespace trng {
     
   public:
     // constructor
+    TRNG_CUDA_ENABLE
     explicit geometric_dist(double p) : P(p) {
     }
+    TRNG_CUDA_ENABLE
     explicit geometric_dist(const param_type &P) : P(P) {
     }
     // reset internal state
+    TRNG_CUDA_ENABLE
     void reset() { }
     // random numbers
     template<typename R>
+    TRNG_CUDA_ENABLE
     int operator()(R &r) {
       return static_cast<int>(math::ln(utility::uniformoo<double>(r))*
 			      P.one_over_ln_q());
     }
     template<typename R>
+    TRNG_CUDA_ENABLE
     int operator()(R &r, const param_type &p) {
       geometric_dist g(p);
       return g(r);
     }
     // property methods
+    TRNG_CUDA_ENABLE
     int min() const { return 0; }
-    int max() const { return math::numeric_limits<int>::max(); }
+    TRNG_CUDA_ENABLE
+    int max() const { return INT_MAX; }
+    TRNG_CUDA_ENABLE
     param_type param() const { return P; }
+    TRNG_CUDA_ENABLE
     void param(const param_type &P_new) { P=P_new; }
+    TRNG_CUDA_ENABLE
     double p() const { return P.p(); }
+    TRNG_CUDA_ENABLE
     void p(double p_new) { P.p(p_new); }
     // probability density function  
+    TRNG_CUDA_ENABLE
     double pdf(int x) const {
       return x<0 ? 0.0 : P.p()*math::pow(P.q(), static_cast<double>(x));
     }
     // cumulative density function 
+    TRNG_CUDA_ENABLE
     double cdf(int x) const {
       return x<0 ? 0.0 : 1.0-math::pow(P.q(), static_cast<double>(x+1));
     }
@@ -110,10 +129,13 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
+  TRNG_CUDA_ENABLE
   inline bool operator==(const geometric_dist::param_type &p1, 
 			 const geometric_dist::param_type &p2) {
     return p1.p()==p2.p();
   }
+
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const geometric_dist::param_type &p1, 
 			 const geometric_dist::param_type &p2) {
     return !(p1==p2);
@@ -153,10 +175,13 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
+  TRNG_CUDA_ENABLE
   inline bool operator==(const geometric_dist &g1, 
 			 const geometric_dist &g2) {
     return g1.param()==g2.param();
   }
+
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const geometric_dist &g1, 
 			 const geometric_dist &g2) {
     return g1.param()!=g2.param();

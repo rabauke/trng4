@@ -43,6 +43,7 @@
 #include <cstring>
 #include <vector>
 #include <iterator>
+#include <trng/cuda.hpp>
 #include <trng/limits.hpp>
 #include <trng/uniformxx.hpp>
 
@@ -50,27 +51,35 @@ namespace trng {
   
   namespace utility {
     
-    class delim_str;
-    class delim_c;
-    inline delim_str delim(const char * const);
-    inline delim_c delim(char);
-    
-    class ignore_spaces_cl;
-    inline ignore_spaces_cl ignore_spaces();
+    template<typename T>
+    TRNG_CUDA_ENABLE
+    inline const T & min(const T &a, const T &b) {
+      return a<=b ? a : b;
+    }
 
-    long modulo_invers(long a, long m);
-    void gauss(std::vector<long> &a,
-	       std::vector<long> &b, long m);
-    void matrix_mult(const std::vector<long> &a,
-		     const std::vector<long> &b,
-		     std::vector<long> &c, long m);
-    void matrix_vec_mult(const std::vector<long> &a,
-			 const std::vector<long> &b,
-			 std::vector<long> &c, long m);
+    template<typename T>
+    TRNG_CUDA_ENABLE
+    inline const T & max(const T &a, const T &b) {
+      return a>=b ? a : b;
+    }
     
-    template<typename iter>
-    inline int discrete(double x, iter, iter);
-    
+    // ---------------------------------------------------------------
+
+    template<typename T>
+    TRNG_CUDA_ENABLE
+    inline void swap(T &a, T &b) {
+      T c(b);
+      b=a;
+      a=c;
+    }
+
+    // ---------------------------------------------------------------
+
+    template<typename T>
+    inline void throw_this(const T &x) {
+      throw x;
+    }
+
     // ---------------------------------------------------------------
 
     class delim_str {
@@ -195,150 +204,9 @@ namespace trng {
     inline io_range<T> make_io_range(T first, T last, const char *delim_str=0) {
       return io_range<T>(first, last, delim_str);
     }
-
-    // ---------------------------------------------------------------
-
-    template<long m>
-    struct log2_floor {
-      enum { value = 1 + log2_floor<m/2>::value };
-    };
-
-    template<>
-    struct log2_floor<0> { enum { value = 0 }; };
-
-    template<>
-    struct log2_floor<1> { enum { value = 0 }; };
-    
-    template<long m>
-    struct log2_ceil {
-      enum { value = (1ul<<log2_floor<m>::value) < m ? log2_floor<m>::value+1 : log2_floor<m>::value }; 
-    };
-
-    // ---------------------------------------------------------------
-
-    template<long m, long r> 
-    class modulo_helper;
-
-    template<long m> 
-    class modulo_helper<m, 0> {
-      static const long e=log2_ceil<m>::value;
-      static const long k=(1ul<<e)-m;
-      static const unsigned long mask=(1ul<<e)-1ul;
-    public:
-      inline static long modulo(unsigned long long x) {
-	if (mask==m) {
-	  unsigned long y=(x&mask)+(x>>e);
-	  if (y>=m)
-	    y-=m;
-	  return y;
-	} else if (static_cast<long long>(k)*static_cast<long long>(k+2)<=m) {
-	  x=(x&mask)+(x>>e)*k;
-	  x=(x&mask)+(x>>e)*k;
-	  if (x>=m)
-	    x-=m;
-	  return x;
-	} else {
-	  return x%m;
-	}
-      }
-    };
-
-    template<long m> 
-    class modulo_helper<m, 1> {
-      static const long e=log2_ceil<m>::value;
-      static const long k=(1ul<<e)-m;
-      static const unsigned long mask=(1ul<<e)-1ul;
-    public:
-      inline static long modulo(unsigned long long x) {
-	if (mask==m) {
-	  unsigned long long y=(x&mask)+(x>>e);
-	  if (y>=2ull*m)
-	    y-=2ull*m;
-	  if (y>=m)
-	    y-=m;
-	  return y;
-	} else if (static_cast<long long>(k)*static_cast<long long>(k+2)<=m) {
-	  x=(x&mask)+(x>>e)*k;
-	  x=(x&mask)+(x>>e)*k;
-	  if (x>=2ull*m) x-=2ull*m; 
-	  if (x>=m)
-	    x-=m;
-	  return x;
-	} else {
-	  return x%m;
-	}
-      }
-    };
-
-    template<long m> 
-    class modulo_helper<m, 2> {
-      static const long e=log2_ceil<m>::value;
-      static const long k=(1ul<<e)-m;
-      static const unsigned long mask=(1ul<<e)-1ul;
-    public:
-      inline static long modulo(unsigned long long x) {
-	if (mask==m) {
-	  unsigned long long y=(x&mask)+(x>>e);
-	  if (y>=4ull*m) y-=4ull*m;
-	  if (y>=2ull*m) y-=2ull*m;
-	  if (y>=m)
-	    y-=m;
-	  return y;
-	} else if (static_cast<long long>(k)*static_cast<long long>(k+2)<=m) {
-	  x=(x&mask)+(x>>e)*k;
-	  x=(x&mask)+(x>>e)*k;
-	  if (x>=4ull*m) x-=4ull*m; 
-	  if (x>=2ull*m) x-=2ull*m; 
-	  if (x>=m)
-	    x-=m;
-	  return x;
-	} else {
-	  return x%m;
-	}
-      }
-    };
-    
-    template<long m, long r> 
-    inline long modulo(unsigned long long x) {
-      return modulo_helper<m, log2_floor<r>::value >::modulo(x);
-    }
     
     // ---------------------------------------------------------------
-
-    template<long m, long b>
-    class power {
-      unsigned long b_power0[0x10000l], b_power1[0x08000l];
-
-      inline long pow(long n) {
-        long long p(1ll), t(b);
-        while (n>0) {
-          if ((n&0x1)==0x1)
-            p=(p*t)%m;
-          t=(t*t)%m;
-          n/=2;
-        }
-        return static_cast<long>(p);
-      }
-      
-      power & operator=(const power &);
-      power(const power &);
-      
-    public:
-      power() {
-        for (long i(0l); i<0x10000l; ++i)
-          b_power0[i]=pow(i);
-        for (long i(0l); i<0x08000l; ++i)
-          b_power1[i]=pow(i*0x10000l);
-      }
-      inline long operator()(long n) const {
-        return modulo<m, 1>(static_cast<unsigned long long>(b_power1[n>>16])*
-			    static_cast<unsigned long long>(b_power0[n&0xffff]));
-      }
-
-    };
-
-    // -----------------------------------------------------------------
-
+    
     template <unsigned int x> 
     struct ceil2 {
       enum { result=2*ceil2<(x+1)/2>::result };

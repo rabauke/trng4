@@ -34,6 +34,7 @@
 
 #define TRNG_EXPONENTIAL_DIST_HPP
 
+#include <trng/cuda.hpp>
 #include <trng/limits.hpp>
 #include <trng/utility.hpp>
 #include <trng/math.hpp>
@@ -55,10 +56,14 @@ namespace trng {
     private:
       result_type mu_;
     public:
+      TRNG_CUDA_ENABLE
       result_type mu() const { return mu_; }
+      TRNG_CUDA_ENABLE
       void mu(result_type mu_new) { mu_=mu_new; }
+      TRNG_CUDA_ENABLE
       param_type() : mu_(1) {
       }
+      TRNG_CUDA_ENABLE
       explicit param_type(result_type mu) : mu_(mu) {
       }
 
@@ -103,41 +108,59 @@ namespace trng {
     
   public:
     // constructor
+    TRNG_CUDA_ENABLE
     explicit exponential_dist(result_type mu) : p(mu) {
     }
+    TRNG_CUDA_ENABLE
     explicit exponential_dist(const param_type &p) : p(p) {
     }
     // reset internal state
+    TRNG_CUDA_ENABLE
     void reset() { }
     // random numbers
     template<typename R>
+    TRNG_CUDA_ENABLE
     result_type operator()(R &r) {
-      return -p.mu()*math::ln(utility::uniformoc<result_type>(r));
+      return -p.mu()*math::ln(
+			      utility::uniformoc<result_type>(r)
+			      );
     }
     template<typename R>
+    TRNG_CUDA_ENABLE
     result_type operator()(R &r, const param_type &p) {
       exponential_dist g(p);
       return g(r);
     }
     // property methods
+    TRNG_CUDA_ENABLE
     result_type min() const { return 0; }
+    TRNG_CUDA_ENABLE
     result_type max() const { return math::numeric_limits<result_type>::infinity(); }
+    TRNG_CUDA_ENABLE
     param_type param() const { return p; }
+    TRNG_CUDA_ENABLE
     void param(const param_type &p_new) { p=p_new; }
+    TRNG_CUDA_ENABLE
     result_type mu() const { return p.mu(); }
+    TRNG_CUDA_ENABLE
     void mu(result_type mu_new) { p.mu(mu_new); }
     // probability density function  
+    TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
       return x<0 ? 0 : math::exp(-x/p.mu())/p.mu();
     }
     // cumulative density function 
+    TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
       return x<=0 ? 0 : 1-math::exp(-x/p.mu());
     }
     // inverse cumulative density function 
+    TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const {
       if (x<0 or x>1) {
+#if !(defined __CUDA_ARCH__)
 	errno=EDOM;
+#endif
 	return math::numeric_limits<result_type>::quiet_NaN();
       }
       if (x==1)
@@ -150,12 +173,14 @@ namespace trng {
 
   // EqualityComparable concept
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator==(const typename exponential_dist<float_t>::param_type &p1, 
 			 const typename exponential_dist<float_t>::param_type &p2) {
     return p1.mu()==p2.mu();
   }
 
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const typename exponential_dist<float_t>::param_type &p1, 
 			 const typename exponential_dist<float_t>::param_type &p2) {
     return not (p1==p2);
@@ -165,12 +190,14 @@ namespace trng {
 
   // EqualityComparable concept
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator==(const exponential_dist<float_t> &g1, 
 			 const exponential_dist<float_t> &g2) {
     return g1.param()==g2.param();
   }
 
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const exponential_dist<float_t> &g1, 
 			 const exponential_dist<float_t> &g2) {
     return g1.param()!=g2.param();

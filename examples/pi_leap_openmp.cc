@@ -42,8 +42,8 @@
 int main(int argc, char *argv[]) {
   const long samples=1000000l;          // total number of points in square
   long in=0l;                           // no points in circle
-  // distribute workload over all processes
-#pragma omp parallel
+  // distribute workload over all processes and make a global reduction 
+#pragma omp parallel reduction(+:in)
   {
     trng::yarn2 rx, ry;                 // random number engines for x- and y-coordinates
     int size=omp_get_num_threads();     // get total number of processes
@@ -54,15 +54,12 @@ int main(int argc, char *argv[]) {
     rx.split(size, rank);               // choose sub-stream no. rank out of size streams
     ry.split(size, rank);               // choose sub-stream no. rank out of size streams
     trng::uniform01_dist<> u;           // random number distribution
-    long in_local=0l;
     // throw random points into square 
     for (long i=rank; i<samples; i+=size) {
       double x=u(rx), y=u(ry);          // choose random x- and y-coordinates
       if (x*x+y*y<=1.0)                 // is point in circle?
-	++in_local;                     // increase thread-local counter
+	++in;                           // increase thread-local counter
     }
-#pragma omp critical
-    in+=in_local;                       // increase global counter
   }
   // print result
   std::cout << "pi = " << 4.0*in/samples << std::endl;

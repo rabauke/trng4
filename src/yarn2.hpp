@@ -37,7 +37,9 @@
 #include <ostream>
 #include <istream>
 #include <stdexcept>
+#include <trng/cuda.hpp>
 #include <trng/utility.hpp>
+#include <trng/int_math.hpp>
 
 namespace trng {
   
@@ -48,6 +50,7 @@ namespace trng {
   
     // Uniform random number generator concept
     typedef long result_type;
+    TRNG_CUDA_ENABLE
     result_type operator()() const;
   private:
     static const result_type modulus=2147483647l;
@@ -62,7 +65,7 @@ namespace trng {
     
     class parameter_type {
       result_type a1, a2;
-      static utility::power<yarn2::modulus, yarn2::gen> g;
+      static int_math::power<yarn2::modulus, yarn2::gen> g;
     public:
       parameter_type() :
         a1(0), a2(0) { };
@@ -218,12 +221,16 @@ namespace trng {
     }
 
     // Parallel random number generator concept
+    TRNG_CUDA_ENABLE
     void split(unsigned int, unsigned int);
+    TRNG_CUDA_ENABLE
     void jump2(unsigned int);
+    TRNG_CUDA_ENABLE
     void jump(unsigned long long);
 
     // Other useful methods
     static const char * name();
+    TRNG_CUDA_ENABLE
     long operator()(long) const;
 
   private:
@@ -231,29 +238,129 @@ namespace trng {
     mutable status_type S;
     static const char * const name_str;
     
+    TRNG_CUDA_ENABLE
     void backward();
+    TRNG_CUDA_ENABLE
     void step() const;
   };
     
   // Inline and template methods
 
+  TRNG_CUDA_ENABLE
   inline void yarn2::step() const {
     unsigned long long t(static_cast<unsigned long long>(P.a1)*
 			 static_cast<unsigned long long>(S.r1)+
 			 static_cast<unsigned long long>(P.a2)*
 			 static_cast<unsigned long long>(S.r2));
-    S.r2=S.r1;  S.r1=utility::modulo<modulus, 2>(t);
+    S.r2=S.r1;  S.r1=int_math::modulo<modulus, 2>(t);
   }
 
+  TRNG_CUDA_ENABLE
   inline yarn2::result_type yarn2::operator()() const {
     step();
+#if defined __CUDA_ARCH__
+    if (S.r1==0) 
+      return 0;
+    yarn2::result_type n=S.r1;
+    long long p(1ll), t(gen);
+    while (n>0) {
+      if ((n&0x1)==0x1)
+	p=int_math::modulo<modulus, 1>(p*t);
+      t=int_math::modulo<modulus, 1>(t*t);
+      n/=2;
+    }
+    return static_cast<yarn2::result_type>(p);
+#else
     return (S.r1==0) ? 0 : P.g(S.r1);
+#endif
   }
 
+  TRNG_CUDA_ENABLE
   inline long yarn2::operator()(long x) const {
     return static_cast<long>(utility::uniformco<double, yarn2>(*this)*x);
   }
       
+  // Parallel random number generator concept
+  TRNG_CUDA_ENABLE
+  inline void yarn2::split(unsigned int s, unsigned int n) {
+#if !(defined __CUDA_ARCH__)
+    if (s<1 or n>=s)
+      utility::throw_this(std::invalid_argument("invalid argument for trng::yarn2::split"));
+#endif
+    if (s>1) {
+      jump(n+1);  long q0=S.r1;
+      jump(s);    long q1=S.r1;
+      jump(s);    long q2=S.r1;
+      jump(s);    long q3=S.r1;
+      long a[2], b[4];
+      a[0]=q2;  b[0]=q1;  b[1]=q0;
+      a[1]=q3;  b[2]=q2;  b[3]=q1;
+      int_math::gauss<2>(b, a, modulus);
+      P.a1=a[0];  P.a2=a[1];
+      S.r1=q1;    S.r2=q0;
+      for (int i=0; i<2; ++i)
+	backward();
+    }
+  }
+
+  TRNG_CUDA_ENABLE
+  inline void yarn2::jump2(unsigned int s) {
+    long b[4], c[4], d[2], r[2];
+    long t1(P.a1), t2(P.a2);
+    b[0]=P.a1;  b[1]=P.a2;
+    b[2]=1l;    b[3]=0l;
+    for (unsigned int i(0); i<s; ++i)
+      if ((i&1)==0)
+	int_math::matrix_mult<2>(b, b, c, modulus);
+      else
+	int_math::matrix_mult<2>(c, c, b, modulus);
+    r[0]=S.r1;  r[1]=S.r2;
+    if ((s&1)==0)
+      int_math::matrix_vec_mult<2>(b, r, d, modulus);
+    else
+      int_math::matrix_vec_mult<2>(c, r, d, modulus);
+    S.r1=d[0];  S.r2=d[1];
+    P.a1=t1;    P.a2=t2;
+  }
+
+  TRNG_CUDA_ENABLE
+  inline void yarn2::jump(unsigned long long s) {
+    if (s<16) {
+      for (unsigned int i(0); i<s; ++i) 
+	step();
+    } else {
+      unsigned int i(0);
+      while (s>0) {
+	if (s%2==1)
+	  jump2(i);
+	++i;
+	s>>=1;
+      }
+    }
+  }
+
+  TRNG_CUDA_ENABLE
+  inline void yarn2::backward() {
+    long t;
+    if (P.a2!=0l) {
+      t=S.r1;
+      t-=static_cast<long>((static_cast<long long>(P.a1)*
+			    static_cast<long long>(S.r2))%modulus);
+      if (t<0l)
+	t+=modulus;
+      t=static_cast<long>((static_cast<long long>(t)*
+			   static_cast<long long>
+			   (int_math::modulo_invers(P.a2, modulus)))%modulus);
+    } else if (P.a1!=0l) {
+      t=S.r2;
+      t=static_cast<long>((static_cast<long long>(t)*
+			   static_cast<long long>
+			   (int_math::modulo_invers(P.a1, modulus)))%modulus);
+    } else
+      t=0l;
+    S.r1=S.r2;  S.r2=t;
+  }
+
 }
   
 #endif

@@ -34,6 +34,7 @@
 
 #define TRNG_BERNOULLI_DIST_HPP
 
+#include <trng/cuda.hpp>
 #include <trng/limits.hpp>
 #include <trng/utility.hpp>
 #include <ostream>
@@ -53,12 +54,19 @@ namespace trng {
       double p_;
       T head_, tail_;
     public:
+      TRNG_CUDA_ENABLE
       double p() const { return p_; }
+      TRNG_CUDA_ENABLE
       void p(double p_new) { p_=p_new; }
+      TRNG_CUDA_ENABLE
       T head() const { return head_; }
+      TRNG_CUDA_ENABLE
       void head(const T &head_new) { head_=head_new; }
+      TRNG_CUDA_ENABLE
       T tail() const { return tail_; }
+      TRNG_CUDA_ENABLE
       void tail(const T &tail_new) { tail_=tail_new; }
+      TRNG_CUDA_ENABLE
       param_type(double p, const T &head, const T &tail) :
 	p_(p), head_(head), tail_(tail) {
       }
@@ -70,35 +78,51 @@ namespace trng {
     
   public:
     // constructor
+    TRNG_CUDA_ENABLE
     bernoulli_dist(double p, const T &head, const T &tail) : 
       P(p, head, tail) {
     }
+    TRNG_CUDA_ENABLE
     explicit bernoulli_dist(const param_type &P) : P(P) {
     }
     // reset internal state
+    TRNG_CUDA_ENABLE
     void reset() { }
     // random numbers
     template<typename R>
+    TRNG_CUDA_ENABLE
     T operator()(R &r) {
       return utility::uniformco<double>(r)<P.p() ? P.head() : P.tail();
     }
     template<typename R>
+    TRNG_CUDA_ENABLE
     T operator()(R &r, const param_type &P) {
       bernoulli_dist g(P);
       return g(r);
     }
     // property methods
+    TRNG_CUDA_ENABLE
     T min() const { return P.head(); }
+    TRNG_CUDA_ENABLE
     T max() const { return P.tail(); }
+    TRNG_CUDA_ENABLE
     param_type param() const { return P; }
+    TRNG_CUDA_ENABLE
     void param(const param_type &P_new) { P=P_new; }
+    TRNG_CUDA_ENABLE
     double p() const { return P.p(); }
+    TRNG_CUDA_ENABLE
     void p(double p_new) { P.p(p_new); }
+    TRNG_CUDA_ENABLE
     T head() const { return P.head(); }
+    TRNG_CUDA_ENABLE
     void head(const T & head_new) { P.head(head_new); }
+    TRNG_CUDA_ENABLE
     T tail() const { return P.tail(); }
+    TRNG_CUDA_ENABLE
     void tail(const T & tail_new) { P.tail(tail_new); }
     // probability density function  
+    TRNG_CUDA_ENABLE
     double pdf(const T &x) const {
       if (x==P.head())
 	return P.p();
@@ -107,6 +131,7 @@ namespace trng {
       return 0.0;
     }
     // cumulative density function 
+    TRNG_CUDA_ENABLE
     double cdf(const T &x) const {
       if (x==P.head())
 	return P.p();
@@ -121,11 +146,13 @@ namespace trng {
 
   // EqualityComparable concept
   template<typename T>
+  TRNG_CUDA_ENABLE
   inline bool operator==(const typename bernoulli_dist<T>::param_type &p1, 
 			 const typename bernoulli_dist<T>::param_type &p2) {
     return p1.p()==p2.p() and p1.head()==p2.head() and p1.tail()==p2.tail();
   }
   template<typename T>
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const typename bernoulli_dist<T>::param_type &p1, 
 			 const typename bernoulli_dist<T>::param_type &p2) {
     return !(p1==p2);
@@ -169,11 +196,13 @@ namespace trng {
   
   // EqualityComparable concept
   template<typename T>
+  TRNG_CUDA_ENABLE
   inline bool operator==(const bernoulli_dist<T> &g1, 
 			 const bernoulli_dist<T> &g2) {
     return g1.param()==g2.param();
   }
   template<typename T>
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const bernoulli_dist<T> &g1, 
 			 const bernoulli_dist<T> &g2) {
     return g1.param()!=g2.param();

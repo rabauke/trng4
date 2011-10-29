@@ -30,46 +30,21 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <trng/config.hpp>
-#if defined TRNG_HAVE_OPENMP
+#if !(defined TRNG_CUDA_HPP)
 
-#include <cstdlib>
-#include <iostream>
-#include <omp.h>
-#include <trng/yarn2.hpp>
-#include <trng/uniform01_dist.hpp>
+#define TRNG_CUDA_HPP
 
-int main(int argc, char *argv[]) {
-  const long samples=1000000l;          // total number of points in square
-  long in=0l;                           // number of points in circle
-  // distribute workload over all processes and make a global reduction 
-#pragma omp parallel reduction(+:in)
-  {
-    trng::yarn2 r;                      // random number engine
-    int size=omp_get_num_threads();     // get total number of processes 
-    int rank=omp_get_thread_num();      // get rank of current process
-    trng::uniform01_dist<> u;           // random number distribution
-    r.jump(2*(rank*samples/size));      // jump ahead
-    // throw random points into square 
-    for (long i=rank*samples/size; i<(rank+1)*samples/size; ++i) {
-      double x=u(r), y=u(r);            // choose random x- and y-coordinates
-      if (x*x+y*y<=1.0)                 // is point in circle?
-	++in;                           // increase thread-local counter
-    }
-  }
-  // print result
-  std::cout << "pi = " << 4.0*in/samples << std::endl;
-  return EXIT_SUCCESS;
-}
+#if defined __CUDACC__
+
+#define TRNG_CUDA 1
+#define TRNG_CUDA_ENABLE __device__ __host__
+
+#include <cuda.h>
 
 #else
 
-#include <cstdlib>
-#include <iostream>
+#define TRNG_CUDA_ENABLE
 
-int main() {
-  std::cerr << "Sorry, OpenMP is not supported by your compiler.\n";
-  return EXIT_FAILURE;
-}
+#endif
 
 #endif

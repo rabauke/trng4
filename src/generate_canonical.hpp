@@ -34,6 +34,7 @@
 
 #define TRNG_GENERATE_CANONICAL_HPP
 
+#include <trng/cuda.hpp>
 #include <trng/limits.hpp>
 #include <trng/math.hpp>
 #include <trng/utility.hpp>
@@ -65,11 +66,13 @@ namespace trng {
     };
     
     template<typename result_type, typename R>
+    TRNG_CUDA_ENABLE
     inline result_type generate_canonical_impl(R &r, result_type, float_tag) {
       return utility::uniformoo<result_type>(r);
     }
   
     template<typename result_type, typename R>
+    TRNG_CUDA_ENABLE
     inline result_type generate_canonical_impl(R &r, result_type, integer_tag) {
       return static_cast<result_type>(math::floor(utility::uniformco<double>(r)*(static_cast<double>(R::max)-static_cast<double>(R::min)+1.0)));
     }
@@ -77,6 +80,7 @@ namespace trng {
   }
   
   template<typename result_type, typename R>
+  TRNG_CUDA_ENABLE
   result_type generate_canonical(R &g) {
     return detail::generate_canonical_impl(g, result_type(), 
 					   typename detail::integer_float_traits<math::numeric_limits<result_type>::is_integer>::cat());

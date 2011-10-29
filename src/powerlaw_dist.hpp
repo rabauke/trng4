@@ -34,6 +34,7 @@
 
 #define TRNG_POWERLAW_DIST_HPP
 
+#include <trng/cuda.hpp>
 #include <trng/limits.hpp>
 #include <trng/utility.hpp>
 #include <trng/math.hpp>
@@ -55,12 +56,18 @@ namespace trng {
     private:
       result_type gamma_, theta_;
     public:
+      TRNG_CUDA_ENABLE
       result_type gamma() const { return gamma_; }
+      TRNG_CUDA_ENABLE
       void gamma(result_type gamma_new) { gamma_=gamma_new; }
+      TRNG_CUDA_ENABLE
       result_type theta() const { return theta_; }
+      TRNG_CUDA_ENABLE
       void theta(result_type theta_new) { theta_=theta_new; }
+      TRNG_CUDA_ENABLE
       param_type() : gamma_(1), theta_(1) {
       }
+      TRNG_CUDA_ENABLE
       param_type(result_type gamma, result_type theta) : gamma_(gamma), theta_(theta) {
       }
 
@@ -106,32 +113,46 @@ namespace trng {
     
   public:
     // constructor
+    TRNG_CUDA_ENABLE
     powerlaw_dist(result_type gamma, result_type theta) : p(gamma, theta) {
     }
+    TRNG_CUDA_ENABLE
     explicit powerlaw_dist(const param_type &p) : p(p) {
     }
     // reset internal state
+    TRNG_CUDA_ENABLE
     void reset() { }
     // random numbers
     template<typename R>
+    TRNG_CUDA_ENABLE
     result_type operator()(R &r) {
       return p.theta()*math::pow(utility::uniformoc<result_type>(r), -1/p.gamma());
     }
     template<typename R>
+    TRNG_CUDA_ENABLE
     result_type operator()(R &r, const param_type &p) {
       powerlaw_dist g(p);
       return g(r);
     }
     // property methods
+    TRNG_CUDA_ENABLE
     result_type min() const { return p.theta(); }
+    TRNG_CUDA_ENABLE
     result_type max() const { return math::numeric_limits<result_type>::infinity(); }
+    TRNG_CUDA_ENABLE
     param_type param() const { return p; }
+    TRNG_CUDA_ENABLE
     void param(const param_type &p_new) { p=p_new; }
+    TRNG_CUDA_ENABLE
     result_type gamma() const { return p.gamma(); }
+    TRNG_CUDA_ENABLE
     void gamma(result_type gamma_new) { p.gamma(gamma_new); }
+    TRNG_CUDA_ENABLE
     result_type theta() const { return p.theta(); }
+    TRNG_CUDA_ENABLE
     void theta(result_type theta_new) { p.theta(theta_new); }
     // probability density function  
+    TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
       if (x<p.theta())
 	return 0;
@@ -140,6 +161,7 @@ namespace trng {
 	  math::pow(x/p.theta(), -p.gamma()-1);
     }
     // cumulative density function 
+    TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
       if (x<=0)
 	return 0;
@@ -147,9 +169,12 @@ namespace trng {
 	return 1-math::pow(x/p.theta(), -p.gamma());
     }
     // inverse cumulative density function 
+    TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const {
       if (x<=0 or x>=1) {
+#if !(defined __CUDA_ARCH__)
 	errno=EDOM;
+#endif
 	return math::numeric_limits<result_type>::quiet_NaN();
       }
       if (x==0)
@@ -164,12 +189,14 @@ namespace trng {
 
   // EqualityComparable concept
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator==(const typename powerlaw_dist<float_t>::param_type &p1, 
 			 const typename powerlaw_dist<float_t>::param_type &p2) {
     return p1.gamma()==p2.gamma() and p1.theta()==p2.theta();
   }
 
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const typename powerlaw_dist<float_t>::param_type &p1, 
 			 const typename powerlaw_dist<float_t>::param_type &p2) {
     return not (p1==p2);
@@ -179,12 +206,14 @@ namespace trng {
 
   // EqualityComparable concept
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator==(const powerlaw_dist<float_t> &g1, 
 			 const powerlaw_dist<float_t> &g2) {
     return g1.param()==g2.param();
   }
 
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const powerlaw_dist<float_t> &g1, 
 			 const powerlaw_dist<float_t> &g2) {
     return g1.param()!=g2.param();

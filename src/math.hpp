@@ -41,6 +41,8 @@
 #  include <cmath>
 #endif
 
+#include <trng/cuda.hpp>
+
 namespace trng {
   
   namespace math {
@@ -307,10 +309,12 @@ namespace trng {
       return T(1) << x;
     }
     
+    TRNG_CUDA_ENABLE
     inline float ln(float x) {
       return log(x);
     }
 
+    TRNG_CUDA_ENABLE
     inline double ln(double x) {
       return log(x);
     }
@@ -372,13 +376,13 @@ namespace trng {
     using ::std::pow;
     using ::std::sqrt;
     inline float sqrt(float r, float x) {
-      return ::std::pow(x, 1.0f/x);
+      return ::std::pow(x, 1.0f/r);
     }
     inline double sqrt(double r, double x) {
-      return ::std::pow(x, 1.0/x);
+      return ::std::pow(x, 1.0/r);
     }
     inline long double sqrt(long double r, long double x) {
-      return ::std::pow(x, 1.0l/x);
+      return ::std::pow(x, 1.0l/r);
     }
   
     // --- nearest integer functions -------------------------------------

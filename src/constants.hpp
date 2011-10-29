@@ -34,7 +34,10 @@
 
 #define TRNG_CONSTANTS_HPP
 
+#include <trng/cuda.hpp>
+
 #define TRNG_NEW_CONSTANT(type, value, x) \
+    TRNG_CUDA_ENABLE \
     static type x() throw () { \
       return value; \
     }
@@ -44,42 +47,11 @@ namespace trng {
   namespace math {  
 
     template<typename T>
-    class constants {
-    public:
-      static T pi() throw () {
-	return T(0);
-      }
-      static T catalan() throw () {
-	return T(0);
-      }
-      static T e() throw () {
-	return T(0);
-      }
-      static T gamma() throw () {
-	return T(0);
-      }
-      static T ln_2() throw () {
-	return T(0);
-      }
-      static T sqrt_2() throw () {
-	return T(0);
-      }
-      static T sqrt_2pi() throw () {
-	return T(0);
-      }
-      static T one_over_pi() throw () {
-	return T(0);
-      }
-      static T one_over_sqrt_2() throw () {
-	return T(0);
-      }
-      static T one_over_sqrt_2pi() throw () {
-	return T(0);
-      }
-    };
+    class constants;
 
     template<> class constants<float> {
     public:
+      TRNG_NEW_CONSTANT(float, 0.5f, one_half);
       TRNG_NEW_CONSTANT(float, 3.14159265358979323846264f, pi);
       TRNG_NEW_CONSTANT(float, .915965594177219015054604f, catalan);
       TRNG_NEW_CONSTANT(float, 2.71828182845904523536029f, e);
@@ -94,6 +66,7 @@ namespace trng {
   
     template<> class constants<double> {
     public:
+      TRNG_NEW_CONSTANT(double, 0.5, one_half);
       TRNG_NEW_CONSTANT(double, 3.14159265358979323846264, pi);
       TRNG_NEW_CONSTANT(double, .915965594177219015054604, catalan);
       TRNG_NEW_CONSTANT(double, 2.71828182845904523536029, e);
@@ -108,6 +81,7 @@ namespace trng {
   
     template<> class constants<long double> {
     public:
+      TRNG_NEW_CONSTANT(long double, 0.5l, one_half);
       TRNG_NEW_CONSTANT(long double, 3.14159265358979323846264l, pi);
       TRNG_NEW_CONSTANT(long double, .915965594177219015054604l, catalan);
       TRNG_NEW_CONSTANT(long double, 2.71828182845904523536029l, e);

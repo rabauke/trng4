@@ -34,6 +34,7 @@
 
 #define TRNG_STUDENT_T_DIST_HPP
 
+#include <trng/cuda.hpp>
 #include <trng/limits.hpp>
 #include <trng/utility.hpp>
 #include <trng/math.hpp>
@@ -56,10 +57,14 @@ namespace trng {
     private:
       int nu_;
     public:
+      TRNG_CUDA_ENABLE
       int nu() const { return nu_; }
+      TRNG_CUDA_ENABLE
       void nu(int nu_new) { nu_=nu_new; }
+      TRNG_CUDA_ENABLE
       param_type() : nu_(1) {
       }
+      TRNG_CUDA_ENABLE
       explicit param_type(int nu) : nu_(nu) {
       }
 
@@ -102,6 +107,7 @@ namespace trng {
     param_type p;
 
     // inverse cumulative density function
+    TRNG_CUDA_ENABLE
     result_type icdf_(result_type x) const {
       result_type t=math::inv_Beta_I(x, p.nu()/result_type(2), p.nu()/result_type(2));
       return math::sqrt(p.nu()/(t*(1-t)))*(t-result_type(1)/result_type(2));
@@ -109,30 +115,42 @@ namespace trng {
 
   public:
     // constructor
+    TRNG_CUDA_ENABLE
     explicit student_t_dist(int nu) : p(nu) {
     }
+    TRNG_CUDA_ENABLE
     explicit student_t_dist(const param_type &p) : p(p) {
     }
     // reset internal state
+    TRNG_CUDA_ENABLE
     void reset() { }
     // random numbers
     template<typename R>
+    TRNG_CUDA_ENABLE
     result_type operator()(R &r) {
       return icdf_(utility::uniformoo<result_type>(r));
     }
     template<typename R>
+    TRNG_CUDA_ENABLE
     result_type operator()(R &r, const param_type &p) {
       student_t_dist g(p);
       return g(r);
     }
     // property methods
+    TRNG_CUDA_ENABLE
     result_type min() const { return -math::numeric_limits<result_type>::infinity(); }
+    TRNG_CUDA_ENABLE
     result_type max() const { return math::numeric_limits<result_type>::infinity(); }
+    TRNG_CUDA_ENABLE
     param_type param() const { return p; }
+    TRNG_CUDA_ENABLE
     void param(const param_type &p_new) { p=p_new; }
+    TRNG_CUDA_ENABLE
     int nu() const { return p.nu(); }
+    TRNG_CUDA_ENABLE
     void nu(int nu_new) { p.nu(nu_new); }
     // probability density function  
+    TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
       result_type norm=
 	math::exp(math::ln_Gamma((p.nu()+1)/result_type(2))-
@@ -141,15 +159,19 @@ namespace trng {
       return norm*math::pow(1+x*x/p.nu(), (p.nu()+1)/result_type(-2));
     }
     // cumulative density function 
+    TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
       result_type t1=+math::sqrt(x*x+p.nu());
       result_type t2=(x+t1)/(2*t1);
       return math::Beta_I(t2, p.nu()/result_type(2), p.nu()/result_type(2));
     }
     // inverse cumulative density function 
+    TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const {
       if (x<=0 or x>=1) {
+#if !(defined __CUDA_ARCH__)
 	errno=EDOM;
+#endif
 	return math::numeric_limits<result_type>::quiet_NaN();
       }
       if (x==0)
@@ -164,12 +186,14 @@ namespace trng {
 
   // EqualityComparable concept
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator==(const typename student_t_dist<float_t>::param_type &p1, 
 			 const typename student_t_dist<float_t>::param_type &p2) {
     return p1.nu()==p2.nu();
   }
 
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const typename student_t_dist<float_t>::param_type &p1, 
 			 const typename student_t_dist<float_t>::param_type &p2) {
     return not (p1==p2);
@@ -179,12 +203,14 @@ namespace trng {
 
   // EqualityComparable concept
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator==(const student_t_dist<float_t> &g1, 
 			 const student_t_dist<float_t> &g2) {
     return g1.param()==g2.param();
   }
 
   template<typename float_t>
+  TRNG_CUDA_ENABLE
   inline bool operator!=(const student_t_dist<float_t> &g1, 
 			 const student_t_dist<float_t> &g2) {
     return g1.param()!=g2.param();

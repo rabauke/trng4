@@ -30,46 +30,40 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <trng/config.hpp>
-#if defined TRNG_HAVE_OPENMP
-
 #include <cstdlib>
 #include <iostream>
-#include <omp.h>
-#include <trng/yarn2.hpp>
+#include <trng/yarn5s.hpp>
 #include <trng/uniform01_dist.hpp>
 
-int main(int argc, char *argv[]) {
-  const long samples=1000000l;          // total number of points in square
-  long in=0l;                           // number of points in circle
-  // distribute workload over all processes and make a global reduction 
-#pragma omp parallel reduction(+:in)
-  {
-    trng::yarn2 r;                      // random number engine
-    int size=omp_get_num_threads();     // get total number of processes 
-    int rank=omp_get_thread_num();      // get rank of current process
-    trng::uniform01_dist<> u;           // random number distribution
-    r.jump(2*(rank*samples/size));      // jump ahead
-    // throw random points into square 
-    for (long i=rank*samples/size; i<(rank+1)*samples/size; ++i) {
-      double x=u(r), y=u(r);            // choose random x- and y-coordinates
-      if (x*x+y*y<=1.0)                 // is point in circle?
-	++in;                           // increase thread-local counter
-    }
+__global__
+void parallel_pi(long samples, long *in, trng::yarn5s r) {
+  long rank=threadIdx.x;
+  long size=blockDim.x;
+  r.jump(2*(rank*samples/size));      // jump ahead
+  trng::uniform01_dist<float> u;      // random number distribution
+  in[rank]=0;                         // local number of points in circle
+  for (long i=rank*samples/size; i<(rank+1)*samples/size; ++i) {
+    float x=u(r), y=u(r);             // choose random x- and y-coordinates
+    if (x*x+y*y<=1)                   // is point in circle?
+      ++in[rank];                     // increase thread-local counter
   }
+}
+
+int main(int argc, char *argv[]) {
+  const long samples=1000000l;             // total number of points in square
+  const int size=128;                      // number of threads
+  long *in_device;
+  cudaMalloc(&in_device, size*sizeof(*in_device));
+  trng::yarn5s r;
+  // start parallel Monte Carlo
+  parallel_pi<<<1, size>>>(samples, in_device, r);
+  // gather results
+  long *in=new long[size];
+  cudaMemcpy(in, in_device, size*sizeof(*in), cudaMemcpyDeviceToHost);
+  long sum=0;
+  for (int rank=0; rank<size; ++rank) 
+    sum+=in[rank];
   // print result
-  std::cout << "pi = " << 4.0*in/samples << std::endl;
+  std::cout << "pi = " << 4.0*sum/samples << std::endl;
   return EXIT_SUCCESS;
 }
-
-#else
-
-#include <cstdlib>
-#include <iostream>
-
-int main() {
-  std::cerr << "Sorry, OpenMP is not supported by your compiler.\n";
-  return EXIT_FAILURE;
-}
-
-#endif

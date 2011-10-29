@@ -4,15 +4,15 @@ lib_LTLIBRARIES = libtrng4.la
 
 AM_CPPFLAGS = -I$(top_builddir)
 
-libtrng4_la_SOURCES = utility.cc minstd.cc \
+libtrng4_la_SOURCES = minstd.cc \
                       lcg64.cc lcg64_shift.cc \
 		      mt19937.cc mt19937_64.cc \
 		      mrg2.cc mrg3.cc mrg3s.cc mrg4.cc mrg5.cc mrg5s.cc \
                       yarn2.cc yarn3.cc yarn3s.cc yarn4.cc yarn5.cc yarn5s.cc
 
-pkginclude_HEADERS = config.hpp utility.hpp uniformxx.hpp \
+pkginclude_HEADERS = config.hpp cuda.hpp utility.hpp uniformxx.hpp \
 		     generate_canonical.hpp minstd.hpp \
-                     limits.hpp math.hpp special_functions.hpp constants.hpp \
+                     limits.hpp math.hpp int_math.hpp special_functions.hpp constants.hpp \
 		     lcg64.hpp lcg64_shift.hpp \
                      mt19937.hpp mt19937_64.hpp \
                      mrg2.hpp mrg3.hpp mrg3s.hpp mrg4.hpp mrg5.hpp mrg5s.hpp \
