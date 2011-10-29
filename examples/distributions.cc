@@ -42,6 +42,7 @@
 #include <trng/rayleigh_dist.hpp>
 #include <trng/bernoulli_dist.hpp>
 #include <trng/binomial_dist.hpp>
+#include <trng/hypergeometric_dist.hpp>
 #include <trng/geometric_dist.hpp>
 #include <trng/poisson_dist.hpp>
 #include <trng/discrete_dist.hpp>
@@ -261,6 +262,10 @@ int main() {
   {
     trng::binomial_dist d(0.4, 20);
     discrete_test(d, "binomial distribution");
+  }
+  {
+    trng::hypergeometric_dist d(10, 5, 5);
+    discrete_test(d, "hypergeometric distribution");
   }
   {
     trng::geometric_dist d(0.3);

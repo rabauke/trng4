@@ -1,3 +1,35 @@
+// Copyright (c) 2000-2010, Heiko Bauke
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 
+//   * Redistributions of source code must retain the above copyright
+//     notice, this list of conditions and the following disclaimer.  
+// 
+//   * Redistributions in binary form must reproduce the above
+//     copyright notice, this list of conditions and the following
+//     disclaimer in the documentation and/or other materials provided
+//     with the distribution.  
+// 
+//   * Neither the name of the copyright holder nor the names of its
+//     contributors may be used to endorse or promote products derived
+//     from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+// FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+// COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+// OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #if !(defined TRNG_MATH_HPP)
 
 #define TRNG_MATH_HPP
@@ -132,13 +164,13 @@ namespace trng {
 
 #if !(defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
     inline float acosh(float x) {
-      return log(x+::std::sqrt(x*x-1.0f));
+      return ::std::log(x+::std::sqrt(x*x-1.0f));
     }
     inline double acosh(double x) {
-      return log(x+::std::sqrt(x*x-1.0));
+      return ::std::log(x+::std::sqrt(x*x-1.0));
     }
     inline long double acosh(long double x) {
-      return log(x+::std::sqrt(x*x-1.0l));
+      return ::std::log(x+::std::sqrt(x*x-1.0l));
     }
 #else
     inline float acosh(float x) {
@@ -353,57 +385,19 @@ namespace trng {
 
     using ::std::ceil;
     using ::std::floor;
-  
-    inline long lrint(float x) {
-      return ::lrintf(x);
-    }
-    using ::lrint;
-    inline long lrint(long double x) {
-      return ::lrintl(x);
-    }
-
-    inline long long llrint(float x) {
-      return ::llrintf(x);
-    }
-    using ::llrint;
-    inline long long llrint(long double x) {
-      return ::llrintl(x);
-    }
-  
-    inline long lround(float x) {
-      return ::lroundf(x);
-    }
-    using ::lround;
-    inline long lround(long double x) {
-      return ::lroundl(x);
-    }
-
-    inline long long llround(float x) {
-      return ::llroundf(x);
-    }
-    using ::llround;
-    inline long long llround(long double x) {
-      return ::llroundl(x);
-    }
-
     using ::std::modf;
 
-    inline float nearbyint(float x) {
-      return ::nearbyintf(x);
+#if !(defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+    inline float round(float x) {
+      return floor(x+0.5f);
     }
-    using ::nearbyint;
-    inline long double nearbyint(long double x) {
-      return ::nearbyintl(x);
+    inline double round(double x) {
+      return floor(x+0.5);
     }
-
-    inline float rint(float x) {
-      return ::rintf(x);
+    inline long double round(long double x) {
+      return floor(x+0.5l);
     }
-    using ::rint;
-    inline long double rint(long double x) {
-      return ::rintl(x);
-    }
-
+#else
     inline float round(float x) {
       return ::roundf(x);
     }
@@ -411,14 +405,7 @@ namespace trng {
     inline long double round(long double x) {
       return ::roundl(x);
     }
-
-    inline float trunc(float x) {
-      return ::truncf(x);
-    }
-    using ::trunc;
-    inline long double trunc(long double x) {
-      return ::truncl(x);
-    }
+#endif
 
     // --- misc functions ------------------------------------------------
 

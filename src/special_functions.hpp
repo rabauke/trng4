@@ -1,3 +1,35 @@
+// Copyright (c) 2000-2010, Heiko Bauke
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 
+//   * Redistributions of source code must retain the above copyright
+//     notice, this list of conditions and the following disclaimer.  
+// 
+//   * Redistributions in binary form must reproduce the above
+//     copyright notice, this list of conditions and the following
+//     disclaimer in the documentation and/or other materials provided
+//     with the distribution.  
+// 
+//   * Neither the name of the copyright holder nor the names of its
+//     contributors may be used to endorse or promote products derived
+//     from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+// FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+// COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+// OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #if !(defined TRNG_SPECIAL_FUNCTIONS_HPP)
 
 #define TRNG_SPECIAL_FUNCTIONS_HPP
@@ -8,6 +40,47 @@
 #include <trng/constants.hpp>
 #include <cerrno>
 #include <algorithm>
+
+#if defined(TRNG_HAVE_LGAMMAF)
+extern "C" float lgammaf(float);
+#endif
+#if defined(TRNG_HAVE_LGAMMA)
+extern "C" double lgamma(double);
+#endif
+#if defined(TRNG_HAVE_LGAMMAL)
+extern "C" long double lgammal(long double);
+#endif
+
+#if defined(TRNG_HAVE_TGAMMAF)
+extern "C" float tgammaf(float);
+#endif
+#if defined(TRNG_HAVE_TGAMMA)
+extern "C" double tgamma(double);
+#endif
+#if defined(TRNG_HAVE_TGAMMAL)
+extern "C" long double tgammal(long double);
+#endif
+
+#if defined(TRNG_HAVE_ERFF)
+extern "C" float erff(float);
+#endif
+#if defined(TRNG_HAVE_ERF)
+extern "C" double erf(double);
+#endif
+#if defined(TRNG_HAVE_ERFL)
+extern "C" long double erfl(long double);
+#endif
+
+#if defined(TRNG_HAVE_ERFCF)
+extern "C" float erfcf(float);
+#endif
+#if defined(TRNG_HAVE_ERFC)
+extern "C" double erfc(double);
+#endif
+#if defined(TRNG_HAVE_ERFCL)
+extern "C" long double erfcl(long double);
+#endif
+
 
 namespace trng {
 
@@ -180,7 +253,11 @@ namespace trng {
     
     }
 
-#if !(defined(TRNG_HAVE_LGAMMAF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if defined(TRNG_HAVE_LGAMMAF)
+    inline float ln_Gamma(float x) {
+      return ::lgammaf(x);
+    }
+#else
     inline float ln_Gamma(float x) {
       if (x>0.0f)
 	return detail::ln_Gamma(x);
@@ -189,13 +266,14 @@ namespace trng {
 	return numeric_limits<float>::infinity();
       return ln(constants<float>::pi()/(-x*t))-detail::ln_Gamma(-x);
     }
-#else
-    inline float ln_Gamma(float x) {
-      return ::lgammaf(x);
-    }
 #endif
   
-#if !(defined(TRNG_HAVE_LGAMMA) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if defined(TRNG_HAVE_LGAMMA)
+    double lgamma(double);
+    inline double ln_Gamma(double x) {
+      return ::lgamma(x);
+    }
+#else
     inline double ln_Gamma(double x) {
       if (x>0.0)
 	return detail::ln_Gamma(x);
@@ -204,13 +282,13 @@ namespace trng {
 	return numeric_limits<double>::infinity();
       return ln(constants<double>::pi()/(-x*t))-detail::ln_Gamma(-x);
     }
-#else
-    inline double ln_Gamma(double x) {
-      return ::lgamma(x);
-    }
 #endif
  
-#if !(defined(TRNG_HAVE_LGAMMAL) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if defined(TRNG_HAVE_LGAMMAL)
+    inline long double ln_Gamma(long double x) {
+      return ::lgammal(x);
+    }
+#else
     inline long double ln_Gamma(long double x) {
       if (x>0.0l)
 	return detail::ln_Gamma(x);
@@ -218,10 +296,6 @@ namespace trng {
       if (t<4.0l*numeric_limits<long double>::epsilon())
 	return numeric_limits<long double>::infinity();
       return ln(constants<long double>::pi()/(-x*t))-detail::ln_Gamma(-x);
-    }
-#else
-    inline long double ln_Gamma(long double x) {
-      return ::lgammal(x);
     }
 #endif
 
@@ -373,7 +447,11 @@ namespace trng {
 
     }
 
-#if !(defined(TRNG_HAVE_TGAMMAF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if defined(TRNG_HAVE_TGAMMAF)
+    inline float Gamma(float x) {
+      return ::tgammaf(x);
+    }
+#else
     inline float Gamma(float x) {
       if (x>0.0f)
 	return detail::Gamma(x);
@@ -382,13 +460,13 @@ namespace trng {
 	return (t>=0.0f ? 1.0f : -1.0f)*numeric_limits<float>::infinity();
       return constants<float>::pi()/(-x*detail::Gamma(-x)*t);
     }
-#else
-    inline float Gamma(float x) {
-      return ::tgammaf(x);
-    }
 #endif
 
-#if !(defined(TRNG_HAVE_TGAMMA) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if defined(TRNG_HAVE_TGAMMA)
+    inline double Gamma(double x) {
+      return ::tgamma(x);
+    }
+#else
     inline double Gamma(double x) {
       if (x>0.0)
 	return detail::Gamma(x);
@@ -397,13 +475,13 @@ namespace trng {
 	return (t>=0.0 ? 1.0 : -1.0)*numeric_limits<double>::infinity();
       return constants<double>::pi()/(-x*detail::Gamma(-x)*t);
     }
-#else
-    inline double Gamma(double x) {
-      return ::tgamma(x);
-    }
 #endif
 
-#if !(defined(TRNG_HAVE_TGAMMAL) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if defined(TRNG_HAVE_TGAMMAL)
+    inline long double Gamma(long double x) {
+      return ::tgammal(x);
+    }
+#else
     inline long double Gamma(long double x) {
       if (x>0.0l)
 	return detail::Gamma(x);
@@ -411,10 +489,6 @@ namespace trng {
       if (abs(t)<4.0l*numeric_limits<long double>::epsilon())
 	return (t>=0.0l ? 1.0l : -1.0l)*numeric_limits<long double>::infinity();
       return constants<long double>::pi()/(-x*detail::Gamma(-x)*t);
-    }
-#else
-    inline long double Gamma(long double x) {
-      return ::tgammal(x);
     }
 #endif
 
@@ -430,6 +504,20 @@ namespace trng {
   
     inline long double Beta(long double x, long double y) {
       return exp(ln_Gamma(x)+ln_Gamma(y)-ln_Gamma(x+y));
+    }
+
+    // --- ln of binomial coefficient ----------------------------------
+
+    inline float ln_binomial(float n, float m) {
+      return ln_Gamma(n+1.f)-ln_Gamma(m+1.f)-ln_Gamma(n-m+1.f);
+    }
+
+    inline double ln_binomial(double n, double m) {
+      return ln_Gamma(n+1.)-ln_Gamma(m+1.)-ln_Gamma(n-m+1.);
+    }
+
+    inline long double ln_binomial(long double n, long double m) {
+      return ln_Gamma(n+1.l)-ln_Gamma(m+1.l)-ln_Gamma(n-m+1.l);
     }
 
     // --- Pochhammer function -----------------------------------------
@@ -847,65 +935,65 @@ namespace trng {
 
     // --- error function ----------------------------------------------
 
-#if !(defined(TRNG_HAVE_ERFF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
-    inline float erf(float x) {
-      return x<0.0f ? -GammaP(0.5f, x*x) : GammaP(0.5f, x*x);
-    }
-#else
+#if defined(TRNG_HAVE_ERFF)
     inline float erf(float x) {
       return ::erff(x);
     }
+#else
+    inline float erf(float x) {
+      return x<0.0f ? -GammaP(0.5f, x*x) : GammaP(0.5f, x*x);
+    }
 #endif
 
-#if !(defined(TRNG_HAVE_ERF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
-    inline double erf(double x) {
-      return x<0.0 ? -GammaP(0.5, x*x) : GammaP(0.5, x*x);
-    }
-#else
+#if defined(TRNG_HAVE_ERF)
     inline double erf(double x) {
       return ::erf(x);
     }
+#else
+    inline double erf(double x) {
+      return x<0.0 ? -GammaP(0.5, x*x) : GammaP(0.5, x*x);
+    }
 #endif
   
-#if !(defined(TRNG_HAVE_ERFL) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if defined(TRNG_HAVE_ERFL)
     inline long double erf(long double x) {
-      return x<0.0l ? -GammaP(0.5l, x*x) : GammaP(0.5l, x*x);
+      return ::erfl(x);
     }
 #else
     inline long double erf(long double x) {
-      return ::erfl(x);
+      return x<0.0l ? -GammaP(0.5l, x*x) : GammaP(0.5l, x*x);
     }
 #endif
 
     // --- complementary error function --------------------------------
 
-#if !(defined(TRNG_HAVE_ERFCF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
-    inline float erfc(float x) {
-      return x<0.0f ? 1.0f+GammaP(0.5f, x*x) : GammaQ(0.5f, x*x);
-    }
-#else
+#if defined(TRNG_HAVE_ERFCF)
     inline float erfc(float x) {
       return ::erfcf(x);
     }
+#else
+    inline float erfc(float x) {
+      return x<0.0f ? 1.0f+GammaP(0.5f, x*x) : GammaQ(0.5f, x*x);
+    }
 #endif
 
-#if !(defined(TRNG_HAVE_ERFC) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
-    inline double erfc(double x) {
-      return x<0.0 ? 1.0+GammaP(0.5, x*x) : GammaQ(0.5, x*x);
-    }
-#else
+#if defined(TRNG_HAVE_ERFC)
     inline double erfc(double x) {
       return ::erfc(x);
     }
+#else
+    inline double erfc(double x) {
+      return x<0.0 ? 1.0+GammaP(0.5, x*x) : GammaQ(0.5, x*x);
+    }
 #endif
   
-#if !(defined(TRNG_HAVE_ERFCL) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if defined(TRNG_HAVE_ERFCL)
     inline long double erfc(long double x) {
-      return x<0.0l ? 1.0l+GammaP(0.5l, x*x) : GammaQ(0.5l, x*x);
+      return ::erfcl(x);
     }
 #else
     inline long double erfc(long double x) {
-      return ::erfcl(x);
+      return x<0.0l ? 1.0l+GammaP(0.5l, x*x) : GammaQ(0.5l, x*x);
     }
 #endif
 
@@ -962,14 +1050,21 @@ namespace trng {
 	    2.445134137142996e+00f,    3.754408661907416e+00f};
 	  return d_[i];
 	}
-	static const float x_low=0.02425f;
-	static const float x_high=1.0f-0.02425f;
-	static const float zero=0.0f;
-	static const float one=1.0f;
-	static const float one_half=0.5f;
-	static const float minus_two=-2.0f;
+	static const float x_low;
+	static const float x_high;
+	static const float zero;
+	static const float one;
+	static const float one_half;
+	static const float minus_two;
       };
 
+      const float inv_Phi_traits<float>::x_low=0.02425f;
+      const float inv_Phi_traits<float>::x_high=1.0f-0.02425f;
+      const float inv_Phi_traits<float>::zero=0.0f;
+      const float inv_Phi_traits<float>::one=1.0f;
+      const float inv_Phi_traits<float>::one_half=0.5f;
+      const float inv_Phi_traits<float>::minus_two=-2.0f;
+      
       template<>
       struct inv_Phi_traits<double> {
 	static double a(int i) throw() {
@@ -999,13 +1094,20 @@ namespace trng {
 	    2.445134137142996e+00,    3.754408661907416e+00};
 	  return d_[i];
 	}
-	static const double x_low=0.02425;
-	static const double x_high=1.0-0.02425;
-	static const double zero=0.0;
-	static const double one=1.0;
-	static const double one_half=0.5;
-	static const double minus_two=-2.0;
+	static const double x_low;
+	static const double x_high;
+	static const double zero;
+	static const double one;
+	static const double one_half;
+	static const double minus_two;
       };
+
+      const double inv_Phi_traits<double>::x_low=0.02425;
+      const double inv_Phi_traits<double>::x_high=1.0-0.02425;
+      const double inv_Phi_traits<double>::zero=0.0;
+      const double inv_Phi_traits<double>::one=1.0;
+      const double inv_Phi_traits<double>::one_half=0.5;
+      const double inv_Phi_traits<double>::minus_two=-2.0;
 
       template<>
       struct inv_Phi_traits<long double> {
@@ -1036,13 +1138,20 @@ namespace trng {
 	    2.445134137142996e+00l,    3.754408661907416e+00l};
 	  return d_[i];
 	}
-	static const long double x_low=0.02425l;
-	static const long double x_high=1.0l-0.02425l;
-	static const long double zero=0.0l;
-	static const long double one=1.0l;
-	static const long double one_half=0.5l;
-	static const long double minus_two=-2.0l;
+	static const long double x_low;
+	static const long double x_high;
+	static const long double zero;
+	static const long double one;
+	static const long double one_half;
+	static const long double minus_two;
       };
+
+      const long double inv_Phi_traits<long double>::x_low=0.02425l;
+      const long double inv_Phi_traits<long double>::x_high=1.0l-0.02425l;
+      const long double inv_Phi_traits<long double>::zero=0.0l;
+      const long double inv_Phi_traits<long double>::one=1.0l;
+      const long double inv_Phi_traits<long double>::one_half=0.5l;
+      const long double inv_Phi_traits<long double>::minus_two=-2.0l;
 
       template<typename T>
       T inv_Phi(T x) {

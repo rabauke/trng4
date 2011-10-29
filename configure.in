@@ -1,10 +1,11 @@
-AC_INIT([trng], [4.8], [heiko.bauke@mpi-hd.mpg.de])
+AC_INIT([trng], [4.9], [heiko.bauke@mpi-hd.mpg.de])
 AM_INIT_AUTOMAKE()
 
-AC_DEFINE([TRNG_VERSION], [4.8], [TRNG version number.])
+AC_DEFINE([TRNG_VERSION], [4.9], [TRNG version number.])
 
 AC_LANG_CPLUSPLUS
 AC_LANG(C)
+AC_LANG(C++)
 
 # Checks for programs.
 AC_PROG_CXX
@@ -14,7 +15,7 @@ AC_PROG_LIBTOOL
 
 # Check for libraries and functions
 AC_CXX_LONG_LONG(,)
-AC_PATH_BOOST(1.30.0, 
+AC_PATH_BOOST(103000, 
               AC_DEFINE(TRNG_HAVE_BOOST, 1, [Define to 1 if you have BOOST library.]),
 	      )
 AC_SUBST(BOOST_CXXFLAGS)
@@ -22,6 +23,7 @@ AC_LANG_CPLUSPLUS
 ACX_MPI(AC_DEFINE(TRNG_HAVE_MPI, 1, [Define to 1 if you have a MPI library.]))
 AX_OPENMP
 AC_SUBST(OPENMP_CXXFLAGS)
+AC_LANG_PUSH([C++])
 AC_CHECK_FUNCS(erff, AC_DEFINE(TRNG_HAVE_ERFF, 1, [Define to 1 if you have the `errff' function.]))
 AC_CHECK_FUNCS(erf, AC_DEFINE(TRNG_HAVE_ERF, 1, [Define to 1 if you have the `errf' function.]))
 AC_CHECK_FUNCS(erfl, AC_DEFINE(TRNG_HAVE_ERFL, 1, [Define to 1 if you have the `errfl' function.]))
@@ -34,6 +36,7 @@ AC_CHECK_FUNCS(tgammal, AC_DEFINE(TRNG_HAVE_TGAMMAL, 1, [Define to 1 if you have
 AC_CHECK_FUNCS(lgammaf, AC_DEFINE(TRNG_HAVE_LGAMMAF, 1, [Define to 1 if you have the `lgammaf' function.]))
 AC_CHECK_FUNCS(lgamma, AC_DEFINE(TRNG_HAVE_LGAMMA, 1, [Define to 1 if you have the `lgamma' function.]))
 AC_CHECK_FUNCS(lgammal, AC_DEFINE(TRNG_HAVE_LGAMMAL, 1, [Define to 1 if you have the `lgammal' function.]))
+AC_LANG_POP
 # check for  Intel Threading Building Blocks
 AC_CHECK_HEADER([tbb/parallel_for.h],	
                 [ LIB_TBB="-ltbb" 

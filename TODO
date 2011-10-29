@@ -1,23 +1,21 @@
 Implement:
 
-* Beta distribution
+* include faster normal distribution normal2
 
-* Kolmogorov-Smirnov distribution
+* more distributions 
 
-* Maxwell distribution
-  http://mathworld.wolfram.com/MaxwellDistribution.html
+  * Continous distributions 
+    - Beta distribution
+      http://en.wikipedia.org/wiki/Beta_distribution
+    - Maxwell distribution
+      http://mathworld.wolfram.com/MaxwellDistribution.html
+    - Kolmogorov-Smirnov distribution
+      http://en.wikipedia.org/wiki/Kolmogorov-Smirnov
+    - Levy distribution
+      http://en.wikipedia.org/wiki/L%C3%A9vy_distribution
 
-* Levy distribution
-  http://en.wikipedia.org/wiki/L%C3%A9vy_distribution
-
-* Zipf distribution
-  http://en.wikipedia.org/wiki/Zipf%27s_law
-
-* Hypergeometric distribution
-
-* Rayleight distribution
-
-* and other distributions
+  * and other distributions
 
 * ISAAC generator
   http://burtleburtle.net/bob/rand/isaacafa.html
+

@@ -54,6 +54,7 @@
 
 #if defined __unix__
 # include <unistd.h>
+# include <time.h>
 # include <sys/time.h>
 # include <sys/times.h>
 #else
@@ -74,8 +75,7 @@ private:
   double get_time() {
 #if defined __unix__
     struct timeval  tv;
-    struct timezone tz;
-    gettimeofday(&tv, &tz);
+    gettimeofday(&tv, NULL);
     return static_cast<double>(tv.tv_sec)+static_cast<double>(tv.tv_usec)*1e-6;
 #else
     return static_cast<double>(std::clock())*_resolution;
@@ -208,25 +208,25 @@ int main() {
   std::cout.flush();
   try {
     { trng::lcg64       r;  time_main(r, "trng::lcg64"); }
-    //{ trng::lcg64_shift r;  time_main(r, "trng::lcg64_shift"); }
-    // { trng::mrg2        r;  time_main(r, "trng::mrg2"); }
-    // { trng::mrg3        r;  time_main(r, "trng::mrg3"); }
-    // { trng::mrg3s       r;  time_main(r, "trng::mrg3s"); }
-    // { trng::mrg4        r;  time_main(r, "trng::mrg4"); }
-    // { trng::mrg5        r;  time_main(r, "trng::mrg5"); }
-    // { trng::mrg5s       r;  time_main(r, "trng::mrg5s"); }
-    // { trng::yarn2       r;  time_main(r, "trng::yarn2"); }
-    // { trng::yarn3       r;  time_main(r, "trng::yarn3"); }
-    // { trng::yarn3s      r;  time_main(r, "trng::yarn3s"); }
-    // { trng::yarn4       r;  time_main(r, "trng::yarn4"); }
-    // { trng::yarn5       r;  time_main(r, "trng::yarn5"); }
-    // { trng::yarn5s      r;  time_main(r, "trng::yarn5s"); }
-    // { trng::mt19937     r;  time_main(r, "trng::mt19937"); }
-    // { trng::mt19937_64  r;  time_main(r, "trng::mt19937_64"); }
-    // { trng::lagfib2xor_19937_ull  r;  time_main(r, "trng::lagfib2xor_19937_ull"); }
-    // { trng::lagfib4xor_19937_ull  r;  time_main(r, "trng::lagfib4xor_19937_ull"); }
-    // { trng::lagfib4plus_19937_ull r;  time_main(r, "trng::lagfib2plus_19937_ull"); }
-    // { trng::lagfib2plus_19937_ull r;  time_main(r, "trng::lagfib4plus_19937_ull"); }
+    { trng::lcg64_shift r;  time_main(r, "trng::lcg64_shift"); }
+    { trng::mrg2        r;  time_main(r, "trng::mrg2"); }
+    { trng::mrg3        r;  time_main(r, "trng::mrg3"); }
+    { trng::mrg3s       r;  time_main(r, "trng::mrg3s"); }
+    { trng::mrg4        r;  time_main(r, "trng::mrg4"); }
+    { trng::mrg5        r;  time_main(r, "trng::mrg5"); }
+    { trng::mrg5s       r;  time_main(r, "trng::mrg5s"); }
+    { trng::yarn2       r;  time_main(r, "trng::yarn2"); }
+    { trng::yarn3       r;  time_main(r, "trng::yarn3"); }
+    { trng::yarn3s      r;  time_main(r, "trng::yarn3s"); }
+    { trng::yarn4       r;  time_main(r, "trng::yarn4"); }
+    { trng::yarn5       r;  time_main(r, "trng::yarn5"); }
+    { trng::yarn5s      r;  time_main(r, "trng::yarn5s"); }
+    { trng::mt19937     r;  time_main(r, "trng::mt19937"); }
+    { trng::mt19937_64  r;  time_main(r, "trng::mt19937_64"); }
+    { trng::lagfib2xor_19937_ull  r;  time_main(r, "trng::lagfib2xor_19937_ull"); }
+    { trng::lagfib4xor_19937_ull  r;  time_main(r, "trng::lagfib4xor_19937_ull"); }
+    { trng::lagfib4plus_19937_ull r;  time_main(r, "trng::lagfib2plus_19937_ull"); }
+    { trng::lagfib2plus_19937_ull r;  time_main(r, "trng::lagfib4plus_19937_ull"); }
 // #if defined TRNG_HAVE_BOOST
 //     { boost::minstd_rand    r; time_boost(r, "boost::minstd_rand"); }
 //     { boost::ecuyer1988     r; time_boost(r, "boost::ecuyer1988"); }

@@ -6,3 +6,5 @@ This proposal describes an extensible pseudorandom number generator
 facility, which will be (up to minor changes) part of the forthcoming
 revision of the ISO C++ standard.
 
+See the «History» section in trng.pdf in the doc directory for a 
+detailed changelog on TRNG versions.

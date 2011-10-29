@@ -56,8 +56,7 @@ private:
   double get_time() {
 #if defined __unix__
     struct timeval  tv;
-    struct timezone tz;
-    gettimeofday(&tv, &tz);
+    gettimeofday(&tv, NULL);
     return static_cast<double>(tv.tv_sec)+static_cast<double>(tv.tv_usec)*1e-6;
 #else
     return static_cast<double>(std::clock())*_resolution;

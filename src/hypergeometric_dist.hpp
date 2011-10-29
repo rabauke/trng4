@@ -30,91 +30,64 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#if !(defined TRNG_FAST_DISCRETE_DIST_HPP)
+#if !(defined TRNG_HYPERGEOMETRIC_DIST_HPP)
 
-#define TRNG_FAST_DISCRETE_DIST_HPP
+#define TRNG_HYPERGEOMETRIC_DIST_HPP
 
-// Algorithm described in
-//
-// Richard A. Kronmal; Arthur V. Peterson, Jr.
-// On the Alias Method for Generating Random Variables from a Discrete Distribution
-// The American Statistician, Vol. 33, No. 4. (Nov., 1979), pp. 214-218.
-// 
-// http://links.jstor.org/sici?sici=0003-1305%28197911%2933%3A4%3C214%3AOTAMFG%3E2.0.CO%3B2-1
-
+#include <trng/limits.hpp>
 #include <trng/utility.hpp>
 #include <trng/math.hpp>
+#include <trng/special_functions.hpp>
 #include <ostream>
-#include <iomanip>
 #include <istream>
+#include <iomanip>
 #include <vector>
-#include <numeric>
-#include <functional>
+#include <algorithm>
 
 namespace trng {
 
   // non-uniform random number generator class
-  class fast_discrete_dist {
+  class hypergeometric_dist {
   public:
     typedef int result_type;
     class param_type;
     
     class param_type {
     private:
-      typedef std::vector<double>::size_type size_type;
-      std::vector<double> P, F;
-      std::vector<int> L;
-      size_type N;
+      int n_, // total number of balls in urn
+	m_,   // number of "white" balls in urn
+	d_,   // number of selected balls
+	x_min, x_max;  // minimum and maximum values of random raviable
+      std::vector<double> P_;
+      
+      void calc_probabilities() {
+	x_min=std::max(0, d_-n_+m_);
+	x_max=std::min(d_, m_);
+	P_=std::vector<double>();
+	for (int x=x_min; x<=x_max; ++x)
+	  P_.push_back(math::exp(math::ln_binomial(static_cast<double>(m_), 
+						   static_cast<double>(x))+
+				 math::ln_binomial(static_cast<double>(n_-m_), 
+						   static_cast<double>(m_-x))));
+	// build list with cumulative density function
+	for (std::vector<double>::size_type i(1); i<P_.size(); ++i)
+	  P_[i]+=P_[i-1];
+	for (std::vector<double>::size_type i(0); i<P_.size(); ++i)
+	  P_[i]/=P_.back();
+      }
       
     public:
-      template<typename iter>
-      param_type(iter first, iter last) :
-	P(first, last), F(P.size()), L(P.size()), N(P.size()) {
-	update();
+      int n() const { return n_; }
+      void n(int n_new) { n_=n_new;  calc_probabilities(); }
+      int m() const { return m_; }
+      void m(int m_new) { m_=m_new;  calc_probabilities(); }
+      int d() const { return d_; }
+      void d(int d_new) { d_=d_new;  calc_probabilities(); }
+      param_type(int n, int m, int d) :
+	n_(n), m_(m), d_(d) {
+	calc_probabilities();
       }
-      explicit param_type(int n) :
-	P(n, 1.0), F(P.size()), L(P.size()), N(P.size()) {
-	update();
-      }
-    private:
-      void update() {
-	double s=std::accumulate(P.begin(), P.end(), 0.0);
-	if (s>0.0) {
-	  for (int i=0; i<P.size(); ++i) 
-	    P[i]/=s;
-	  std::vector<int> G, S;
-	  G.reserve(N);
-	  S.reserve(N);
-	  for (int i=0; i<F.size(); ++i) {
-	    F[i]=N*P[i];
-	    if (F[i]<1.0)
-	      S.push_back(i);
-	    else
-	      G.push_back(i);
-	  }
-	  while (not S.empty()) {
-	    int k=G.back(), j=S.back();
-	    L[j]=k;
-	    F[k]-=1.0-F[j];
-	    S.pop_back();
-	    if (F[k]<1.0) {
-	      G.pop_back();
-	      S.push_back(k);
-	    }
-	  }
-	}
-      }
-    public:
-      friend class fast_discrete_dist;
-      friend bool operator==(const param_type &, const param_type &);
-      template<typename char_t, typename traits_t>
-      friend std::basic_ostream<char_t, traits_t> &
-      operator<<(std::basic_ostream<char_t, traits_t> &,
-		 const fast_discrete_dist::param_type &);
-      template<typename char_t, typename traits_t>
-      friend std::basic_istream<char_t, traits_t> &
-      operator>>(std::basic_istream<char_t, traits_t> &,
-		 fast_discrete_dist::param_type &);
+      friend class hypergeometric_dist;
     };
     
   private:
@@ -122,73 +95,75 @@ namespace trng {
     
   public:
     // constructor
-    template<typename iter>
-    fast_discrete_dist(iter first, iter last) : P(first, last) {
+    hypergeometric_dist(int n, int m, int d) : P(n, m, d) {
     }
-    explicit fast_discrete_dist(int N) : P(N) {
-    }
-    explicit fast_discrete_dist(const param_type &P) : P(P) {
+    explicit hypergeometric_dist(const param_type &P) : P(P) {
     }
     // reset internal state
     void reset() { }
     // random numbers
     template<typename R>
     int operator()(R &r) {
-      double U=utility::uniformco<double>(r)*P.N;
-      int I=static_cast<int>(U);
-      return U-I<=P.F[I] ? I : P.L[I];
+      return P.x_min+utility::discrete(utility::uniformoo<double>(r), P.P_.begin(), P.P_.end());
     }
     template<typename R>
     int operator()(R &r, const param_type &p) {
-      fast_discrete_dist g(p);
+      hypergeometric_dist g(p);
       return g(r);
     }
     // property methods
-    int min() const { return 0; }
-    int max() const { return P.N-1; }
+    int min() const { return P.x_min; }
+    int max() const { return P.x_max; }
     param_type param() const { return P; }
     void param(const param_type &P_new) { P=P_new; }
+    int n() const { return P.n(); }
+    void n(int n_new) { P.n(n_new); }
+    int m() const { return P.m(); }
+    void m(int m_new) { P.m(m_new); }
+    int d() const { return P.d(); }
+    void d(int d_new) { P.d(d_new); }
     // probability density function  
     double pdf(int x) const {
-      return (x<0 or x>=static_cast<int>(P.N)) ? 0.0 : P.P[x];
+      if (x<P.x_min or x>P.x_max)
+        return 0.0;
+      x-=P.x_min;
+      if (x==0)
+        return P.P_[0];
+      return P.P_[x]-P.P_[x-1];
     }
     // cumulative density function 
     double cdf(int x) const {
-      if (x<0)
-	return 0.0;
-      if (x<static_cast<int>(P.N))
-	return std::accumulate(P.P.begin(), P.P.begin()+x+1, 0.0);
-      return 1.0;
+      if (x<P.x_min)
+        return 0.0;
+      if (x>P.x_max)
+        return 1.0;
+      return P.P_[x-P.x_min];
     }
   };
-  
+
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const fast_discrete_dist::param_type &p1, 
-			 const fast_discrete_dist::param_type &p2) {
-    return p1.P==p2.P;
+  inline bool operator==(const hypergeometric_dist::param_type &p1, 
+			 const hypergeometric_dist::param_type &p2) {
+    return p1.n()==p2.n() and p1.m()==p2.m() and p1.d()==p2.d();
   }
-  inline bool operator!=(const fast_discrete_dist::param_type &p1, 
-			 const fast_discrete_dist::param_type &p2) {
-    return !(p1==p2);
+  inline bool operator!=(const hypergeometric_dist::param_type &p1, 
+			 const hypergeometric_dist::param_type &p2) {
+    return not (p1==p2);
   }
   
   // Streamable concept
   template<typename char_t, typename traits_t>
   std::basic_ostream<char_t, traits_t> &
   operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const fast_discrete_dist::param_type &P) {
+	     const hypergeometric_dist::param_type &P) {
     std::ios_base::fmtflags flags(out.flags());
     out.flags(std::ios_base::dec | std::ios_base::fixed |
 	      std::ios_base::left);
-    out << '(' << P.N << ' ';
-    for (std::vector<double>::size_type i=0; i<P.P.size(); ++i) {
-      out << std::setprecision(17) << P.P[i];
-      if (i+1<P.P.size())
-	out << ' ';
-    }
-    out	<< ')';
+    out << '('
+	<< std::setprecision(17) << P.n() << ' ' << P.m() << ' ' << P.d()
+	<< ')';
     out.flags(flags);
     return out;
   }
@@ -196,24 +171,17 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_istream<char_t, traits_t> &
   operator>>(std::basic_istream<char_t, traits_t> &in,
-	     fast_discrete_dist::param_type &P) {
-    double p;
-    std::vector<double>::size_type n;
-    std::vector<double> P_new;
+	     hypergeometric_dist::param_type &P) {
+    int n, m, d;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed |
 	     std::ios_base::left);
     in >> utility::delim('(')
-       >> n >> utility::delim(' ');
-    for (std::vector<double>::size_type i=0; i<n; ++i) {
-      in >> p;
-      if (i+1<n)
-	in >> utility::delim(' ');
-      P_new.push_back(p);
-    }
-    in >> utility::delim(')');
+       >> n >> utility::delim(' ')
+       >> m >> utility::delim(' ')
+       >> d >> utility::delim(')');
     if (in)
-      P=fast_discrete_dist::param_type(P_new.begin(), P_new.end());
+      P=hypergeometric_dist::param_type(n, m, d);
     in.flags(flags);
     return in;
   }
@@ -221,12 +189,12 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const fast_discrete_dist &g1, 
-			 const fast_discrete_dist &g2) {
+  inline bool operator==(const hypergeometric_dist &g1, 
+			 const hypergeometric_dist &g2) {
     return g1.param()==g2.param();
   }
-  inline bool operator!=(const fast_discrete_dist &g1, 
-			 const fast_discrete_dist &g2) {
+  inline bool operator!=(const hypergeometric_dist &g1, 
+			 const hypergeometric_dist &g2) {
     return g1.param()!=g2.param();
   }
   
@@ -234,11 +202,11 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_ostream<char_t, traits_t> &
   operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const fast_discrete_dist &g) {
+	     const hypergeometric_dist &g) {
     std::ios_base::fmtflags flags(out.flags());
     out.flags(std::ios_base::dec | std::ios_base::fixed |
 	      std::ios_base::left);
-    out << "[fast_discrete " << g.param() << ']';
+    out << "[hypergeometric " << g.param() << ']';
     out.flags(flags);
     return out;
   }
@@ -246,13 +214,13 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_istream<char_t, traits_t> &
   operator>>(std::basic_istream<char_t, traits_t> &in,
-	     fast_discrete_dist &g) {
-    fast_discrete_dist::param_type p;
+	     hypergeometric_dist &g) {
+    hypergeometric_dist::param_type p;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed |
 	     std::ios_base::left);
     in >> utility::ignore_spaces()
-       >> utility::delim("[fast_discrete ") >> p >> utility::delim(']');
+       >> utility::delim("[hypergeometric ") >> p >> utility::delim(']');
     if (in)
       g.param(p);
     in.flags(flags);
@@ -262,3 +230,4 @@ namespace trng {
 }
 
 #endif
+

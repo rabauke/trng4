@@ -228,7 +228,9 @@ libtrng4_la_SOURCES = utility.cc minstd.cc \
 		      mrg2.cc mrg3.cc mrg3s.cc mrg4.cc mrg5.cc mrg5s.cc \
                       yarn2.cc yarn3.cc yarn3s.cc yarn4.cc yarn5.cc yarn5s.cc
 
-pkginclude_HEADERS = config.hpp utility.hpp uniformxx.hpp generate_canonical.hpp minstd.hpp limits.hpp math.hpp special_functions.hpp constants.hpp \
+pkginclude_HEADERS = config.hpp utility.hpp uniformxx.hpp \
+		     generate_canonical.hpp minstd.hpp \
+                     limits.hpp math.hpp special_functions.hpp constants.hpp \
 		     lcg64.hpp lcg64_shift.hpp \
                      mt19937.hpp mt19937_64.hpp \
                      mrg2.hpp mrg3.hpp mrg3s.hpp mrg4.hpp mrg5.hpp mrg5s.hpp \
@@ -240,7 +242,7 @@ pkginclude_HEADERS = config.hpp utility.hpp uniformxx.hpp generate_canonical.hpp
                      powerlaw_dist.hpp tent_dist.hpp weibull_dist.hpp \
                      extreme_value_dist.hpp gamma_dist.hpp chi_square_dist.hpp student_t_dist.hpp snedecor_f_dist.hpp\
                      rayleigh_dist.hpp \
-                     bernoulli_dist.hpp binomial_dist.hpp geometric_dist.hpp \
+                     bernoulli_dist.hpp binomial_dist.hpp hypergeometric_dist.hpp geometric_dist.hpp \
                      poisson_dist.hpp discrete_dist.hpp fast_discrete_dist.hpp
 
 libtrng4_la_LDFLAGS = -version-info 0:0:0

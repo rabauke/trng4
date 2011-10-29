@@ -33,7 +33,7 @@ dnl use it
     fi
   fi
 
-  boost_min_version=ifelse([$1], ,1.20.0,$1)
+  boost_min_version=ifelse([$1], ,102000,$1)
 
   AC_LANG_SAVE
   AC_LANG_CPLUSPLUS
@@ -55,11 +55,7 @@ dnl use it
     ])
 
   if test "$have_boost" = "yes"; then
-    WANT_BOOST_MAJOR=`expr $boost_min_version : '\([[0-9]]\+\)'`
-    WANT_BOOST_MINOR=`expr $boost_min_version : '[[0-9]]\+\.\([[0-9]]\+\)'`
-    WANT_BOOST_SUB_MINOR=`expr $boost_min_version : '[[0-9]]\+\.[[0-9]]\+\.\([[0-9]]\+\)'`
-    WANT_BOOST_VERSION=`expr $WANT_BOOST_MAJOR \* 100000 \+ $WANT_BOOST_MINOR \* 100 \+ $WANT_BOOST_SUB_MINOR`
-
+    WANT_BOOST_VERSION=$boost_min_version
     AC_TRY_COMPILE(
       [
 #include <boost/version.hpp>
