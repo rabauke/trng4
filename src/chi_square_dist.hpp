@@ -31,9 +31,10 @@
 namespace trng {
 
   // uniform random number generator class
+  template<typename float_t=double>
   class chi_square_dist {
   public:
-    typedef double result_type;
+    typedef float_t result_type;
     class param_type;
     
     class param_type {
@@ -42,39 +43,74 @@ namespace trng {
     public:
       int nu() const { return nu_; }
       void nu(int nu_new) { nu_=nu_new; }
+      param_type() : nu_(1) {
+      }
       explicit param_type(int nu) : nu_(nu) {
       }
+
       friend class chi_square_dist;
+
+      // Streamable concept
+      template<typename char_t, typename traits_t>
+      friend std::basic_ostream<char_t, traits_t> &
+      operator<<(std::basic_ostream<char_t, traits_t> &out,
+		 const param_type &p) {
+	std::ios_base::fmtflags flags(out.flags());
+	out.flags(std::ios_base::dec | std::ios_base::fixed |
+		  std::ios_base::left);
+	out << '('
+	    << p.nu()
+	    << ')';
+	out.flags(flags);
+	return out;
+      }
+      
+      template<typename char_t, typename traits_t>
+      friend std::basic_istream<char_t, traits_t> &
+      operator>>(std::basic_istream<char_t, traits_t> &in,
+		 param_type &p) {
+	int nu;
+	std::ios_base::fmtflags flags(in.flags());
+	in.flags(std::ios_base::dec | std::ios_base::fixed |
+		 std::ios_base::left);
+	in >> utility::delim('(')
+	   >> nu >> utility::delim(')');
+	if (in)
+	  p=param_type(nu);
+	in.flags(flags);
+	return in;
+      }
+      
     };
     
   private:
     param_type p;
 
     // inverse cumulative density function
-    double icdf_(double x) const {
-      if (x<=math::numeric_limits<double>::epsilon())
-        return 0.0;
-      const double kappa=0.5*p.nu();
-      const double theta=2.0;
-      if (kappa==1.0)  // special case of exponential distribution
-        return -math::ln(1.0-x)*theta;
-      const double ln_Gamma_kappa=math::ln_Gamma(kappa);
-      double y=kappa, y_old;
-      if (kappa<1.0 && x<0.5)
+    result_type icdf_(result_type x) const {
+      if (x<=math::numeric_limits<result_type>::epsilon())
+        return 0;
+      const result_type kappa=p.nu()/2;
+      const result_type theta=2;
+      if (kappa==1)  // special case of exponential distribution
+        return -math::ln(1-x)*theta;
+      const result_type ln_Gamma_kappa=math::ln_Gamma(kappa);
+      result_type y=kappa, y_old;
+      if (kappa<1 and x<result_type(1)/result_type(2))
 	y=x*x;
       int num_iterations=0;
       do {
 	++num_iterations;
         y_old=y;
-        double f0=math::GammaP(kappa, y)-x;
-        double f1=math::pow(y, kappa-1.0)*math::exp(-y-ln_Gamma_kappa);
-        double f2=f1*(kappa-1.0-y)/y;
-        y-=f0/f1*(1+0.5*f0*f2/(f1*f1));
+        result_type f0=math::GammaP(kappa, y)-x;
+        result_type f1=math::pow(y, kappa-1)*math::exp(-y-ln_Gamma_kappa);
+        result_type f2=f1*(kappa-1-y)/y;
+        y-=f0/f1*(1+f0*f2/(2*f1*f1));
       } while (num_iterations<16 &&
-               math::abs((y-y_old)/y)>16*math::numeric_limits<double>::epsilon());
+               math::abs((y-y_old)/y)>16*math::numeric_limits<result_type>::epsilon());
       return y*theta;
     }
-
+    
   public:
     // constructor
     explicit chi_square_dist(int nu) : p(nu) {
@@ -85,48 +121,48 @@ namespace trng {
     void reset() { }
     // random numbers
     template<typename R>
-    double operator()(R &r) {
-      return icdf_(utility::uniformco(r));
+    result_type operator()(R &r) {
+      return icdf_(utility::uniformco<result_type>(r));
     }
     template<typename R>
-    double operator()(R &r, const param_type &p) {
+    result_type operator()(R &r, const param_type &p) {
       chi_square_dist g(p);
       return g(r);
     }
     // property methods
-    double min() const { return 0; }
-    double max() const { return math::numeric_limits<double>::infinity(); }
+    result_type min() const { return 0; }
+    result_type max() const { return math::numeric_limits<result_type>::infinity(); }
     param_type param() const { return p; }
     void param(const param_type &p_new) { p=p_new; }
     int nu() const { return p.nu(); }
     void nu(int nu_new) { p.nu(nu_new); }
     // probability density function  
-    double pdf(double x) const {
-      if (x<0.0)
-	return 0.0;
+    result_type pdf(result_type x) const {
+      if (x<0)
+	return 0;
       else {
-	x/=2.0;
-	return math::pow(x, 0.5*p.nu()-1.0)/
-	  (math::exp(x+math::ln_Gamma(0.5*p.nu()))*2.0);
+	x/=2;
+	return math::pow(x, p.nu()/result_type(2)-1)/
+	  (math::exp(x+math::ln_Gamma(p.nu()/result_type(2)))*2);
       }
     }
     // cumulative density function 
-    double cdf(double x) const {
-      if (x<=0.0)
-	return 0.0;
+    result_type cdf(result_type x) const {
+      if (x<=0)
+	return 0;
       else
-	return math::GammaP(0.5*p.nu(), x/2.0);
+	return math::GammaP(p.nu()/result_type(2), x/2);
     }
     // inverse cumulative density function 
-    double icdf(double x) const {
-      if (x<=0.0 || x>=1.0) {
+    result_type icdf(result_type x) const {
+      if (x<=0 or x>=1) {
 	errno=EDOM;
-	return math::numeric_limits<double>::quiet_NaN();
+	return math::numeric_limits<result_type>::quiet_NaN();
       }
-      if (x==0.0)
-	return 0.0;
-      if (x==1.0)
-	return math::numeric_limits<double>::infinity();
+      if (x==0)
+	return 0;
+      if (x==1)
+	return math::numeric_limits<result_type>::infinity();
       return icdf_(x);
     }
   };
@@ -134,63 +170,38 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const chi_square_dist::param_type &p1, 
-			 const chi_square_dist::param_type &p2) {
+  template<typename float_t>
+  inline bool operator==(const typename chi_square_dist<float_t>::param_type &p1, 
+			 const typename chi_square_dist<float_t>::param_type &p2) {
     return p1.nu()==p2.nu();
   }
-  inline bool operator!=(const chi_square_dist::param_type &p1, 
-			 const chi_square_dist::param_type &p2) {
-    return !(p1==p2);
+
+  template<typename float_t>
+  inline bool operator!=(const typename chi_square_dist<float_t>::param_type &p1, 
+			 const typename chi_square_dist<float_t>::param_type &p2) {
+    return not (p1==p2);
   }
-  
-  // Streamable concept
-  template<typename char_t, typename traits_t>
-  std::basic_ostream<char_t, traits_t> &
-  operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const chi_square_dist::param_type &p) {
-    std::ios_base::fmtflags flags(out.flags());
-    out.flags(std::ios_base::dec | std::ios_base::fixed |
-	      std::ios_base::left);
-    out << '('
-	<< std::setprecision(17) << p.nu()
-	<< ')';
-    out.flags(flags);
-    return out;
-  }
-  
-  template<typename char_t, typename traits_t>
-  std::basic_istream<char_t, traits_t> &
-  operator>>(std::basic_istream<char_t, traits_t> &in,
-	     chi_square_dist::param_type &p) {
-    int nu;
-    std::ios_base::fmtflags flags(in.flags());
-    in.flags(std::ios_base::dec | std::ios_base::fixed |
-	     std::ios_base::left);
-    in >> utility::delim('(')
-       >> nu >> utility::delim(')');
-    if (in)
-      p=chi_square_dist::param_type(nu);
-    in.flags(flags);
-    return in;
-  }
-  
+    
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const chi_square_dist &g1, 
-			 const chi_square_dist &g2) {
+  template<typename float_t>
+  inline bool operator==(const chi_square_dist<float_t> &g1, 
+			 const chi_square_dist<float_t> &g2) {
     return g1.param()==g2.param();
   }
-  inline bool operator!=(const chi_square_dist &g1, 
-			 const chi_square_dist &g2) {
+
+  template<typename float_t>
+  inline bool operator!=(const chi_square_dist<float_t> &g1, 
+			 const chi_square_dist<float_t> &g2) {
     return g1.param()!=g2.param();
   }
   
   // Streamable concept
-  template<typename char_t, typename traits_t>
+  template<typename char_t, typename traits_t, typename float_t>
   std::basic_ostream<char_t, traits_t> &
   operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const chi_square_dist &g) {
+	     const chi_square_dist<float_t> &g) {
     std::ios_base::fmtflags flags(out.flags());
     out.flags(std::ios_base::dec | std::ios_base::fixed |
 	      std::ios_base::left);
@@ -199,11 +210,11 @@ namespace trng {
     return out;
   }
   
-  template<typename char_t, typename traits_t>
+  template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &
   operator>>(std::basic_istream<char_t, traits_t> &in,
-	     chi_square_dist &g) {
-    chi_square_dist::param_type p;
+	     chi_square_dist<float_t> &g) {
+    typename chi_square_dist<float_t>::param_type p;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed |
 	     std::ios_base::left);

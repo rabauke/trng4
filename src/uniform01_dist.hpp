@@ -28,16 +28,46 @@
 namespace trng {
 
   // uniform random number generator class
+  template<typename float_t=double>
   class uniform01_dist {
   public:
-    typedef double result_type;
+    typedef float_t result_type;
     class param_type;
     
     class param_type {
     public:
-      explicit param_type() {
+      param_type() {
       }
-      friend class uniform01_dist;
+
+      friend class uniform01_dist<float_t>;
+
+      // Streamable concept
+      template<typename char_t, typename traits_t>
+      friend std::basic_ostream<char_t, traits_t> &
+      operator<<(std::basic_ostream<char_t, traits_t> &out,
+		 const param_type &p) {
+	std::ios_base::fmtflags flags(out.flags());
+	out.flags(std::ios_base::dec | std::ios_base::fixed |
+		  std::ios_base::left);
+	out << '('
+	    << ')';
+	out.flags(flags);
+	return out;
+      }
+      
+      template<typename char_t, typename traits_t>
+      friend std::basic_istream<char_t, traits_t> &
+      operator>>(std::basic_istream<char_t, traits_t> &in,
+		 param_type &p) {
+	std::ios_base::fmtflags flags(in.flags());
+	in.flags(std::ios_base::dec | std::ios_base::fixed |
+		 std::ios_base::left);
+	in >> utility::delim('(')
+	   >> utility::delim(')');
+	in.flags(flags);
+	return in;
+      }
+      
     };
     
   private:
@@ -45,7 +75,7 @@ namespace trng {
     
   public:
     // constructor
-    explicit uniform01_dist() {
+    uniform01_dist() {
     }
     explicit uniform01_dist(const param_type &p) {
     }
@@ -53,121 +83,92 @@ namespace trng {
     void reset() { }
     // random numbers
     template<typename R>
-    double operator()(R &r) {
-      return utility::uniformco(r);
+    result_type operator()(R &r) {
+      return utility::uniformco<result_type>(r);
     }
     template<typename R>
-    double operator()(R &r, const param_type &p) {
-      return utility::uniformco(r);
+    result_type operator()(R &r, const param_type &p) {
+      return utility::uniformco<result_type>(r);
     }
     // property methods
     // min / max
-    double min() const { return 0.0; }
-    double max() const { return 1.0; }
+    result_type min() const { return 0; }
+    result_type max() const { return 1; }
     param_type param() const { return p; }
     void param(const param_type &p_new) { }
     // probability density function  
-    double pdf(double x) const {
-      if (x<0.0 || x>=1.0)
-	return 0.0;
-      return 1.0;
+    result_type pdf(result_type x) const {
+      if (x<0 or x>=1)
+	return 0;
+      return 1;
     }
     // cumulative density function 
-    double cdf(double x) const {
-      if (x<0.0)
+    result_type cdf(result_type x) const {
+      if (x<0)
 	return 0;
-      if (x>=1.0)
-	return 1.0;
+      if (x>=1)
+	return 1;
       return x;
     }
     // inverse cumulative density function 
-    double icdf(double x) const {
-      if (x<0.0 || x>1.0) {
+    result_type icdf(result_type x) const {
+      if (x<0 or x>1) {
 	errno=EDOM;
-	return math::numeric_limits<double>::quiet_NaN();
+	return math::numeric_limits<result_type>::quiet_NaN();
       }
       return x; 
     }
     
-    // Streamable concept
-    template<typename char_t, typename traits_t>
-    friend std::basic_ostream<char_t, traits_t> &
-    operator<<(std::basic_ostream<char_t, traits_t> &,
-	       const uniform01_dist &);    
-    template<typename char_t, typename traits_t>
-    friend std::basic_istream<char_t, traits_t> &
-    operator>>(std::basic_istream<char_t, traits_t> &,
-	       uniform01_dist &);
   };
   
   // -------------------------------------------------------------------
 
   // Equality comparable concept
-  inline bool operator==(const uniform01_dist::param_type &, 
-			 const uniform01_dist::param_type &) {
+  template<typename float_t>
+  inline bool operator==(const typename uniform01_dist<float_t>::param_type &, 
+			 const typename uniform01_dist<float_t>::param_type &) {
     return true;
   }
-  inline bool operator!=(const uniform01_dist::param_type &, 
-			 const uniform01_dist::param_type &) {
+
+  template<typename float_t>
+  inline bool operator!=(const typename uniform01_dist<float_t>::param_type &, 
+			 const typename uniform01_dist<float_t>::param_type &) {
     return false;
   }
-
-  // Streamable concept
-  template<typename char_t, typename traits_t>
-  std::basic_ostream<char_t, traits_t> &
-  operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const uniform01_dist::param_type &p) {
-    std::ios_base::fmtflags flags(out.flags());
-    out.flags(std::ios_base::dec | std::ios_base::fixed |
-	      std::ios_base::left);
-    out << '('
-	<< ')';
-    out.flags(flags);
-    return out;
-  }
-
-  template<typename char_t, typename traits_t>
-  std::basic_istream<char_t, traits_t> &
-  operator>>(std::basic_istream<char_t, traits_t> &in,
-	     uniform01_dist::param_type &p) {
-    std::ios_base::fmtflags flags(in.flags());
-    in.flags(std::ios_base::dec | std::ios_base::fixed |
-	     std::ios_base::left);
-    in >> utility::delim('(')
-       >> utility::delim(')');
-    in.flags(flags);
-    return in;
-  }
-  
+   
   // -------------------------------------------------------------------
   
-  inline bool operator==(const uniform01_dist &g1, 
-			 const uniform01_dist &g2) {
+  // Equality comparable concept
+  template<typename float_t>
+  inline bool operator==(const uniform01_dist<float_t> &g1, 
+			 const uniform01_dist<float_t> &g2) {
     return g1.param()==g2.param();
   }
-  inline bool operator!=(const uniform01_dist &g1, 
-			 const uniform01_dist &g2) {
+
+  template<typename float_t>
+  inline bool operator!=(const uniform01_dist<float_t> &g1, 
+			 const uniform01_dist<float_t> &g2) {
     return g1.param()!=g2.param();
   }
   
   // Streamable concept
-  template<typename char_t, typename traits_t>
+  template<typename char_t, typename traits_t, typename float_t>
   std::basic_ostream<char_t, traits_t> &
   operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const uniform01_dist &g) {
+	     const uniform01_dist<float_t> &g) {
     std::ios_base::fmtflags flags(out.flags());
     out.flags(std::ios_base::dec | std::ios_base::fixed |
 	      std::ios_base::left);
-    out << "[uniform01 " << g.p << ']';
+    out << "[uniform01 " << g.param() << ']';
     out.flags(flags);
     return out;
   }
   
-  template<typename char_t, typename traits_t>
+  template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &
   operator>>(std::basic_istream<char_t, traits_t> &in,
-	     uniform01_dist &g) {
-    uniform01_dist::param_type p;
+	     uniform01_dist<float_t> &g) {
+    typename uniform01_dist<float_t>::param_type p;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed |
 	     std::ios_base::left);

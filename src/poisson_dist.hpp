@@ -75,7 +75,7 @@ namespace trng {
     // random numbers
     template<typename R>
     int operator()(R &r) {
-      double p(utility::uniformco(r));
+      double p(utility::uniformco<double>(r));
       int x(utility::discrete(p, P.P_.begin(), P.P_.end()));
       if (x+1==P.P_.size())
         while (p>cdf(x))

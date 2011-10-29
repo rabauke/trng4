@@ -115,7 +115,7 @@ namespace trng {
     // random numbers
     template<typename R>
     int operator()(R &r) {
-      double u=utility::uniformco(r)*P.P[0];
+      double u=utility::uniformco<double>(r)*P.P[0];
       int x=0;
       while (x<P.offset) {
 	if (u<P.P[2*x+1]) {
@@ -149,7 +149,7 @@ namespace trng {
     }
     // probability density function  
     double pdf(int x) const {
-      return (x<0 || x>=static_cast<int>(P.N)) ? 0.0 : P.P[x+P.offset]/P.P[0];
+      return (x<0 or x>=static_cast<int>(P.N)) ? 0.0 : P.P[x+P.offset]/P.P[0];
     }
     // cumulative density function 
     double cdf(int x) const {

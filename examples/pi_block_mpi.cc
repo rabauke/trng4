@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
   int size=MPI::COMM_WORLD.Get_size();  // get total number of processes
   int rank=MPI::COMM_WORLD.Get_rank();  // get rank of current process
   long in=0l;                           // number of points in circle
-  trng::uniform01_dist u;               // random number distribution
+  trng::uniform01_dist<> u;             // random number distribution
   r.jump(2*(rank*samples/size));        // jump ahead
   // throw random points into square and distribute workload over all processes
   for (long i=rank*samples/size; i<(rank+1)*samples/size; ++i) {

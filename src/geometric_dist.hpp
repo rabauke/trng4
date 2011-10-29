@@ -67,7 +67,7 @@ namespace trng {
     // random numbers
     template<typename R>
     int operator()(R &r) {
-      return static_cast<int>(math::ln(utility::uniformoo(r))*
+      return static_cast<int>(math::ln(utility::uniformoo<double>(r))*
 			      P.one_over_ln_q());
     }
     template<typename R>

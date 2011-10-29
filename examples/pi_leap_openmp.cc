@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
     ry.split(2, 1);                     // choose sub-stream no. 1 out of 2 streams
     rx.split(size, rank);               // choose sub-stream no. rank out of size streams
     ry.split(size, rank);               // choose sub-stream no. rank out of size streams
-    trng::uniform01_dist u;             // random number distribution
+    trng::uniform01_dist<> u;           // random number distribution
     long in_local=0l;
     // throw random points into square 
     for (long i=rank; i<samples; i+=size) {

@@ -34,19 +34,20 @@
 namespace trng {
 
   // uniform random number generator class
+  template<typename float_t=double>
   class correlated_normal_dist {
   public:
-    typedef double result_type;
+    typedef float_t result_type;
     class param_type;
     
     class param_type {
-      typedef std::vector<double>::size_type size_type;
-      std::vector<double> H_;
+      typedef typename std::vector<result_type>::size_type size_type;
+      std::vector<result_type> H_;
       size_type d_;
 
       void Cholesky_factorization() {
 	for (size_type i=0; i<d_; ++i) {
-	  double t;
+	  result_type t;
 	  for (size_type k=0; k<i; ++k) {
 	    t=0.0;
 	    for (size_type j=0; j<k; ++j)
@@ -62,9 +63,9 @@ namespace trng {
 	}
       }
       
-      double H_times(const std::vector<double> &normal) {
+      result_type H_times(const std::vector<result_type> &normal) {
 	size_type d(normal.size());
-	double y=0.0;
+	result_type y=0.0;
 	for (size_type j=0; j<d; ++j)
 	  y+=H_[(d-1)*d_ + j]*normal[j];
 	return y;
@@ -77,7 +78,7 @@ namespace trng {
     public:
       template<typename iter>
       param_type(iter first, iter last) {
-	d_=static_cast<size_type>(trng::math::sqrt(static_cast<double>(std::distance(first, last))));
+	d_=static_cast<size_type>(trng::math::sqrt(static_cast<result_type>(std::distance(first, last))));
 	H_.reserve(d_*d_);
 	for (size_type i=0; i<d_*d_; ++i, ++first)
 	  H_.push_back(*first);
@@ -93,14 +94,14 @@ namespace trng {
       }
       friend inline bool operator!=(const correlated_normal_dist::param_type &p1, 
 				    const correlated_normal_dist::param_type &p2) {
-	return !(p1==p2);
+	return not (p1==p2);
       }
 
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &
       operator<<(std::basic_ostream<char_t, traits_t> &out,
-		 const correlated_normal_dist::param_type &p) {
+		 const param_type &p) {
 	std::ios_base::fmtflags flags(out.flags());
 	out.flags(std::ios_base::dec | std::ios_base::fixed |
 		  std::ios_base::left);
@@ -115,15 +116,15 @@ namespace trng {
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &
       operator>>(std::basic_istream<char_t, traits_t> &in,
-		 correlated_normal_dist::param_type &p) {
-	std::vector<double> H, normal;
+		 param_type &p) {
+	std::vector<result_type> H, normal;
 	unsigned int d;
 	std::ios_base::fmtflags flags(in.flags());
 	in.flags(std::ios_base::dec | std::ios_base::fixed |
 		 std::ios_base::left);
  	in >> utility::delim('(') >> d ;
 	for (unsigned int i=0; i<d*d; ++i) {
-	  double t=0;
+	  result_type t=0;
 	  in >> utility::delim(' ') >> t;
 	  H.push_back(t);
 	}
@@ -139,7 +140,7 @@ namespace trng {
     
   private:
     param_type p;
-    std::vector<double> normal;
+    std::vector<result_type> normal;
 
   public:
     // constructor
@@ -152,21 +153,21 @@ namespace trng {
     void reset() { normal.clear(); }
     // random numbers
     template<typename R>
-    double operator()(R &r) {
-      normal.push_back(trng::math::inv_Phi(utility::uniformoo(r)));
-      double y=p.H_times(normal);
+    result_type operator()(R &r) {
+      normal.push_back(trng::math::inv_Phi(utility::uniformoo<result_type>(r)));
+      result_type y=p.H_times(normal);
       if (normal.size()==p.d())
 	normal.clear();
       return y;
     }
     template<typename R>
-    double operator()(R &r, const param_type &p) {
+    result_type operator()(R &r, const param_type &p) {
       correlated_normal_dist g(p);
       return g(r);
     }
     // property methods
-    double min() const { return -math::numeric_limits<double>::infinity(); }
-    double max() const { return math::numeric_limits<double>::infinity(); }
+    result_type min() const { return -math::numeric_limits<result_type>::infinity(); }
+    result_type max() const { return math::numeric_limits<result_type>::infinity(); }
     param_type param() const { return p; }
     void param(const param_type &p_new) { p=p_new; }
   };
@@ -174,20 +175,22 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const correlated_normal_dist &g1, 
-			 const correlated_normal_dist &g2) {
+  template<typename float_t>
+  inline bool operator==(const correlated_normal_dist<float_t> &g1, 
+			 const correlated_normal_dist<float_t> &g2) {
     return g1.param()==g2.param();
   }
-  inline bool operator!=(const correlated_normal_dist &g1, 
-			 const correlated_normal_dist &g2) {
+  template<typename float_t>
+  inline bool operator!=(const correlated_normal_dist<float_t> &g1, 
+			 const correlated_normal_dist<float_t> &g2) {
     return g1.param()!=g2.param();
   }
   
   // Streamable concept
-  template<typename char_t, typename traits_t>
+  template<typename char_t, typename traits_t, typename float_t>
   std::basic_ostream<char_t, traits_t> &
   operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const correlated_normal_dist &g) {
+	     const correlated_normal_dist<float_t> &g) {
     std::ios_base::fmtflags flags(out.flags());
     out.flags(std::ios_base::dec | std::ios_base::fixed |
 	      std::ios_base::left);
@@ -196,11 +199,11 @@ namespace trng {
     return out;
   }
   
-  template<typename char_t, typename traits_t>
+  template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &
   operator>>(std::basic_istream<char_t, traits_t> &in,
-	     correlated_normal_dist &g) {
-    correlated_normal_dist::param_type p;
+	     correlated_normal_dist<float_t> &g) {
+    typename correlated_normal_dist<float_t>::param_type p;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed |
 	     std::ios_base::left);

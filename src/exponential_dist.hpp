@@ -30,20 +30,57 @@
 namespace trng {
 
   // uniform random number generator class
+  template<typename float_t=double>
   class exponential_dist {
   public:
-    typedef double result_type;
+    typedef float_t result_type;
     class param_type;
     
     class param_type {
     private:
-      double mu_;
+      result_type mu_;
     public:
-      double mu() const { return mu_; }
-      void mu(double mu_new) { mu_=mu_new; }
-      explicit param_type(double mu) :	mu_(mu) {
+      result_type mu() const { return mu_; }
+      void mu(result_type mu_new) { mu_=mu_new; }
+      param_type() : mu_(1) {
       }
-      friend class exponential_dist;
+      explicit param_type(result_type mu) : mu_(mu) {
+      }
+
+      friend class exponential_dist<result_type>;
+
+      // Streamable concept
+      template<typename char_t, typename traits_t>
+      friend std::basic_ostream<char_t, traits_t> &
+      operator<<(std::basic_ostream<char_t, traits_t> &out,
+                 const param_type &p) {
+        std::ios_base::fmtflags flags(out.flags());
+        out.flags(std::ios_base::dec | std::ios_base::fixed |
+                  std::ios_base::left);
+        out << '('
+            << std::setprecision(math::numeric_limits<float_t>::digits10+1) 
+            << p.mu() 
+            << ')';
+        out.flags(flags);
+        return out;
+      }
+
+      template<typename char_t, typename traits_t>
+      friend std::basic_istream<char_t, traits_t> &
+      operator>>(std::basic_istream<char_t, traits_t> &in,
+                 param_type &p) {
+        float_t mu;
+        std::ios_base::fmtflags flags(in.flags());
+        in.flags(std::ios_base::dec | std::ios_base::fixed |
+                 std::ios_base::left);
+        in >> utility::delim('(')
+           >> mu >> utility::delim(')');
+        if (in)
+          p=param_type(mu);
+        in.flags(flags);
+        return in;
+      }
+
     };
     
   private:
@@ -51,7 +88,7 @@ namespace trng {
     
   public:
     // constructor
-    explicit exponential_dist(double mu) : p(mu) {
+    explicit exponential_dist(result_type mu) : p(mu) {
     }
     explicit exponential_dist(const param_type &p) : p(p) {
     }
@@ -59,101 +96,76 @@ namespace trng {
     void reset() { }
     // random numbers
     template<typename R>
-    double operator()(R &r) {
-      return -p.mu()*math::ln(utility::uniformoc(r));
+    result_type operator()(R &r) {
+      return -p.mu()*math::ln(utility::uniformoc<result_type>(r));
     }
     template<typename R>
-    double operator()(R &r, const param_type &p) {
+    result_type operator()(R &r, const param_type &p) {
       exponential_dist g(p);
       return g(r);
     }
     // property methods
-    double min() const { return 0; }
-    double max() const { return math::numeric_limits<double>::infinity(); }
+    result_type min() const { return 0; }
+    result_type max() const { return math::numeric_limits<result_type>::infinity(); }
     param_type param() const { return p; }
     void param(const param_type &p_new) { p=p_new; }
-    double mu() const { return p.mu(); }
-    void mu(double mu_new) { p.mu(mu_new); }
+    result_type mu() const { return p.mu(); }
+    void mu(result_type mu_new) { p.mu(mu_new); }
     // probability density function  
-    double pdf(double x) const {
-      return x<0.0 ? 0.0 : math::exp(-x/p.mu())/p.mu();
+    result_type pdf(result_type x) const {
+      return x<0 ? 0 : math::exp(-x/p.mu())/p.mu();
     }
     // cumulative density function 
-    double cdf(double x) const {
-      return x<=0.0 ? 0.0 : 1.0-math::exp(-x/p.mu());
+    result_type cdf(result_type x) const {
+      return x<=0 ? 0 : 1-math::exp(-x/p.mu());
     }
     // inverse cumulative density function 
-    double icdf(double x) const {
-      if (x<0.0 || x>1.0) {
+    result_type icdf(result_type x) const {
+      if (x<0 or x>1) {
 	errno=EDOM;
-	return math::numeric_limits<double>::quiet_NaN();
+	return math::numeric_limits<result_type>::quiet_NaN();
       }
-      if (x==1.0)
-        return math::numeric_limits<double>::infinity();
-      return -p.mu()*math::ln(1.0-x);
+      if (x==1)
+        return math::numeric_limits<result_type>::infinity();
+      return -p.mu()*math::ln(1-x);
     }
   };
 
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const exponential_dist::param_type &p1, 
-			 const exponential_dist::param_type &p2) {
+  template<typename float_t>
+  inline bool operator==(const typename exponential_dist<float_t>::param_type &p1, 
+			 const typename exponential_dist<float_t>::param_type &p2) {
     return p1.mu()==p2.mu();
   }
-  inline bool operator!=(const exponential_dist::param_type &p1, 
-			 const exponential_dist::param_type &p2) {
-    return !(p1==p2);
-  }
-  
-  // Streamable concept
-  template<typename char_t, typename traits_t>
-  std::basic_ostream<char_t, traits_t> &
-  operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const exponential_dist::param_type &p) {
-    std::ios_base::fmtflags flags(out.flags());
-    out.flags(std::ios_base::dec | std::ios_base::fixed |
-	      std::ios_base::left);
-    out << '('
-	<< std::setprecision(17) << p.mu() 
-	<< ')';
-    out.flags(flags);
-    return out;
-  }
-  
-  template<typename char_t, typename traits_t>
-  std::basic_istream<char_t, traits_t> &
-  operator>>(std::basic_istream<char_t, traits_t> &in,
-	     exponential_dist::param_type &p) {
-    double mu;
-    std::ios_base::fmtflags flags(in.flags());
-    in.flags(std::ios_base::dec | std::ios_base::fixed |
-	     std::ios_base::left);
-    in >> utility::delim('(')
-       >> mu >> utility::delim(')');
-    if (in)
-      p=exponential_dist::param_type(mu);
-    in.flags(flags);
-    return in;
+
+  template<typename float_t>
+  inline bool operator!=(const typename exponential_dist<float_t>::param_type &p1, 
+			 const typename exponential_dist<float_t>::param_type &p2) {
+    return not (p1==p2);
   }
   
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const exponential_dist &g1, 
-			 const exponential_dist &g2) {
+  template<typename float_t>
+  inline bool operator==(const exponential_dist<float_t> &g1, 
+			 const exponential_dist<float_t> &g2) {
     return g1.param()==g2.param();
   }
-  inline bool operator!=(const exponential_dist &g1, 
-			 const exponential_dist &g2) {
+
+  template<typename float_t>
+  inline bool operator!=(const exponential_dist<float_t> &g1, 
+			 const exponential_dist<float_t> &g2) {
     return g1.param()!=g2.param();
   }
   
   // Streamable concept
-  template<typename char_t, typename traits_t>
+  template<typename char_t, typename traits_t, typename float_t>
   std::basic_ostream<char_t, traits_t> &
   operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const exponential_dist &g) {
+	     const exponential_dist<float_t> &g) {
     std::ios_base::fmtflags flags(out.flags());
     out.flags(std::ios_base::dec | std::ios_base::fixed |
 	      std::ios_base::left);
@@ -162,11 +174,11 @@ namespace trng {
     return out;
   }
   
-  template<typename char_t, typename traits_t>
+  template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &
   operator>>(std::basic_istream<char_t, traits_t> &in,
-	     exponential_dist &g) {
-    exponential_dist::param_type p;
+	     exponential_dist<float_t> &g) {
+    typename exponential_dist<float_t>::param_type p;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed |
 	     std::ios_base::left);

@@ -26,7 +26,7 @@ namespace trng {
   // Equality comparable concept
   bool operator==(const lcg64_shift::parameter_type &P1, 
 		  const lcg64_shift::parameter_type &P2) {
-    return P1.a==P2.a && P1.b==P2.b;
+    return P1.a==P2.a and P1.b==P2.b;
   }
 
   bool operator!=(const lcg64_shift::parameter_type &P1, 
@@ -80,7 +80,7 @@ namespace trng {
   
   // Equality comparable concept
   bool operator==(const lcg64_shift &R1, const lcg64_shift &R2) {
-    return R1.P==R2.P && R1.S==R2.S;
+    return R1.P==R2.P and R1.S==R2.S;
   }
 
   bool operator!=(const lcg64_shift &R1, const lcg64_shift &R2) {
@@ -89,7 +89,7 @@ namespace trng {
 
   // Parallel random number generator concept
   void lcg64_shift::split(unsigned int s, unsigned int n) {
-    if (s<1 || n>=s)
+    if (s<1 or n>=s)
       throw std::invalid_argument("invalid argument for trng::lcg64_shift::split");
     if (s>1) {
       lcg64_shift::result_type t1(1ull), t2(0ull);

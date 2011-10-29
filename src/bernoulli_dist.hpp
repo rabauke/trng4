@@ -44,7 +44,7 @@ namespace trng {
       void head(const T &head_new) { head_=head_new; }
       T tail() const { return tail_; }
       void tail(const T &tail_new) { tail_=tail_new; }
-      explicit param_type(double p, const T &head, const T &tail) :
+      param_type(double p, const T &head, const T &tail) :
 	p_(p), head_(head), tail_(tail) {
       }
       friend class bernoulli_dist;
@@ -55,7 +55,7 @@ namespace trng {
     
   public:
     // constructor
-    explicit bernoulli_dist(double p, const T &head, const T &tail) : 
+    bernoulli_dist(double p, const T &head, const T &tail) : 
       P(p, head, tail) {
     }
     explicit bernoulli_dist(const param_type &P) : P(P) {
@@ -65,7 +65,7 @@ namespace trng {
     // random numbers
     template<typename R>
     T operator()(R &r) {
-      return utility::uniformco(r)<P.p() ? P.head() : P.tail();
+      return utility::uniformco<double>(r)<P.p() ? P.head() : P.tail();
     }
     template<typename R>
     T operator()(R &r, const param_type &P) {
@@ -108,7 +108,7 @@ namespace trng {
   template<typename T>
   inline bool operator==(const typename bernoulli_dist<T>::param_type &p1, 
 			 const typename bernoulli_dist<T>::param_type &p2) {
-    return p1.p()==p2.p() && p1.head()==p2.head() && p1.tail()==p2.tail();
+    return p1.p()==p2.p() and p1.head()==p2.head() and p1.tail()==p2.tail();
   }
   template<typename T>
   inline bool operator!=(const typename bernoulli_dist<T>::param_type &p1, 

@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
   const long samples=1000000l;          // total number of points in square
   long in=0l;                           // no points in circle
   trng::yarn2 r;                        // random number engine
-  trng::uniform01_dist u;               // random number distribution
+  trng::uniform01_dist<> u;             // random number distribution
   // throw random points into square 
   for (long i=0; i<samples; ++i) {
     double x=u(r), y=u(r);              // choose random x- and y-coordinates

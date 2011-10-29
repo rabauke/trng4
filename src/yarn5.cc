@@ -26,28 +26,27 @@ namespace trng {
   // EqualityComparable concept
   bool operator==(const yarn5::parameter_type &P1,
                   const yarn5::parameter_type &P2) {
-    return P1.a1==P2.a1 && P1.a2==P2.a2 && P1.a3==P2.a3 && P1.a4==P2.a4 && P1.a5==P2.a5 && P1.g==P2.g;
+    return P1.a1==P2.a1 and P1.a2==P2.a2 and P1.a3==P2.a3 and P1.a4==P2.a4 and P1.a5==P2.a5;
   }
 
   bool operator!=(const yarn5::parameter_type &P1,
                   const yarn5::parameter_type &P2) {
-    return !(P1==P2);
+    return not (P1==P2);
   }
 
   // Equality comparable concept
   bool operator==(const yarn5::status_type &S1,
                   const yarn5::status_type &S2) {
-    return S1.r1==S2.r1 && S1.r2==S2.r2 && S1.r3==S2.r3 && S1.r4==S2.r4  && S1.r5==S2.r5;
+    return S1.r1==S2.r1 and S1.r2==S2.r2 and S1.r3==S2.r3 and S1.r4==S2.r4 and S1.r5==S2.r5;
   }
 
   bool operator!=(const yarn5::status_type &S1,
                   const yarn5::status_type &S2) {
-    return !(S1==S2);
+    return not (S1==S2);
   }
   
   const yarn5::parameter_type
-  yarn5::LEcuyer1=parameter_type(107374182l, 0l, 0l, 0l, 104480l,
-				 123567893l);
+  yarn5::LEcuyer1=parameter_type(107374182l, 0l, 0l, 0l, 104480l);
 
   // Random number engine concept
   yarn5::yarn5(yarn5::parameter_type P) :
@@ -96,16 +95,16 @@ namespace trng {
 
   // Equality comparable concept
   bool operator==(const yarn5 &R1, const yarn5 &R2) {
-    return R1.P==R2.P && R1.S==R2.S;
+    return R1.P==R2.P and R1.S==R2.S;
   }
 
   bool operator!=(const yarn5 &R1, const yarn5 &R2) {
-    return !(R1==R2);
+    return not (R1==R2);
   }
 
   // Parallel random number generator concept
   void yarn5::split(unsigned int s, unsigned int n) {
-    if (s<1 || n>=s)
+    if (s<1 or n>=s)
       throw std::invalid_argument("invalid argument for trng::yarn5::split");
     long q0, q1, q2, q3, q4, q5, q6, q7, q8, q9;
     if (s>1) {
@@ -256,5 +255,7 @@ namespace trng {
       t=0l;
     S.r1=S.r2;  S.r2=S.r3;  S.r3=S.r4;  S.r4=S.r5;  S.r5=t;
   }
-  
+
+  utility::power<yarn5::modulus, yarn5::gen> yarn5::parameter_type::g;
+
 }

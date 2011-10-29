@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
     trng::yarn2 r;                      // random number engine
     int size=omp_get_num_threads();     // get total number of processes 
     int rank=omp_get_thread_num();      // get rank of current process
-    trng::uniform01_dist u;             // random number distribution
+    trng::uniform01_dist<> u;           // random number distribution
     r.jump(2*(rank*samples/size));      // jump ahead
     long in_local=0l;
     // throw random points into square 

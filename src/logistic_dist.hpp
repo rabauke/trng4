@@ -30,35 +30,73 @@
 namespace trng {
 
   // uniform random number generator class
+  template<typename float_t=double>
   class logistic_dist {
   public:
-    typedef double result_type;
+    typedef float_t result_type;
     class param_type;
     
     class param_type {
     private:
-      double theta_, eta_;
+      result_type theta_, eta_;
     public:
-      double theta() const { return theta_; }
-      void theta(double theta_new) { theta_=theta_new; }
-      double eta() const { return eta_; }
-      void eta(double eta_new) { eta_=eta_new; }
-      explicit param_type(double theta, double eta) : theta_(theta), eta_(eta) {
+      result_type theta() const { return theta_; }
+      void theta(result_type theta_new) { theta_=theta_new; }
+      result_type eta() const { return eta_; }
+      void eta(result_type eta_new) { eta_=eta_new; }
+      param_type() : theta_(1), eta_(0) {
       }
+      param_type(result_type theta, result_type eta) : theta_(theta), eta_(eta) {
+      }
+
       friend class logistic_dist;
+
+      // Streamable concept
+      template<typename char_t, typename traits_t>
+      friend std::basic_ostream<char_t, traits_t> &
+      operator<<(std::basic_ostream<char_t, traits_t> &out,
+                 const param_type &p) {
+        std::ios_base::fmtflags flags(out.flags());
+        out.flags(std::ios_base::dec | std::ios_base::fixed |
+                  std::ios_base::left);
+        out << '('
+            << std::setprecision(math::numeric_limits<float_t>::digits10+1) 
+            << p.theta() << ' ' << p.eta() 
+            << ')';
+        out.flags(flags);
+        return out;
+      }
+      
+      template<typename char_t, typename traits_t>
+      friend std::basic_istream<char_t, traits_t> &
+      operator>>(std::basic_istream<char_t, traits_t> &in,
+                 param_type &p) {
+        float_t theta, eta;
+        std::ios_base::fmtflags flags(in.flags());
+        in.flags(std::ios_base::dec | std::ios_base::fixed |
+                 std::ios_base::left);
+        in >> utility::delim('(')
+           >> theta >> utility::delim(' ')
+           >> eta >> utility::delim(')');
+        if (in)
+          p=param_type(theta, eta);
+        in.flags(flags);
+        return in;
+      }
+      
     };
     
   private:
     param_type p;
     
     // inverse cumulative density function
-    double icdf_(double x) const {
-      return p.eta()-math::ln((1.0-x)/x)*p.theta();
+    result_type icdf_(result_type x) const {
+      return p.eta()-math::ln((1-x)/x)*p.theta();
     }
     
   public:
     // constructor
-    explicit logistic_dist(double theta, double eta) : p(theta, eta) {
+    logistic_dist(result_type theta, result_type eta) : p(theta, eta) {
     }
     explicit logistic_dist(const param_type &p) : p(p) {
     }
@@ -66,44 +104,44 @@ namespace trng {
     void reset() { }
     // random numbers
     template<typename R>
-    double operator()(R &r) {
-      return icdf_(utility::uniformoo(r));
+    result_type operator()(R &r) {
+      return icdf_(utility::uniformoo<result_type>(r));
     }
     template<typename R>
-    double operator()(R &r, const param_type &p) {
+    result_type operator()(R &r, const param_type &p) {
       logistic_dist g(p);
       return g(r);
     }
     // property methods
-    double min() const { return -math::numeric_limits<double>::infinity(); }
-    double max() const { return math::numeric_limits<double>::infinity(); }
+    result_type min() const { return -math::numeric_limits<result_type>::infinity(); }
+    result_type max() const { return math::numeric_limits<result_type>::infinity(); }
     param_type param() const { return p; }
     void param(const param_type &p_new) { p=p_new; }
-    double theta() const { return p.theta(); }
-    void theta(double theta_new) { p.theta(theta_new); }
-    double eta() const { return p.eta(); }
-    void eta(double eta_new) { p.eta(eta_new); }
+    result_type theta() const { return p.theta(); }
+    void theta(result_type theta_new) { p.theta(theta_new); }
+    result_type eta() const { return p.eta(); }
+    void eta(result_type eta_new) { p.eta(eta_new); }
     // probability density function  
-    double pdf(double x) const {
-      double t1(math::exp(-math::abs((x-p.eta())/p.theta())));
-      double t2(1.0+t1);
+    result_type pdf(result_type x) const {
+      result_type t1(math::exp(-math::abs((x-p.eta())/p.theta())));
+      result_type t2(1+t1);
       return t1/(p.theta()*t2*t2);
     }
     // cumulative density function 
-    double cdf(double x) const {
-      double t1(math::exp(-math::abs((x-p.eta())/p.theta())));
-      return x>=p.eta() ? (1.0/(1.0+t1)) : (t1/(1.0+t1));
+    result_type cdf(result_type x) const {
+      result_type t1(math::exp(-math::abs((x-p.eta())/p.theta())));
+      return x>=p.eta() ? (1/(1+t1)) : (t1/(1+t1));
     }
     // inverse cumulative density function 
-    double icdf(double x) const {
-      if (x<0.0 || x>1.0) {
+    result_type icdf(result_type x) const {
+      if (x<0 or x>1) {
         errno=EDOM;
-        return math::numeric_limits<double>::quiet_NaN();
+        return math::numeric_limits<result_type>::quiet_NaN();
       }
-      if (x==0.0)
-        return -math::numeric_limits<double>::infinity();
-      if (x==1.0)
-        return math::numeric_limits<double>::infinity();
+      if (x==0)
+        return -math::numeric_limits<result_type>::infinity();
+      if (x==1)
+        return math::numeric_limits<result_type>::infinity();
       return icdf_(x);
     }
   };
@@ -111,64 +149,38 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const logistic_dist::param_type &p1, 
-			 const logistic_dist::param_type &p2) {
-    return p1.theta()==p2.theta() && p1.eta()==p2.eta();
+  template<typename float_t>
+  inline bool operator==(const typename logistic_dist<float_t>::param_type &p1, 
+			 const typename logistic_dist<float_t>::param_type &p2) {
+    return p1.theta()==p2.theta() and p1.eta()==p2.eta();
   }
-  inline bool operator!=(const logistic_dist::param_type &p1, 
-			 const logistic_dist::param_type &p2) {
-    return !(p1==p2);
-  }
-  
-  // Streamable concept
-  template<typename char_t, typename traits_t>
-  std::basic_ostream<char_t, traits_t> &
-  operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const logistic_dist::param_type &p) {
-    std::ios_base::fmtflags flags(out.flags());
-    out.flags(std::ios_base::dec | std::ios_base::fixed |
-	      std::ios_base::left);
-    out << '('
-	<< std::setprecision(17) << p.theta() << ' ' << p.eta() 
-	<< ')';
-    out.flags(flags);
-    return out;
-  }
-  
-  template<typename char_t, typename traits_t>
-  std::basic_istream<char_t, traits_t> &
-  operator>>(std::basic_istream<char_t, traits_t> &in,
-	     logistic_dist::param_type &p) {
-    double theta, eta;
-    std::ios_base::fmtflags flags(in.flags());
-    in.flags(std::ios_base::dec | std::ios_base::fixed |
-	     std::ios_base::left);
-    in >> utility::delim('(')
-       >> theta >> utility::delim(' ')
-       >> eta >> utility::delim(')');
-    if (in)
-      p=logistic_dist::param_type(theta, eta);
-    in.flags(flags);
-    return in;
-  }
+
+  template<typename float_t>
+  inline bool operator!=(const typename logistic_dist<float_t>::param_type &p1, 
+			 const typename logistic_dist<float_t>::param_type &p2) {
+    return not (p1==p2);
+  }  
   
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const logistic_dist &g1, 
-			 const logistic_dist &g2) {
+  template<typename float_t>
+  inline bool operator==(const logistic_dist<float_t> &g1, 
+			 const logistic_dist<float_t> &g2) {
     return g1.param()==g2.param();
   }
-  inline bool operator!=(const logistic_dist &g1, 
-			 const logistic_dist &g2) {
+
+  template<typename float_t>
+  inline bool operator!=(const logistic_dist<float_t> &g1, 
+			 const logistic_dist<float_t> &g2) {
     return g1.param()!=g2.param();
   }
   
   // Streamable concept
-  template<typename char_t, typename traits_t>
+  template<typename char_t, typename traits_t, typename float_t>
   std::basic_ostream<char_t, traits_t> &
   operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const logistic_dist &g) {
+	     const logistic_dist<float_t> &g) {
     std::ios_base::fmtflags flags(out.flags());
     out.flags(std::ios_base::dec | std::ios_base::fixed |
 	      std::ios_base::left);
@@ -177,11 +189,11 @@ namespace trng {
     return out;
   }
   
-  template<typename char_t, typename traits_t>
+  template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &
   operator>>(std::basic_istream<char_t, traits_t> &in,
-	     logistic_dist &g) {
-    logistic_dist::param_type p;
+	     logistic_dist<float_t> &g) {
+    typename logistic_dist<float_t>::param_type p;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed |
 	     std::ios_base::left);

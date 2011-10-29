@@ -31,13 +31,14 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-EXTRA_PROGRAMS = hello_world$(EXEEXT) test$(EXEEXT) time$(EXEEXT) \
-	pi$(EXEEXT) pi_block_mpi$(EXEEXT) pi_block_openmp$(EXEEXT) \
-	pi_leap_mpi$(EXEEXT) pi_leap_openmp$(EXEEXT) \
-	stl_container$(EXEEXT) distributions$(EXEEXT) \
-	implementation_test$(EXEEXT) Ising_model$(EXEEXT) \
-	correlated_normal_dist$(EXEEXT) discrete_dist$(EXEEXT) \
-	discrete_dist_c_style$(EXEEXT) bernoulli_dist$(EXEEXT)
+EXTRA_PROGRAMS = hello_world$(EXEEXT) sample_output$(EXEEXT) \
+	time$(EXEEXT) pi$(EXEEXT) pi_block_mpi$(EXEEXT) \
+	pi_block_openmp$(EXEEXT) pi_leap_mpi$(EXEEXT) \
+	pi_leap_openmp$(EXEEXT) stl_container$(EXEEXT) \
+	distributions$(EXEEXT) plausibility_test$(EXEEXT) \
+	Ising_model$(EXEEXT) correlated_normal_dist$(EXEEXT) \
+	discrete_dist$(EXEEXT) discrete_dist_c_style$(EXEEXT) \
+	bernoulli_dist$(EXEEXT)
 subdir = examples
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -69,9 +70,6 @@ distributions_LDADD = $(LDADD)
 am_hello_world_OBJECTS = hello_world.$(OBJEXT)
 hello_world_OBJECTS = $(am_hello_world_OBJECTS)
 hello_world_LDADD = $(LDADD)
-am_implementation_test_OBJECTS = implementation_test.$(OBJEXT)
-implementation_test_OBJECTS = $(am_implementation_test_OBJECTS)
-implementation_test_LDADD = $(LDADD)
 am_pi_OBJECTS = pi.$(OBJEXT)
 pi_OBJECTS = $(am_pi_OBJECTS)
 pi_LDADD = $(LDADD)
@@ -87,12 +85,15 @@ pi_leap_mpi_LDADD = $(LDADD)
 am_pi_leap_openmp_OBJECTS = pi_leap_openmp.$(OBJEXT)
 pi_leap_openmp_OBJECTS = $(am_pi_leap_openmp_OBJECTS)
 pi_leap_openmp_LDADD = $(LDADD)
+am_plausibility_test_OBJECTS = plausibility_test.$(OBJEXT)
+plausibility_test_OBJECTS = $(am_plausibility_test_OBJECTS)
+plausibility_test_LDADD = $(LDADD)
+am_sample_output_OBJECTS = sample_output.$(OBJEXT)
+sample_output_OBJECTS = $(am_sample_output_OBJECTS)
+sample_output_LDADD = $(LDADD)
 am_stl_container_OBJECTS = stl_container.$(OBJEXT)
 stl_container_OBJECTS = $(am_stl_container_OBJECTS)
 stl_container_LDADD = $(LDADD)
-am_test_OBJECTS = test.$(OBJEXT)
-test_OBJECTS = $(am_test_OBJECTS)
-test_LDADD = $(LDADD)
 am_time_OBJECTS = time.$(OBJEXT)
 time_OBJECTS = $(am_time_OBJECTS)
 time_LDADD = $(LDADD)
@@ -111,19 +112,19 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 SOURCES = $(Ising_model_SOURCES) $(bernoulli_dist_SOURCES) \
 	$(correlated_normal_dist_SOURCES) $(discrete_dist_SOURCES) \
 	$(discrete_dist_c_style_SOURCES) $(distributions_SOURCES) \
-	$(hello_world_SOURCES) $(implementation_test_SOURCES) \
-	$(pi_SOURCES) $(pi_block_mpi_SOURCES) \
+	$(hello_world_SOURCES) $(pi_SOURCES) $(pi_block_mpi_SOURCES) \
 	$(pi_block_openmp_SOURCES) $(pi_leap_mpi_SOURCES) \
-	$(pi_leap_openmp_SOURCES) $(stl_container_SOURCES) \
-	$(test_SOURCES) $(time_SOURCES)
+	$(pi_leap_openmp_SOURCES) $(plausibility_test_SOURCES) \
+	$(sample_output_SOURCES) $(stl_container_SOURCES) \
+	$(time_SOURCES)
 DIST_SOURCES = $(Ising_model_SOURCES) $(bernoulli_dist_SOURCES) \
 	$(correlated_normal_dist_SOURCES) $(discrete_dist_SOURCES) \
 	$(discrete_dist_c_style_SOURCES) $(distributions_SOURCES) \
-	$(hello_world_SOURCES) $(implementation_test_SOURCES) \
-	$(pi_SOURCES) $(pi_block_mpi_SOURCES) \
+	$(hello_world_SOURCES) $(pi_SOURCES) $(pi_block_mpi_SOURCES) \
 	$(pi_block_openmp_SOURCES) $(pi_leap_mpi_SOURCES) \
-	$(pi_leap_openmp_SOURCES) $(stl_container_SOURCES) \
-	$(test_SOURCES) $(time_SOURCES)
+	$(pi_leap_openmp_SOURCES) $(plausibility_test_SOURCES) \
+	$(sample_output_SOURCES) $(stl_container_SOURCES) \
+	$(time_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -248,7 +249,7 @@ MPICXXCOMPILE = $(MPICXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CX
 MPICXXLD = $(MPICXX)
 MPICXXLINK = $(MPICXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $(AM_MPILDFLAGS)
 hello_world_SOURCES = hello_world.cc
-test_SOURCES = test.cc
+sample_output_SOURCES = sample_output.cc
 time_SOURCES = time.cc
 pi_SOURCES = pi.cc
 pi_block_mpi_SOURCES = pi_block_mpi.cc
@@ -257,7 +258,7 @@ pi_leap_mpi_SOURCES = pi_leap_mpi.cc
 pi_leap_openmp_SOURCES = pi_leap_openmp.cc
 stl_container_SOURCES = stl_container.cc
 distributions_SOURCES = distributions.cc
-implementation_test_SOURCES = implementation_test.cc
+plausibility_test_SOURCES = plausibility_test.cc
 Ising_model_SOURCES = Ising_model.cc
 correlated_normal_dist_SOURCES = correlated_normal_dist.cc
 discrete_dist_SOURCES = discrete_dist.cc
@@ -317,18 +318,18 @@ distributions$(EXEEXT): $(distributions_OBJECTS) $(distributions_DEPENDENCIES)
 hello_world$(EXEEXT): $(hello_world_OBJECTS) $(hello_world_DEPENDENCIES) 
 	@rm -f hello_world$(EXEEXT)
 	$(CXXLINK) $(hello_world_OBJECTS) $(hello_world_LDADD) $(LIBS)
-implementation_test$(EXEEXT): $(implementation_test_OBJECTS) $(implementation_test_DEPENDENCIES) 
-	@rm -f implementation_test$(EXEEXT)
-	$(CXXLINK) $(implementation_test_OBJECTS) $(implementation_test_LDADD) $(LIBS)
 pi$(EXEEXT): $(pi_OBJECTS) $(pi_DEPENDENCIES) 
 	@rm -f pi$(EXEEXT)
 	$(CXXLINK) $(pi_OBJECTS) $(pi_LDADD) $(LIBS)
+plausibility_test$(EXEEXT): $(plausibility_test_OBJECTS) $(plausibility_test_DEPENDENCIES) 
+	@rm -f plausibility_test$(EXEEXT)
+	$(CXXLINK) $(plausibility_test_OBJECTS) $(plausibility_test_LDADD) $(LIBS)
+sample_output$(EXEEXT): $(sample_output_OBJECTS) $(sample_output_DEPENDENCIES) 
+	@rm -f sample_output$(EXEEXT)
+	$(CXXLINK) $(sample_output_OBJECTS) $(sample_output_LDADD) $(LIBS)
 stl_container$(EXEEXT): $(stl_container_OBJECTS) $(stl_container_DEPENDENCIES) 
 	@rm -f stl_container$(EXEEXT)
 	$(CXXLINK) $(stl_container_OBJECTS) $(stl_container_LDADD) $(LIBS)
-test$(EXEEXT): $(test_OBJECTS) $(test_DEPENDENCIES) 
-	@rm -f test$(EXEEXT)
-	$(CXXLINK) $(test_OBJECTS) $(test_LDADD) $(LIBS)
 time$(EXEEXT): $(time_OBJECTS) $(time_DEPENDENCIES) 
 	@rm -f time$(EXEEXT)
 	$(CXXLINK) $(time_OBJECTS) $(time_LDADD) $(LIBS)
@@ -346,14 +347,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/discrete_dist_c_style.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributions.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hello_world.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/implementation_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_block_mpi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_block_openmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_leap_mpi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_leap_openmp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plausibility_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sample_output.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stl_container.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/time.Po@am__quote@
 
 .cc.o:

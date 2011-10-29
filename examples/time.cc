@@ -21,6 +21,7 @@
 #include <string>
 #include <sstream>
 #include <trng/config.hpp>
+#include <trng/generate_canonical.hpp>
 #include <trng/lcg64.hpp>
 #include <trng/lcg64_shift.hpp>
 #include <trng/mrg2.hpp>
@@ -35,6 +36,8 @@
 #include <trng/yarn4.hpp>
 #include <trng/yarn5.hpp>
 #include <trng/yarn5s.hpp>
+#include <trng/mt19937_64.hpp>
+#include <trng/mt19937.hpp>
 #include <trng/lagfib2xor.hpp>
 #include <trng/lagfib2plus.hpp>
 #include <trng/lagfib4xor.hpp>
@@ -92,10 +95,10 @@ public:
 };
 
 template<typename R>
-typename R::result_type time_main_plain(R &r) {
+typename R::result_type time_plain(R &r) {
   typename R::result_type s(0);
   timer T;
-  long max(1l<<26);
+  long max(1l<<24);
   for (long i(0); i<max; ++i)
     s+=r();
   std::string res(to_string(1e-6*max/T.time()));
@@ -106,12 +109,12 @@ typename R::result_type time_main_plain(R &r) {
 }
 
 template<typename R>
-double time_main_cc(R &r) {
+double time_cc(R &r) {
   double s(0);
   timer T;
-  long max(1l<<26);
+  long max(1l<<24);
   for (long i(0); i<max; ++i)
-    s+=trng::utility::uniformcc(r);
+    s+=trng::utility::uniformcc<double>(r);
   std::string res(to_string(1e-6*max/T.time()));
   while (res.length()<10)
     res+=' ';
@@ -120,12 +123,12 @@ double time_main_cc(R &r) {
 }
 
 template<typename R>
-double time_main_oc(R &r) {
+double time_oc(R &r) {
   double s(0);
   timer T;
-  long max(1l<<26);
+  long max(1l<<24);
   for (long i(0); i<max; ++i)
-    s+=trng::utility::uniformoc(r);
+    s+=trng::utility::uniformoc<double>(r);
   std::string res(to_string(1e-6*max/T.time()));
   while (res.length()<10)
     res+=' ';
@@ -134,12 +137,12 @@ double time_main_oc(R &r) {
 }
 
 template<typename R>
-double time_main_co(R &r) {
+double time_co(R &r) {
   double s(0);
   timer T;
-  long max(1l<<26);
+  long max(1l<<24);
   for (long i(0); i<max; ++i)
-    s+=trng::utility::uniformco(r);
+    s+=trng::utility::uniformco<double>(r);
   std::string res(to_string(1e-6*max/T.time()));
   while (res.length()<10)
     res+=' ';
@@ -148,12 +151,26 @@ double time_main_co(R &r) {
 }
 
 template<typename R>
-double time_main_oo(R &r) {
+double time_oo(R &r) {
   double s(0);
   timer T;
-  long max(1l<<26);
+  long max(1l<<24);
   for (long i(0); i<max; ++i)
-    s+=trng::utility::uniformoo(r);
+    s+=trng::utility::uniformoo<double>(r);
+  std::string res(to_string(1e-6*max/T.time()));
+  while (res.length()<10)
+    res+=' ';
+  std::cout << res;
+  return s;
+}
+
+template<typename R, typename FLOAT>
+FLOAT time_canonical(R &r) {
+  FLOAT s(0);
+  timer T;
+  long max(1l<<24);
+  for (long i(0); i<max; ++i)
+    s+=trng::generate_canonical<FLOAT>(r);
   std::string res(to_string(1e-6*max/T.time()));
   while (res.length()<10)
     res+=' ';
@@ -166,11 +183,12 @@ void time_main(R &r, std::string name) {
    while (name.length()<32)
      name+=' ';
    std::cout << name;
-   time_main_plain(r);
-   time_main_cc(r);
-   time_main_co(r);
-   time_main_oc(r);
-   time_main_oo(r);
+   time_plain(r);
+   time_cc(r);
+   time_co(r);
+   time_oc(r);
+   time_oo(r);
+   time_canonical<R, double>(r);
    std::cout << std::endl;
 }
 
@@ -179,51 +197,53 @@ void time_boost(R &r, std::string name) {
    while (name.length()<32)
      name+=' ';
    std::cout << name;
-   time_main_plain(r);
+   time_plain(r);
    std::cout << std::endl;
 }
 
 int main() {
-  std::cout << "                                        10^6 random numbers per second\n"
-            << "generator                       [min,max] [0,1]     [0,1)     (0,1]     (0,1)\n"
-	    << "=================================================================================\n";
+  std::cout << "                                            10^6 random numbers per second\n"
+            << "generator                       [min,max] [0,1]     [0,1)     (0,1]     (0,1)     canonical\n"
+	    << "=============================================================================================\n";
   std::cout.flush();
   try {
     { trng::lcg64       r;  time_main(r, "trng::lcg64"); }
-    { trng::lcg64_shift r;  time_main(r, "trng::lcg64_shift"); }
-    { trng::mrg2        r;  time_main(r, "trng::mrg2"); }
-    { trng::mrg3        r;  time_main(r, "trng::mrg3"); }
-    { trng::mrg3s       r;  time_main(r, "trng::mrg3s"); }
-    { trng::mrg4        r;  time_main(r, "trng::mrg4"); }
-    { trng::mrg5        r;  time_main(r, "trng::mrg5"); }
-    { trng::mrg5s       r;  time_main(r, "trng::mrg5s"); }
-    { trng::yarn2       r;  time_main(r, "trng::yarn2"); }
-    { trng::yarn3       r;  time_main(r, "trng::yarn3"); }
-    { trng::yarn3s      r;  time_main(r, "trng::yarn3s"); }
-    { trng::yarn4       r;  time_main(r, "trng::yarn4"); }
-    { trng::yarn5       r;  time_main(r, "trng::yarn5"); }
-    { trng::yarn5s      r;  time_main(r, "trng::yarn5s"); }
-    { trng::lagfib2xor_19937_ull  r;  time_main(r, "trng::lagfib2xor_19937_ull"); }
-    { trng::lagfib4xor_19937_ull  r;  time_main(r, "trng::lagfib4xor_19937_ull"); }
-    { trng::lagfib4plus_19937_ull r;  time_main(r, "trng::lagfib2plus_19937_ull"); }
-    { trng::lagfib2plus_19937_ull r;  time_main(r, "trng::lagfib4plus_19937_ull"); }
-#if defined HAVE_BOOST
-    { boost::minstd_rand    r; time_boost(r, "boost::minstd_rand"); }
-    { boost::ecuyer1988     r; time_boost(r, "boost::ecuyer1988"); }
-    { boost::kreutzer1986   r; time_boost(r, "boost::kreutzer1986"); }
-    { boost::hellekalek1995 r; time_boost(r, "boost::hellekalek1995"); }
-    { boost::mt11213b       r; time_boost(r, "boost::mt11213b"); }
-    { boost::mt19937        r; time_boost(r, "boost::mt19937"); }
-    { boost::lagged_fibonacci607   r; time_boost(r, "boost::lagged_fibonacci607"); }
-    { boost::lagged_fibonacci1279  r; time_boost(r, "boost::lagged_fibonacci1279"); }
-    { boost::lagged_fibonacci2281  r; time_boost(r, "boost::lagged_fibonacci2281"); }
-    { boost::lagged_fibonacci3217  r; time_boost(r, "boost::lagged_fibonacci3217"); }
-    { boost::lagged_fibonacci4423  r; time_boost(r, "boost::lagged_fibonacci4423"); }
-    { boost::lagged_fibonacci9689  r; time_boost(r, "boost::lagged_fibonacci9689"); }
-    { boost::lagged_fibonacci19937 r; time_boost(r, "boost::lagged_fibonacci19937"); }
-    { boost::lagged_fibonacci23209 r; time_boost(r, "boost::lagged_fibonacci23209"); }
-    { boost::lagged_fibonacci44497 r; time_boost(r, "boost::lagged_fibonacci44497"); }
-#endif
+    //{ trng::lcg64_shift r;  time_main(r, "trng::lcg64_shift"); }
+    // { trng::mrg2        r;  time_main(r, "trng::mrg2"); }
+    // { trng::mrg3        r;  time_main(r, "trng::mrg3"); }
+    // { trng::mrg3s       r;  time_main(r, "trng::mrg3s"); }
+    // { trng::mrg4        r;  time_main(r, "trng::mrg4"); }
+    // { trng::mrg5        r;  time_main(r, "trng::mrg5"); }
+    // { trng::mrg5s       r;  time_main(r, "trng::mrg5s"); }
+    // { trng::yarn2       r;  time_main(r, "trng::yarn2"); }
+    // { trng::yarn3       r;  time_main(r, "trng::yarn3"); }
+    // { trng::yarn3s      r;  time_main(r, "trng::yarn3s"); }
+    // { trng::yarn4       r;  time_main(r, "trng::yarn4"); }
+    // { trng::yarn5       r;  time_main(r, "trng::yarn5"); }
+    // { trng::yarn5s      r;  time_main(r, "trng::yarn5s"); }
+    // { trng::mt19937     r;  time_main(r, "trng::mt19937"); }
+    // { trng::mt19937_64  r;  time_main(r, "trng::mt19937_64"); }
+    // { trng::lagfib2xor_19937_ull  r;  time_main(r, "trng::lagfib2xor_19937_ull"); }
+    // { trng::lagfib4xor_19937_ull  r;  time_main(r, "trng::lagfib4xor_19937_ull"); }
+    // { trng::lagfib4plus_19937_ull r;  time_main(r, "trng::lagfib2plus_19937_ull"); }
+    // { trng::lagfib2plus_19937_ull r;  time_main(r, "trng::lagfib4plus_19937_ull"); }
+// #if defined HAVE_BOOST
+//     { boost::minstd_rand    r; time_boost(r, "boost::minstd_rand"); }
+//     { boost::ecuyer1988     r; time_boost(r, "boost::ecuyer1988"); }
+//     { boost::kreutzer1986   r; time_boost(r, "boost::kreutzer1986"); }
+//     { boost::hellekalek1995 r; time_boost(r, "boost::hellekalek1995"); }
+//     { boost::mt11213b       r; time_boost(r, "boost::mt11213b"); }
+//     { boost::mt19937        r; time_boost(r, "boost::mt19937"); }
+//     { boost::lagged_fibonacci607   r; time_boost(r, "boost::lagged_fibonacci607"); }
+//     { boost::lagged_fibonacci1279  r; time_boost(r, "boost::lagged_fibonacci1279"); }
+//     { boost::lagged_fibonacci2281  r; time_boost(r, "boost::lagged_fibonacci2281"); }
+//     { boost::lagged_fibonacci3217  r; time_boost(r, "boost::lagged_fibonacci3217"); }
+//     { boost::lagged_fibonacci4423  r; time_boost(r, "boost::lagged_fibonacci4423"); }
+//     { boost::lagged_fibonacci9689  r; time_boost(r, "boost::lagged_fibonacci9689"); }
+//     { boost::lagged_fibonacci19937 r; time_boost(r, "boost::lagged_fibonacci19937"); }
+//     { boost::lagged_fibonacci23209 r; time_boost(r, "boost::lagged_fibonacci23209"); }
+//     { boost::lagged_fibonacci44497 r; time_boost(r, "boost::lagged_fibonacci44497"); }
+// #endif
   } 
   catch (std::exception &err) {
     std::cerr << err.what() << std::endl;

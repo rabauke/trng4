@@ -15,9 +15,20 @@
 // 02111-1307, USA.
 //  
 
-#if !(defined TRNG_LCG64_SHIFT_HPP)
 
-#define TRNG_LCG64_SHIFT_HPP
+// This is a 32-bit version of Mersenne Twister pseudorandom number
+// generator.
+//
+// References:
+// M. Matsumoto and T. Nishimura,
+//   ``Mersenne Twister: a 623-dimensionally equidistributed
+//     uniform pseudorandom number generator''
+//   ACM Transactions on Modeling and 
+//   Computer Simulation 8. (Jan. 1998) 3--30.
+
+#if !(defined TRNG_MT19937_HPP)
+
+#define TRNG_MT19937_HPP
 
 #include <trng/limits.hpp>
 #include <climits>
@@ -29,32 +40,32 @@
 
 namespace trng {
   
-  class lcg64_shift;
+  class mt19937;
   
-  class lcg64_shift {
+  class mt19937 {
   public:
 
     // Uniform random number generator concept
-    typedef unsigned long long result_type;
-    result_type operator()() const;
+    typedef unsigned long result_type;
+    result_type operator()() const;  
     static const result_type min=0;
-    static const result_type max=18446744073709551615ull;
+    static const result_type max=4294967295ul;
   private:
-    static const bool use_mask=math::numeric_limits<result_type>::digits>64;
+    static const int N=624;
+    static const int M=397;
+    static const result_type UM=0x80000000ull; // most significant bit
+    static const result_type LM=0x7FFFFFFFull; // least significant 31 bits 
   public:
+
     // Parameter and status classes
     class parameter_type;
     class status_type;
 
     class parameter_type {
-      result_type a, b;
     public:
-      parameter_type() :
-	a(0), b(0) { };
-      parameter_type(result_type a, result_type b) :
-	a(a), b(b) { };
+      parameter_type() { };
 
-      friend class lcg64_shift;
+      friend class mt19937;
 
       // Equality comparable concept
       friend bool operator==(const parameter_type &, const parameter_type &);
@@ -69,7 +80,6 @@ namespace trng {
 	out.flags(std::ios_base::dec | std::ios_base::fixed | 
 		  std::ios_base::left);
 	out << '(' 
-	    << P.a << ' ' << P.b 
 	    << ')';
 	out.flags(flags);
 	return out;
@@ -83,9 +93,7 @@ namespace trng {
 	std::ios_base::fmtflags flags(in.flags());
 	in.flags(std::ios_base::dec | std::ios_base::fixed | 
 		 std::ios_base::left);
-	in >> utility::delim('(')
-	   >> P_new.a >> utility::delim(' ')
-	   >> P_new.b >> utility::delim(')');
+	in >> utility::delim('(') >> utility::delim(')');
 	if (in)
 	  P=P_new;
 	in.flags(flags);
@@ -95,12 +103,16 @@ namespace trng {
     };
     
     class status_type {
-      result_type r;
+      static const int N=624;
+      int mti;
+      result_type mt[N];
     public:
-      status_type() : r(0) { };
-      explicit status_type(result_type r) : r(r) { };
+      status_type() : mti(0) { 
+	for (int i=0; i<N; ++i)
+	  mt[i]=0;
+      }
       
-      friend class lcg64_shift;
+      friend class mt19937;
 
       // Equality comparable concept
       friend bool operator==(const status_type &, const status_type &);
@@ -115,7 +127,7 @@ namespace trng {
 	out.flags(std::ios_base::dec | std::ios_base::fixed | 
 		  std::ios_base::left);
 	out << '(' 
-	    << S.r 
+	    << S.mti << ' ' << utility::make_io_range(S.mt, S.mt+N, " ")
 	    << ')';
 	out.flags(flags);
 	return out;
@@ -130,7 +142,8 @@ namespace trng {
 	in.flags(std::ios_base::dec | std::ios_base::fixed | 
 		 std::ios_base::left);
 	in >> utility::delim('(')
-	   >> S_new.r >> utility::delim(')');
+	   >> S_new.mti >> utility::delim(' ') >> utility::make_io_range(S_new.mt, S_new.mt+N, " ")
+	   >> utility::delim(')');
 	if (in)
 	  S=S_new;
 	in.flags(flags);
@@ -139,60 +152,50 @@ namespace trng {
 
     };
     
-    static const parameter_type Default;
-    static const parameter_type LEcuyer1;
-    static const parameter_type LEcuyer2;
-    static const parameter_type LEcuyer3;
-
     // Random number engine concept
-    explicit lcg64_shift(parameter_type=Default); 
-    explicit lcg64_shift(unsigned long, parameter_type=Default); 
+    mt19937(); 
+    explicit mt19937(unsigned long); 
     
     template<typename gen>
-    explicit lcg64_shift(gen &g, parameter_type P=Default) : P(P), S() {
+    explicit mt19937(gen &g) : P(), S() {
       seed(g);
     }
     
     void seed(); 
-    void seed(unsigned long); 
     template<typename gen>
     void seed(gen &g) {
-      result_type r=0;
-      for (int i=0; i<2; ++i) {
-	r<<=32;
-	r+=g();
-      }
-      S.r=r;
+      result_type r=g();
+      seed(r);
     }
-    void seed(result_type); 
+    void seed(result_type);
     
     // Equality comparable concept
-    friend bool operator==(const lcg64_shift &, const lcg64_shift &);
-    friend bool operator!=(const lcg64_shift &, const lcg64_shift &);
+    friend bool operator==(const mt19937 &, const mt19937 &);
+    friend bool operator!=(const mt19937 &, const mt19937 &);
 
     // Streamable concept
     template<typename char_t, typename traits_t>
     friend std::basic_ostream<char_t, traits_t> & 
-    operator<<(std::basic_ostream<char_t, traits_t> &out, const lcg64_shift &R) {
+    operator<<(std::basic_ostream<char_t, traits_t> &out, const mt19937 &R) {
       std::ios_base::fmtflags flags(out.flags());
       out.flags(std::ios_base::dec | std::ios_base::fixed | 
 		std::ios_base::left);
-      out << '[' << lcg64_shift::name() << ' ' << R.P << ' ' << R.S << ']';
+      out << '[' << mt19937::name() << ' ' << R.P << ' ' << R.S << ']';
       out.flags(flags);
       return out;
     }
 
     template<typename char_t, typename traits_t>
     friend std::basic_istream<char_t, traits_t> & 
-    operator>>(std::basic_istream<char_t, traits_t> &in, lcg64_shift &R) {
-      lcg64_shift::parameter_type P_new;
-      lcg64_shift::status_type S_new;
+    operator>>(std::basic_istream<char_t, traits_t> &in, mt19937 &R) {
+      mt19937::parameter_type P_new;
+      mt19937::status_type S_new;
       std::ios_base::fmtflags flags(in.flags());
       in.flags(std::ios_base::dec | std::ios_base::fixed | 
 	       std::ios_base::left);
       in >> utility::ignore_spaces();
       in >> utility::delim('[')
-	 >> utility::delim(lcg64_shift::name()) >> utility::delim(' ')
+	 >> utility::delim(mt19937::name()) >> utility::delim(' ')
 	 >> P_new >> utility::delim(' ')
 	 >> S_new >> utility::delim(']');
       if (in) { 
@@ -203,11 +206,6 @@ namespace trng {
       return in;
     }
     
-    // Parallel random number generator concept
-    void split(unsigned int, unsigned int);
-    void jump2(unsigned int);
-    void jump(unsigned long long);
-    
     // Other useful methods
     static const char * name();
     long operator()(long) const;
@@ -217,32 +215,37 @@ namespace trng {
     mutable status_type S;
     static const char * const name_str;
     
-    void backward();
-    void step() const;
   };
   
   // Inline and template methods
   
-  inline void lcg64_shift::step() const {
-    if (use_mask)
-      S.r=(P.a*S.r+P.b) & max;
-    else
-      S.r=(P.a*S.r+P.b);
+  inline mt19937::result_type mt19937::operator()() const {
+    result_type x;
+    const result_type mag01[2]={ 0ul, 0x9908b0dful };
+    if (S.mti>=N) { // generate N words at one time 
+        int i;
+        for (i=0; i<N-M; ++i) {
+	  x=(S.mt[i]&mt19937::UM)|(S.mt[i+1]&mt19937::LM);
+	  S.mt[i]=S.mt[i+M] ^ (x >> 1) ^ mag01[x & 0x1ul];
+        }
+        for (; i<N-1; ++i) {
+	  x=(S.mt[i]&mt19937::UM)|(S.mt[i+1]&LM);
+	  S.mt[i]=S.mt[i+(M-N)] ^ (x >> 1) ^ mag01[x & 0x1ul];
+        }
+        x=(S.mt[N-1]&mt19937::UM)|(S.mt[0]&mt19937::LM);
+        S.mt[N-1]=S.mt[M-1] ^ (x >> 1) ^ mag01[x & 0x1ul];
+	S.mti=0;
     }
-    
-  inline lcg64_shift::result_type lcg64_shift::operator()() const {
-    step();
-    unsigned long long t=S.r;
-    t^=(t>>17);
-    t^=(t<<31);
-    if (use_mask)
-      t&=max;
-    t^=(t>>8);
-    return t;
+    x=S.mt[S.mti++];
+    x^=(x >> 11);
+    x^=(x << 7) & 0x9d2c5680ul;
+    x^=(x << 15) & 0xefc60000ul;
+    x^=(x >> 18);
+    return x;
   }
 
-  inline long lcg64_shift::operator()(long x) const {
-    return static_cast<long>(utility::uniformco<double, lcg64_shift>(*this)*x);
+  inline long mt19937::operator()(long x) const {
+    return static_cast<long>(utility::uniformco<double, mt19937>(*this)*x);
   }
 
 }

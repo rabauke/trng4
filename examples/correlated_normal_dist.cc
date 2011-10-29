@@ -40,13 +40,16 @@ int main() {
 		       {-0.5,  3.0, -0.3,  0.3},
 		       { 0.3, -0.3,  1.0, -0.3},
 		       {-0.3,  0.3, -0.3,  1.0} };
-  trng::correlated_normal_dist D(&sig[0][0], &sig[d-1][d-1]+1); 
+  trng::correlated_normal_dist<> D(&sig[0][0], &sig[d-1][d-1]+1); 
   trng::lcg64 R;
   
   std::vector<double> x1, x2, x3, x4;
   // generate 4-tuples of correlated normal variables
   for (int i=0; i<1000000; ++i) {
-    x1.push_back(D(R));  x2.push_back(D(R));  x3.push_back(D(R));  x4.push_back(D(R));
+    x1.push_back(D(R));  
+    x2.push_back(D(R));  
+    x3.push_back(D(R)); 
+    x4.push_back(D(R));
   }
   // print (empirical) covariance matrix
   std::cout << std::setprecision(4)

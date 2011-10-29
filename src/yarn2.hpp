@@ -36,9 +36,10 @@ namespace trng {
     result_type operator()() const;
   private:
     static const result_type modulus=2147483647l;
+    static const result_type gen=123567893l;
   public:
     static const result_type min=0l;
-    static const result_type max=2147483646l;
+    static const result_type max=modulus-1;
     
     // Parameter and status classes
     class parameter_type;
@@ -46,13 +47,12 @@ namespace trng {
     
     class parameter_type {
       result_type a1, a2;
-      utility::power<2147483647l> g;
+      static utility::power<yarn2::modulus, yarn2::gen> g;
     public:
       parameter_type() :
-        a1(0), a2(0), g() { };
-      parameter_type(result_type a1, result_type a2,
-		     result_type g) :
-        a1(a1), a2(a2), g(g) { };
+        a1(0), a2(0) { };
+      parameter_type(result_type a1, result_type a2) :
+        a1(a1), a2(a2) { };
 
       friend class yarn2;
 
@@ -69,7 +69,7 @@ namespace trng {
         out.flags(std::ios_base::dec | std::ios_base::fixed |
                   std::ios_base::left);
         out << '('
-            << P.a1 << ' ' << P.a2 << ' ' << P.g
+            << P.a1 << ' ' << P.a2
 	    << ')';
         out.flags(flags);
         return out;
@@ -85,8 +85,7 @@ namespace trng {
                  std::ios_base::left);
         in >> utility::delim('(')
            >> P_new.a1 >> utility::delim(' ')
-           >> P_new.a2 >> utility::delim(' ')
-           >> P_new.g  >> utility::delim(')');
+           >> P_new.a2 >> utility::delim(')');
         if (in)
           P=P_new;
         in.flags(flags);
@@ -228,12 +227,7 @@ namespace trng {
 			 static_cast<unsigned long long>(S.r1)+
 			 static_cast<unsigned long long>(P.a2)*
 			 static_cast<unsigned long long>(S.r2));
-    t=(t&0x7fffffffull)+(t>>31);
-    if (t>=2ull*2147483647ull)
-      t-=2ull*2147483647ull;
-    if (t>=2147483647ull)
-      t-=2147483647ull;
-    S.r2=S.r1;  S.r1=t;
+    S.r2=S.r1;  S.r1=utility::modulo<modulus, 2>(t);
   }
 
   inline yarn2::result_type yarn2::operator()() const {
@@ -242,7 +236,7 @@ namespace trng {
   }
 
   inline long yarn2::operator()(long x) const {
-    return static_cast<long>(utility::uniformco(*this)*x);
+    return static_cast<long>(utility::uniformco<double, yarn2>(*this)*x);
   }
       
 }

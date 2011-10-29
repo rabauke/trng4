@@ -34,17 +34,22 @@ namespace trng {
     
     class param_type {
     private:
-      int a_, b_, d_;
-      int d() const { return d_; }
+      result_type a_, b_, d_;
+      result_type d() const { return d_; }
     public:
-      int a() const { return a_; }
-      void a(int a_new) { a_=a_new; d_=b_-a_; }
-      int b() const { return b_; }
-      void b(int b_new) { b_=b_new; d_=b_-a_; }
-      explicit param_type(int a, int b) :
+      result_type a() const { return a_; }
+      void a(result_type a_new) { a_=a_new; d_=b_-a_; }
+      result_type b() const { return b_; }
+      void b(result_type b_new) { b_=b_new; d_=b_-a_; }
+       param_type() :
+	a_(0), b_(1), d_(1) {
+      }
+       param_type(result_type a, result_type b) :
 	a_(a), b_(b), d_(b-a) {
       }
+
       friend class uniform_int_dist;
+
     };
     
   private:
@@ -52,7 +57,7 @@ namespace trng {
     
   public:
     // constructor
-    explicit uniform_int_dist(int a, int b) : p(a, b) {
+    uniform_int_dist(result_type a, result_type b) : p(a, b) {
     }
     explicit uniform_int_dist(const param_type &p) : p(p) {
     }
@@ -60,31 +65,31 @@ namespace trng {
     void reset() { }
     // random numbers
     template<typename R>
-    int operator()(R &r) {
-      return static_cast<int>(p.d()*utility::uniformco(r))+p.a();
+    result_type operator()(R &r) {
+      return static_cast<result_type>(p.d()*utility::uniformco<double>(r))+p.a();
     }
     template<typename R>
-    int operator()(R &r, const param_type &p) {
+    result_type operator()(R &r, const param_type &p) {
       uniform_int_dist g(p);
       return g(r);
     }
     // property methods
-    int min() const { return p.a(); }
-    int max() const { return p.b()-1; }
+    result_type min() const { return p.a(); }
+    result_type max() const { return p.b()-1; }
     param_type param() const { return p; }
     void param(const param_type &p_new) { p=p_new; }
-    int a() const { return p.a(); }
-    void a(int a_new) { p.a(a_new); }
-    int b() const { return p.b(); }
-    void b(int b_new) { p.b(b_new); }
+    result_type a() const { return p.a(); }
+    void a(result_type a_new) { p.a(a_new); }
+    result_type b() const { return p.b(); }
+    void b(result_type b_new) { p.b(b_new); }
     // probability density function  
-    double pdf(int x) const {
-      if (x<p.a() || x>=p.b())
+    double pdf(result_type x) const {
+      if (x<p.a() or x>=p.b())
 	return 0.0;
       return 1.0/p.d();
     }
     // cumulative density function 
-    double cdf(int x) const {
+    double cdf(result_type x) const {
       if (x<p.a())
 	return 0;
       if (x>=p.b())
@@ -99,11 +104,11 @@ namespace trng {
   // EqualityComparable concept
   inline bool operator==(const uniform_int_dist::param_type &p1, 
 			 const uniform_int_dist::param_type &p2) {
-    return p1.a()==p2.a() && p1.b()==p2.b();
+    return p1.a()==p2.a() and p1.b()==p2.b();
   }
   inline bool operator!=(const uniform_int_dist::param_type &p1, 
 			 const uniform_int_dist::param_type &p2) {
-    return !(p1==p2);
+    return not (p1==p2);
   }
   
   // Streamable concept
@@ -182,4 +187,3 @@ namespace trng {
 }
 
 #endif
-

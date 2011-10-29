@@ -5,7 +5,7 @@ INCLUDES = -I$(top_builddir)
 AM_LDFLAGS = -L../src/.libs -ltrng4 -static
 AM_MPILDFLAGS = -L../src/.libs -ltrng4
 
-EXTRA_PROGRAMS = hello_world test time pi pi_block_mpi pi_block_openmp pi_leap_mpi pi_leap_openmp stl_container distributions implementation_test Ising_model correlated_normal_dist discrete_dist discrete_dist_c_style bernoulli_dist
+EXTRA_PROGRAMS = hello_world sample_output time pi pi_block_mpi pi_block_openmp pi_leap_mpi pi_leap_openmp stl_container distributions plausibility_test Ising_model correlated_normal_dist discrete_dist discrete_dist_c_style bernoulli_dist
 EXTRA_OBJECTS = $(addsuffix .o, $(EXTRA_PROGRAMS))
 
 MPICXXCOMPILE = $(MPICXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -14,7 +14,7 @@ MPICXXLINK = $(MPICXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $(AM_MPILDF
 
 hello_world_SOURCES = hello_world.cc
 
-test_SOURCES = test.cc
+sample_output_SOURCES = sample_output.cc
 
 time_SOURCES = time.cc
 
@@ -32,7 +32,7 @@ stl_container_SOURCES = stl_container.cc
 
 distributions_SOURCES = distributions.cc
 
-implementation_test_SOURCES = implementation_test.cc
+plausibility_test_SOURCES = plausibility_test.cc
 
 Ising_model_SOURCES = Ising_model.cc
 

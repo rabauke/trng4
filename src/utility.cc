@@ -26,7 +26,7 @@ namespace trng {
   namespace utility {
     
     long modulo_invers(long a, long m) {
-      if (a<=0l || m<=1)
+      if (a<=0l or m<=1)
 	throw std::invalid_argument("invalid argument in trng::utility::modulo_invers");
       long temp, q, flast(0), f(1), m1(m);
       while (a>1) {
@@ -44,7 +44,7 @@ namespace trng {
     //------------------------------------------------------------------
 
     void gauss(std::vector<long> &a, std::vector<long> &b, long m) {
-      if (a.size()!=b.size()*b.size() || a.size()==0 || b.size()==0)
+      if (a.size()!=b.size()*b.size() or a.size()==0 or b.size()==0)
 	throw std::invalid_argument("wrong matrix size in trng::utility::gauss");
       // initialize indices
       int n(b.size());
@@ -58,7 +58,7 @@ namespace trng {
 	if (a[n*p[i]+i]==0l) {
 	  // swap rows
 	  int j=i+1;
-	  while (j<n && a[n*p[j]+i]==0l)
+	  while (j<n and a[n*p[j]+i]==0l)
 	    j++;
 	  if (j<n) {
 	    long t=p[i];  p[i]=p[j];  p[j]=t;

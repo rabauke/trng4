@@ -37,7 +37,7 @@ namespace trng {
     static const result_type modulus=2147462579l;  // 2^31-21069
   public:
     static const result_type min=0l;
-    static const result_type max=2147462578l;
+    static const result_type max=modulus-1;
     
     // Parameter and status classes
     class parameter_type;
@@ -233,11 +233,7 @@ namespace trng {
 			 static_cast<unsigned long long>(S.r2)+
 			 static_cast<unsigned long long>(P.a3)*
 			 static_cast<unsigned long long>(S.r3));
-    t=(t&0x7fffffffull)+(t>>31)*21069;
-    t=(t&0x7fffffffull)+(t>>31)*21069;
-    if (t>=2147462579ull)
-      t-=2147462579ull;
-    S.r3=S.r2;  S.r2=S.r1;  S.r1=t;
+    S.r3=S.r2;  S.r2=S.r1;  S.r1=utility::modulo<modulus, 3>(t);
   }
 
   inline mrg3s::result_type mrg3s::operator()() const {
@@ -246,7 +242,7 @@ namespace trng {
   }
   
   inline long mrg3s::operator()(long x) const {
-    return static_cast<long>(utility::uniformco(*this)*x);
+    return static_cast<long>(utility::uniformco<double, mrg3s>(*this)*x);
   }
     
 }

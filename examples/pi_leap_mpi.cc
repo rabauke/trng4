@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
   rx.split(size, rank);                 // choose sub-stream no. rank out of size streams
   ry.split(size, rank);                 // choose sub-stream no. rank out of size streams
   long in=0l;                           // number of points in circle
-  trng::uniform01_dist u;               // random number distribution
+  trng::uniform01_dist<> u;             // random number distribution
   // throw random points into square and distribute workload over all processes
   for (long i=rank; i<samples; i+=size) {
     double x=u(rx), y=u(ry);            // choose random x- and y-coordinates

@@ -25,7 +25,7 @@ int main() {
   // random number engine
   trng::yarn2 R;
   // normal distribution with mean 6 and standard deviation 2
-  trng::normal_dist normal(6.0, 2.0);   
+  trng::normal_dist<> normal(6.0, 2.0);   
   // generate 1000 normal distributed random numbers
   for (int i=0; i<1000; ++i)
     std::cout << normal(R) << '\n';

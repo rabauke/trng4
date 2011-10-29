@@ -36,9 +36,10 @@ namespace trng {
     result_type operator()() const;
   private:
     static const result_type modulus=2147483647l;
+    static const result_type gen=123567893l;
   public:
     static const result_type min=0l;
-    static const result_type max=2147483646l;
+    static const result_type max=modulus-1;
 
     // Parameter and status classes
     class parameter_type;
@@ -46,14 +47,13 @@ namespace trng {
 
     class parameter_type {
       result_type a1, a2, a3, a4;
-      utility::power<2147483647l> g;
+      static utility::power<yarn4::modulus, yarn4::gen> g;
     public:
       parameter_type() :
-        a1(0), a2(0), a3(0), a4(0), g() { };
+        a1(0), a2(0), a3(0), a4(0) { };
       parameter_type(result_type a1, result_type a2,
-                     result_type a3, result_type a4,
-                     result_type g) :
-        a1(a1), a2(a2), a3(a3), a4(a4), g(g) { };
+                     result_type a3, result_type a4) :
+        a1(a1), a2(a2), a3(a3), a4(a4) { };
 
       friend class yarn4;
 
@@ -70,7 +70,7 @@ namespace trng {
         out.flags(std::ios_base::dec | std::ios_base::fixed |
                   std::ios_base::left);
         out << '('
-            << P.a1 << ' ' << P.a2 << ' ' << P.a3 << ' ' << P.a4 << ' ' << P.g
+            << P.a1 << ' ' << P.a2 << ' ' << P.a3 << ' ' << P.a4
             << ')';
         out.flags(flags);
         return out;
@@ -88,8 +88,7 @@ namespace trng {
            >> P_new.a1 >> utility::delim(' ')
            >> P_new.a2 >> utility::delim(' ')
            >> P_new.a3 >> utility::delim(' ')
-           >> P_new.a4 >> utility::delim(' ')
-           >> P_new.g  >> utility::delim(')');
+           >> P_new.a4 >> utility::delim(')');
         if (in)
           P=P_new;
         in.flags(flags);
@@ -244,14 +243,7 @@ namespace trng {
 			 static_cast<unsigned long long>(S.r3)+
 			 static_cast<unsigned long long>(P.a4)*
 			 static_cast<unsigned long long>(S.r4));
-    t=(t&0x7fffffffull)+(t>>31);
-    if (t>=4ull*2147483647ull)
-      t-=4ull*2147483647ull;
-    if (t>=2ull*2147483647ull)
-      t-=2ull*2147483647ull;
-    if (t>=2147483647ull)
-      t-=2147483647ull;
-    S.r4=S.r3;  S.r3=S.r2;  S.r2=S.r1;  S.r1=t;
+    S.r4=S.r3;  S.r3=S.r2;  S.r2=S.r1;  S.r1=utility::modulo<modulus, 4>(t);
   }
 
   inline yarn4::result_type yarn4::operator()() const {
@@ -260,7 +252,7 @@ namespace trng {
   }
   
   inline long yarn4::operator()(long x) const {
-    return static_cast<long>(utility::uniformco(*this)*x);
+    return static_cast<long>(utility::uniformco<double, yarn4>(*this)*x);
   }
 
 }

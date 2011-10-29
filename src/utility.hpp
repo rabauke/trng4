@@ -28,6 +28,7 @@
 #include <vector>
 #include <iterator>
 #include <trng/limits.hpp>
+#include <trng/uniformxx.hpp>
 
 namespace trng {
   
@@ -66,7 +67,7 @@ namespace trng {
 		 const delim_str &d) {
 	char c;
 	std::size_t len(std::strlen(d.str)), i(0);
-	while (i<len && !(in.get(c) && c!=d.str[i])) {
+	while (i<len and !(in.get(c) and c!=d.str[i])) {
 	  ++i;
 	}
  	if (i<len)
@@ -109,7 +110,7 @@ namespace trng {
 		 const ignore_spaces_cl &) {
 	while (true) {
 	  int c(in.peek());
-	  if (c==EOF || !(c==' ' || c=='\t' || c=='\n'))
+	  if (c==EOF or !(c==' ' or c=='\t' or c=='\n'))
 	    break;
 	  in.get();
 	}
@@ -121,104 +122,194 @@ namespace trng {
       return ignore_spaces_cl();
     }
     
-    // ---------------------------------------------------------------
-
-    template<long m> 
-    inline long modulo(unsigned long long x) {
-      return x%m;
-    }
-    
-    // 2^31 - 1 
-    template<>
-    inline long modulo<2147483647l>(unsigned long long x) {
-      unsigned long y(static_cast<unsigned long>(x&0x7ffffffful)+
-		      static_cast<unsigned long>(x>>31));
-      return (y>=2147483647ul) ? (y-2147483647ul) : y;
-    }
-
-    // 2^31 - 21069
-    template<>
-    inline long modulo<2147462579l>(unsigned long long x) {
-      x=(x&0x7ffffffful)+(x>>31)*21069;
-      x=(x&0x7ffffffful)+(x>>31)*21069;
-      return (x>=2147462579ul) ? (x-2147462579ul) : x;
-    }
-
-    // 2^31 - 22641
-    template<>
-    inline long modulo<2147461007l>(unsigned long long x) {
-      x=(x&0x7ffffffful)+(x>>31)*22641;
-      x=(x&0x7ffffffful)+(x>>31)*22641;
-      return (x>=2147461007ul) ? (x-2147461007ul) : x;
-    }
-    
-    // ---------------------------------------------------------------
-
-    template<long modulus>
-    class power {
-      long b;
-      std::vector<unsigned long> b_power0, b_power1;
+    // -------------------------------------------------------------------
       
-      inline long pow(long n) {
-	long long p(1ll), t(b);
-	while (n>0) {
-	  if ((n&0x1)==0x1)
-	    p=(p*t)%modulus;
-	t=(t*t)%modulus;
-	n/=2;
-	}
-	return static_cast<long>(p);
-      }
-      
-      void calc_b_power() {
-	for (long i(0l); i<0x10000l; ++i)
-	  b_power0[i]=pow(i);
-	for (long i(0l); i<0x08000l; ++i)
-	  b_power1[i]=pow(i*0x10000l);
-      }
-
+    template<typename T>
+    class io_range {
+    private:
+      T first, last;
+      const char *delim_str;
     public:
-      inline long operator()(long n) const {
-	return modulo<modulus>(static_cast<unsigned long long>(b_power1[n>>16])*
-			       static_cast<unsigned long long>(b_power0[n&0xffff]));
-      }
-      
-      long operator()() const {
-	return b;
-      }
-
-      power(const long b=2) : b(b), b_power0(0x10000), b_power1(0x08000) {
-	calc_b_power();
+      io_range(const T first, const T last,
+	       const char *delim_str=0) : first(first),
+					  last(last),
+					  delim_str(delim_str) {
       }
 
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> & 
-      operator<<(std::basic_ostream<char_t, traits_t> &out, const power &g) {
-	out << g.b;
+      operator<<(std::basic_ostream<char_t, traits_t> &out, const io_range &IO_range) {
+	T pos(IO_range.first);
+	while (out and pos!=IO_range.last) {
+	  out << (*pos);
+	  ++pos;
+	  if (pos!=IO_range.last and IO_range.delim_str!=0)
+	    out << IO_range.delim_str;
+	}
 	return out;
       }
-
+    
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> & 
-      operator>>(std::basic_istream<char_t, traits_t> &in, power &g) {
-	long b, modulus;
-	in >> b;
-	if (in) 
-	  g=power(b);
+      operator>>(std::basic_istream<char_t, traits_t> &in, const io_range &IO_range) {
+	T pos(IO_range.first);
+	while (in and pos!=IO_range.last) {
+	  in >> (*pos);
+	  ++pos;
+	  if (pos!=IO_range.last)
+	    in >> delim(IO_range.delim_str);
+	}
 	return in;
+      }
+    
+    };
+    
+    template<typename T>
+    inline io_range<T> make_io_range(T first, T last, const char *delim_str=0) {
+      return io_range<T>(first, last, delim_str);
+    }
+
+    // ---------------------------------------------------------------
+
+    template<long m>
+    struct log2_floor {
+      enum { value = 1 + log2_floor<m/2>::value };
+    };
+
+    template<>
+    struct log2_floor<0> { enum { value = 0 }; };
+
+    template<>
+    struct log2_floor<1> { enum { value = 0 }; };
+    
+    template<long m>
+    struct log2_ceil {
+      enum { value = (1ul<<log2_floor<m>::value) < m ? log2_floor<m>::value+1 : log2_floor<m>::value }; 
+    };
+
+    // ---------------------------------------------------------------
+
+    template<long m, long r> 
+    class modulo_helper;
+
+    template<long m> 
+    class modulo_helper<m, 0> {
+      static const long e=log2_ceil<m>::value;
+      static const long k=(1ul<<e)-m;
+      static const unsigned long mask=(1ul<<e)-1ul;
+    public:
+      inline static long modulo(unsigned long long x) {
+	if (mask==m) {
+	  unsigned long y=(x&mask)+(x>>e);
+	  if (y>=m)
+	    y-=m;
+	  return y;
+	} else if (static_cast<long long>(k)*static_cast<long long>(k+2)<=m) {
+	  x=(x&mask)+(x>>e)*k;
+	  x=(x&mask)+(x>>e)*k;
+	  if (x>=m)
+	    x-=m;
+	  return x;
+	} else {
+	  return x%m;
+	}
+      }
+    };
+
+    template<long m> 
+    class modulo_helper<m, 1> {
+      static const long e=log2_ceil<m>::value;
+      static const long k=(1ul<<e)-m;
+      static const unsigned long mask=(1ul<<e)-1ul;
+    public:
+      inline static long modulo(unsigned long long x) {
+	if (mask==m) {
+	  unsigned long long y=(x&mask)+(x>>e);
+	  if (y>=2ull*m)
+	    y-=2ull*m;
+	  if (y>=m)
+	    y-=m;
+	  return y;
+	} else if (static_cast<long long>(k)*static_cast<long long>(k+2)<=m) {
+	  x=(x&mask)+(x>>e)*k;
+	  x=(x&mask)+(x>>e)*k;
+	  if (x>=2ull*m) x-=2ull*m; 
+	  if (x>=m)
+	    x-=m;
+	  return x;
+	} else {
+	  return x%m;
+	}
+      }
+    };
+
+    template<long m> 
+    class modulo_helper<m, 2> {
+      static const long e=log2_ceil<m>::value;
+      static const long k=(1ul<<e)-m;
+      static const unsigned long mask=(1ul<<e)-1ul;
+    public:
+      inline static long modulo(unsigned long long x) {
+	if (mask==m) {
+	  unsigned long long y=(x&mask)+(x>>e);
+	  if (y>=4ull*m) y-=4ull*m;
+	  if (y>=2ull*m) y-=2ull*m;
+	  if (y>=m)
+	    y-=m;
+	  return y;
+	} else if (static_cast<long long>(k)*static_cast<long long>(k+2)<=m) {
+	  x=(x&mask)+(x>>e)*k;
+	  x=(x&mask)+(x>>e)*k;
+	  if (x>=4ull*m) x-=4ull*m; 
+	  if (x>=2ull*m) x-=2ull*m; 
+	  if (x>=m)
+	    x-=m;
+	  return x;
+	} else {
+	  return x%m;
+	}
       }
     };
     
-    template<long modulus>
-    inline bool operator==(const power<modulus> &p1, const power<modulus> &p2) {
-      return p1()==p2();
-    }
-
-    template<long modulus>
-    inline bool operator!=(const power<modulus> &p1, const power<modulus> &p2) {
-      return p1()!=p2();
+    template<long m, long r> 
+    inline long modulo(unsigned long long x) {
+      return modulo_helper<m, log2_floor<r>::value >::modulo(x);
     }
     
+    // ---------------------------------------------------------------
+
+    template<long m, long b>
+    class power {
+      unsigned long b_power0[0x10000l], b_power1[0x08000l];
+
+      inline long pow(long n) {
+        long long p(1ll), t(b);
+        while (n>0) {
+          if ((n&0x1)==0x1)
+            p=(p*t)%m;
+          t=(t*t)%m;
+          n/=2;
+        }
+        return static_cast<long>(p);
+      }
+      
+      power & operator=(const power &);
+      power(const power &);
+      
+    public:
+      power() {
+        for (long i(0l); i<0x10000l; ++i)
+          b_power0[i]=pow(i);
+        for (long i(0l); i<0x08000l; ++i)
+          b_power1[i]=pow(i*0x10000l);
+      }
+      inline long operator()(long n) const {
+        return modulo<m, 1>(static_cast<unsigned long long>(b_power1[n>>16])*
+			    static_cast<unsigned long long>(b_power0[n&0xffff]));
+      }
+
+    };
+
     // -----------------------------------------------------------------
 
     template <unsigned int x> 
@@ -259,85 +350,6 @@ namespace trng {
 	  i1=i3;
       }
       return i2;
-    }
-
-    // -----------------------------------------------------------------
-    //
-    // Thanks to Bruce Carneal for suggesting the following 
-    // implementation of uniformcoXX utility functions (with 
-    // modifications by Heiko Bauke).
-    // 
-    // -----------------------------------------------------------------
-
-    // Most of the code below can be reduced at compile time via constant folding.
-    // In practice, g++ run at -O or higher will produce very tight straight
-    // line code sequences for the intended interface routines:
-    // cc(), co(), oc(), and oo().
-    template<typename T, T Min, T Max, typename R>
-    struct u01_traits {
-      typedef R result_type;
-      
-      static result_type val(T ival) {
-    	const long long llmask( ~(1LL << math::numeric_limits<result_type>::digits));
-    	const bool more_bits_than_needed((((Max - Min) & llmask) == llmask)
-    					 && (math::numeric_limits<long long>::digits > math::numeric_limits<result_type>::digits));
-    	return
-    	  more_bits_than_needed
-    	  ? static_cast<result_type>(static_cast<long long>((ival - T(Min)) & llmask))
-    	  : (((Max - Min) < 0) // does this range overflow?
-    	     ? static_cast<result_type>(ival) - Min
-    	     : static_cast<result_type>(ival - Min));
-      }
-
-      static result_type domain_len() { 
-    	return val(Max); 
-      }
-      static result_type reciprocal() { 
-    	return result_type(1.0)/domain_len(); 
-      }
-      static result_type epsilon() {
-    	return (reciprocal() > math::numeric_limits<result_type>::epsilon()) ?
-    	  reciprocal() : math::numeric_limits<result_type>::epsilon();
-      }
-      static inline result_type cc(T ival) {
-    	return val(ival) / domain_len();
-      }
-      static inline result_type co(T ival) {
-    	const result_type eps_factor(result_type(1.0) - epsilon());
-    	const result_type combo_factor(eps_factor * reciprocal());
-    	const bool combo_OK((domain_len() * combo_factor) < 1.0);
-    	return combo_OK ? (val(ival) * combo_factor) : (cc(ival) * eps_factor);
-      }
-      static inline result_type oc(T ival) { 
-    	return result_type(1.0)-co(ival); 
-      }
-      static inline result_type oo(T ival) {
-    	const result_type eps(epsilon());
-    	const result_type two_eps_factor(1.0 - (eps + eps));
-    	const result_type combo_factor(two_eps_factor * reciprocal());
-    	const bool combo_OK(((combo_factor * domain_len()) + eps) < result_type(1.0));
-    	return eps + (combo_OK ? (val(ival) * combo_factor) : (cc(ival) * two_eps_factor));
-      }
-    };
-
-    template<typename T> 
-    inline double uniformcc(T &r) { 
-      return u01_traits<typename T::result_type, T::min, T::max, double>::cc(r());
-    }
-    
-    template<typename T> 
-    inline double uniformco(T &r) { 
-      return u01_traits<typename T::result_type, T::min, T::max, double>::co(r());
-    }
-    
-    template<typename T> 
-    inline double uniformoc(T &r) { 
-      return u01_traits<typename T::result_type, T::min, T::max, double>::oc(r());
-    }
-    
-    template<typename T> 
-    inline double uniformoo(T &r) { 
-      return u01_traits<typename T::result_type, T::min, T::max, double>::oo(r());
     }
         
   }  

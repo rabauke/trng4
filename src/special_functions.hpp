@@ -471,7 +471,7 @@ namespace trng {
 	  ++i;
 	  xx*=x/n;
 	  sum+=xx;
-	} while (abs(xx)>eps*abs(sum) && i<itmax);
+	} while (abs(xx)>eps*abs(sum) and i<itmax);
 	if (by_Gamma_a)
 	  return exp(-x+a*ln(x)-ln_Gamma(a))*sum;
 	return exp(-x+a*ln(x))*sum;
@@ -506,7 +506,7 @@ namespace trng {
 	  di=T(1)/di;
 	  del=di*ci;
 	  h*=del;
-	} while ((abs(del-T(1))>eps) && i<itmax);
+	} while ((abs(del-T(1))>eps) and i<itmax);
 	if (by_Gamma_a)
 	  return exp(-x+a*ln(x)-ln_Gamma(a))*h;
 	return exp(-x+a*ln(x))*h;
@@ -515,7 +515,7 @@ namespace trng {
       // P(a, x) and gamma(a, x)
       template<typename T>
       T GammaP(T a, T x, bool by_Gamma_a) {
-	if (x<T(0) || a<=T(0))
+	if (x<T(0) or a<=T(0))
 	  return numeric_limits<T>::signaling_NaN();
 	if (by_Gamma_a) {
 	  if (x<a+T(1))
@@ -530,7 +530,7 @@ namespace trng {
       // Q(a, x) and Gamma(a, x)
       template<typename T>
       T GammaQ(T a, T x, bool by_Gamma_a) {
-	if (x<T(0) || a<=T(0))
+	if (x<T(0) or a<=T(0))
 	  return numeric_limits<T>::signaling_NaN();
 	if (by_Gamma_a) {
 	  if (x<a+T(1))
@@ -599,7 +599,7 @@ namespace trng {
     namespace detail {
       
       template<typename T>
-      T invGammaP(T a, T p) {
+      T inv_GammaP(T a, T p) {
         const T eps=sqrt(numeric_limits<T>::epsilon()),
           a1=a-T(1), glna=ln_Gamma(a), 
           lna1=ln(a1), afac=exp(a1*(lna1-T(1))-glna);
@@ -640,18 +640,18 @@ namespace trng {
     }
 
     // inverse of GammaP
-    inline float invGammaP(float a, float p) {
-      return detail::invGammaP(a, p);
+    inline float inv_GammaP(float a, float p) {
+      return detail::inv_GammaP(a, p);
     }
 
     // inverse of GammaP
-    inline double invGammaP(double a, double p) {
-      return detail::invGammaP(a, p);
+    inline double inv_GammaP(double a, double p) {
+      return detail::inv_GammaP(a, p);
     }
 
     // inverse of GammaP
-    inline long double invGammaP(long double a, long double p) {
-      return detail::invGammaP(a, p);
+    inline long double inv_GammaP(long double a, long double p) {
+      return detail::inv_GammaP(a, p);
     }
 
     // --- regularized incomplete Beta function ------------------------
@@ -662,7 +662,7 @@ namespace trng {
       
       template<typename T>
       T Beta_I(T x, T p, T q, T norm) {
-        if (p<=0 || q<=0 || x<0 || x>1) {
+        if (p<=0 or q<=0 or x<0 or x>1) {
           errno=EDOM;
           return numeric_limits<T>::quiet_NaN();
         }
@@ -682,7 +682,7 @@ namespace trng {
           term*=temp*rx/(p+i);
           y+=term;
           temp=abs(term);
-          if (temp<=eps && temp<=eps*y)
+          if (temp<=eps and temp<=eps*y)
             break;
           i++;
           s--;
@@ -789,7 +789,7 @@ namespace trng {
 
       template<typename T>
       T inv_Beta_I(T x, T p, T q, T norm) {
-        if (p<=0 || q<=0 || x<0 || x>1) {
+        if (p<=0 or q<=0 or x<0 or x>1) {
           errno=EDOM;
           return numeric_limits<T>::quiet_NaN();
         }
@@ -804,11 +804,16 @@ namespace trng {
         T y=inv_Beta_I_approx(x, p, q, norm);     
         // Newton-Rapson iteration
         T r=1-p, t=1-q, yy;
+	int iters=0;
+	T err=T(2), err_old;
         do {
           yy=Beta_I(y, p, q, norm);
           yy=(yy-x)*norm*exp(r*ln(y)+t*ln(1-y));
           y-=yy;
-        } while (abs(yy)>eps);
+	  err_old=err;
+	  err=abs(yy);
+	  ++iters;
+        } while (err>eps and err_old>err and iters<32);
         if (flag)
           y=1-y;
         return y;
@@ -1040,7 +1045,7 @@ namespace trng {
 
       template<typename T>
       T inv_Phi(T x) {
-	if (x<inv_Phi_traits<T>::zero && x>inv_Phi_traits<T>::one) {
+	if (x<inv_Phi_traits<T>::zero or x>inv_Phi_traits<T>::one) {
 	  errno=EDOM;
 	  return numeric_limits<T>::quiet_NaN();
 	} 

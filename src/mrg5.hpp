@@ -38,7 +38,7 @@ namespace trng {
     static const result_type modulus=2147483647l;
   public:
     static const result_type min=0l;
-    static const result_type max=2147483646l;
+    static const result_type max=modulus-1;
 
     // Parameter and status classes
     class parameter_type;
@@ -247,18 +247,11 @@ namespace trng {
 			 static_cast<unsigned long long>(S.r3)+
 			 static_cast<unsigned long long>(P.a4)*
 			 static_cast<unsigned long long>(S.r4));
-    if (t>=2ull*2147483647ull*2147483647ull)
-      t-=2ull*2147483647ull*2147483647ull;
+    if (t>=2ull*modulus*modulus)
+      t-=2ull*modulus*modulus;
     t+=static_cast<unsigned long long>(P.a5)*
       static_cast<unsigned long long>(S.r5);
-    t=(t&0x7fffffffull)+(t>>31);
-    if (t>=4ull*2147483647ull)
-      t-=4ull*2147483647ull;
-    if (t>=2ull*2147483647ull)
-      t-=2ull*2147483647ull;
-    if (t>=2147483647ull)
-      t-=2147483647ull;
-    S.r5=S.r4;  S.r4=S.r3;  S.r3=S.r2;  S.r2=S.r1;  S.r1=t;
+    S.r5=S.r4;  S.r4=S.r3;  S.r3=S.r2;  S.r2=S.r1;  S.r1=utility::modulo<modulus, 5>(t);
   }
   
   inline mrg5::result_type mrg5::operator()() const {
@@ -267,7 +260,7 @@ namespace trng {
   }
   
   inline long mrg5::operator()(long x) const {
-    return static_cast<long>(utility::uniformco(*this)*x);
+    return static_cast<long>(utility::uniformco<double, mrg5>(*this)*x);
   }
 
 }

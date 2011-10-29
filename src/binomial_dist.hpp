@@ -43,13 +43,19 @@ namespace trng {
       
       void calc_probabilities() {
 	P_=std::vector<double>();
-	double binom=1.0;
+	double ln_binom=0.0;
+	const double ln_p=math::ln(p_);
+	const double ln_1_p=math::ln(1.0-p_);
 	for (int i=0; i<=n_; ++i) {
-	  P_.push_back(binom*
-		       math::pow(p_    , static_cast<double>(i   ))*
-		       math::pow(1.0-p_, static_cast<double>(n_-i)));
-	  binom*=n_-i;
-	  binom/=i+1;
+	  double ln_prob=ln_binom +
+	    static_cast<double>(i   )*ln_p + 
+	    static_cast<double>(n_-i)*ln_1_p;
+	  if (ln_prob>-700)
+	    P_.push_back(ln_binom*math::exp(ln_prob));
+	  else
+	    P_.push_back(0);
+	  ln_binom+=math::ln(static_cast<double>(n_-i));
+	  ln_binom-=math::ln(static_cast<double>(i+1));
 	}
 	// build list with cumulative density function
 	for (std::vector<double>::size_type i(1); i<P_.size(); ++i)
@@ -84,7 +90,7 @@ namespace trng {
     // random numbers
     template<typename R>
     int operator()(R &r) {
-      return utility::discrete(utility::uniformco(r), P.P_.begin(), P.P_.end());
+      return utility::discrete(utility::uniformoo<double>(r), P.P_.begin(), P.P_.end());
     }
     template<typename R>
     int operator()(R &r, const param_type &p) {
@@ -102,7 +108,7 @@ namespace trng {
     void n(int n_new) { P.n(n_new); }
     // probability density function  
     double pdf(int x) const {
-      if (x<0 || x>P.n())
+      if (x<0 or x>P.n())
         return 0.0;
       if (x==0)
         return P.P_[0];
@@ -123,7 +129,7 @@ namespace trng {
   // EqualityComparable concept
   inline bool operator==(const binomial_dist::param_type &p1, 
 			 const binomial_dist::param_type &p2) {
-    return p1.p()==p2.p() && p1.n()==p2.n();
+    return p1.p()==p2.p() and p1.n()==p2.n();
   }
   inline bool operator!=(const binomial_dist::param_type &p1, 
 			 const binomial_dist::param_type &p2) {

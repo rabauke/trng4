@@ -20,6 +20,8 @@
 #define TRNG_GENERATE_CANONICAL_HPP
 
 #include <trng/limits.hpp>
+#include <trng/math.hpp>
+#include <trng/utility.hpp>
 
 namespace trng {
   
@@ -49,23 +51,12 @@ namespace trng {
     
     template<typename result_type, typename R>
     inline result_type generate_canonical_impl(R &r, result_type, float_tag) {
-      result_type t=(1.0+static_cast<result_type>(r()-R::min))/
-	(2.0+static_cast<result_type>(R::max-R::min));
-      if (t==0.0)
-	return math::numeric_limits<result_type>::epsilon();
-      if (t==1.0)
-	return 1.0-math::numeric_limits<result_type>::epsilon();
-      return t;
+      return utility::uniformoo<result_type>(r);
     }
   
     template<typename result_type, typename R>
     inline result_type generate_canonical_impl(R &r, result_type, integer_tag) {
-      double t=(static_cast<double>(r()-R::min))/
-	(1.0+static_cast<double>(R::max-R::min))*
-	(static_cast<double>(math::numeric_limits<result_type>::max())-
-	 static_cast<double>(math::numeric_limits<result_type>::min()))+
-	static_cast<double>(math::numeric_limits<result_type>::min());
-      return static_cast<result_type>(t);
+      return static_cast<result_type>(math::floor(utility::uniformco<double>(r)*(static_cast<double>(R::max)-static_cast<double>(R::min)+1.0)));
     }
     
   }

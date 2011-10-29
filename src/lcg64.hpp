@@ -20,7 +20,6 @@
 #define TRNG_LCG64_HPP
 
 #include <trng/limits.hpp>
-#include <climits>
 #include <stdexcept>
 #include <ostream>
 #include <istream>
@@ -36,10 +35,12 @@ namespace trng {
 
     // Uniform random number generator concept
     typedef unsigned long long result_type;
-    result_type operator()() const;  
+    result_type operator()() const; 
     static const result_type min=0;
     static const result_type max=18446744073709551615ull;
-
+  private:
+    static const bool use_mask=math::numeric_limits<result_type>::digits>64;
+  public:
     // Parameter and status classes
     class parameter_type;
     class status_type;
@@ -222,11 +223,11 @@ namespace trng {
   // Inline and template methods
   
   inline void lcg64::step() const {
-    S.r=P.a*S.r+P.b;
-#if ULONG_LONG_MAX>18446744073709551615ull
-    S.r&=0xfffffffffffffffful;
-#endif
-    }
+    if (use_mask)
+      S.r=(P.a*S.r+P.b) & max;
+    else
+      S.r=(P.a*S.r+P.b);
+  }
     
   inline lcg64::result_type lcg64::operator()() const {
     step();
@@ -234,7 +235,7 @@ namespace trng {
   }
 
   inline long lcg64::operator()(long x) const {
-    return static_cast<long>(utility::uniformco(*this)*x);
+    return static_cast<long>(utility::uniformco<double, lcg64>(*this)*x);
   }
 
 }

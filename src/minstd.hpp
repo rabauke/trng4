@@ -36,8 +36,8 @@ namespace trng {
     // Uniform random number generator concept
     typedef unsigned long result_type;
     result_type operator()() const;  
-    static const result_type min=1l;
-    static const result_type max=2147483646l;
+    static const result_type min=1ul;
+    static const result_type max=2147483646ul;
 
     // Parameter and status classes
     class status_type;
@@ -167,7 +167,7 @@ namespace trng {
   }
 
   inline long minstd::operator()(long x) const {
-    return static_cast<long>(utility::uniformco(*this)*x);
+    return static_cast<long>(utility::uniformco<double, minstd>(*this)*x);
   }
   
 }
