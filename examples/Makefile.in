@@ -33,12 +33,12 @@ build_triplet = @build@
 host_triplet = @host@
 EXTRA_PROGRAMS = hello_world$(EXEEXT) sample_output$(EXEEXT) \
 	time$(EXEEXT) pi$(EXEEXT) pi_block_mpi$(EXEEXT) \
-	pi_block_openmp$(EXEEXT) pi_leap_mpi$(EXEEXT) \
-	pi_leap_openmp$(EXEEXT) stl_container$(EXEEXT) \
-	distributions$(EXEEXT) plausibility_test$(EXEEXT) \
-	Ising_model$(EXEEXT) correlated_normal_dist$(EXEEXT) \
-	discrete_dist$(EXEEXT) discrete_dist_c_style$(EXEEXT) \
-	bernoulli_dist$(EXEEXT)
+	pi_block_openmp$(EXEEXT) pi_block_tbb$(EXEEXT) \
+	pi_leap_mpi$(EXEEXT) pi_leap_openmp$(EXEEXT) \
+	stl_container$(EXEEXT) distributions$(EXEEXT) \
+	plausibility_test$(EXEEXT) Ising_model$(EXEEXT) \
+	correlated_normal_dist$(EXEEXT) discrete_dist$(EXEEXT) \
+	discrete_dist_c_style$(EXEEXT) bernoulli_dist$(EXEEXT)
 subdir = examples
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -79,6 +79,9 @@ pi_block_mpi_LDADD = $(LDADD)
 am_pi_block_openmp_OBJECTS = pi_block_openmp.$(OBJEXT)
 pi_block_openmp_OBJECTS = $(am_pi_block_openmp_OBJECTS)
 pi_block_openmp_LDADD = $(LDADD)
+am_pi_block_tbb_OBJECTS = pi_block_tbb.$(OBJEXT)
+pi_block_tbb_OBJECTS = $(am_pi_block_tbb_OBJECTS)
+pi_block_tbb_LDADD = $(LDADD)
 am_pi_leap_mpi_OBJECTS = pi_leap_mpi.$(OBJEXT)
 pi_leap_mpi_OBJECTS = $(am_pi_leap_mpi_OBJECTS)
 pi_leap_mpi_LDADD = $(LDADD)
@@ -113,18 +116,18 @@ SOURCES = $(Ising_model_SOURCES) $(bernoulli_dist_SOURCES) \
 	$(correlated_normal_dist_SOURCES) $(discrete_dist_SOURCES) \
 	$(discrete_dist_c_style_SOURCES) $(distributions_SOURCES) \
 	$(hello_world_SOURCES) $(pi_SOURCES) $(pi_block_mpi_SOURCES) \
-	$(pi_block_openmp_SOURCES) $(pi_leap_mpi_SOURCES) \
-	$(pi_leap_openmp_SOURCES) $(plausibility_test_SOURCES) \
-	$(sample_output_SOURCES) $(stl_container_SOURCES) \
-	$(time_SOURCES)
+	$(pi_block_openmp_SOURCES) $(pi_block_tbb_SOURCES) \
+	$(pi_leap_mpi_SOURCES) $(pi_leap_openmp_SOURCES) \
+	$(plausibility_test_SOURCES) $(sample_output_SOURCES) \
+	$(stl_container_SOURCES) $(time_SOURCES)
 DIST_SOURCES = $(Ising_model_SOURCES) $(bernoulli_dist_SOURCES) \
 	$(correlated_normal_dist_SOURCES) $(discrete_dist_SOURCES) \
 	$(discrete_dist_c_style_SOURCES) $(distributions_SOURCES) \
 	$(hello_world_SOURCES) $(pi_SOURCES) $(pi_block_mpi_SOURCES) \
-	$(pi_block_openmp_SOURCES) $(pi_leap_mpi_SOURCES) \
-	$(pi_leap_openmp_SOURCES) $(plausibility_test_SOURCES) \
-	$(sample_output_SOURCES) $(stl_container_SOURCES) \
-	$(time_SOURCES)
+	$(pi_block_openmp_SOURCES) $(pi_block_tbb_SOURCES) \
+	$(pi_leap_mpi_SOURCES) $(pi_leap_openmp_SOURCES) \
+	$(plausibility_test_SOURCES) $(sample_output_SOURCES) \
+	$(stl_container_SOURCES) $(time_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -167,6 +170,7 @@ LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIB_TBB = @LIB_TBB@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
@@ -241,10 +245,9 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = gnu
-INCLUDES = -I$(top_builddir)
+AM_CPPFLAGS = -I$(top_builddir)
 AM_LDFLAGS = -L../src/.libs -ltrng4 -static
 AM_MPILDFLAGS = -L../src/.libs -ltrng4
-EXTRA_OBJECTS = $(addsuffix .o, $(EXTRA_PROGRAMS))
 MPICXXCOMPILE = $(MPICXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 MPICXXLD = $(MPICXX)
 MPICXXLINK = $(MPICXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $(AM_MPILDFLAGS)
@@ -254,6 +257,7 @@ time_SOURCES = time.cc
 pi_SOURCES = pi.cc
 pi_block_mpi_SOURCES = pi_block_mpi.cc
 pi_block_openmp_SOURCES = pi_block_openmp.cc
+pi_block_tbb_SOURCES = pi_block_tbb.cc
 pi_leap_mpi_SOURCES = pi_leap_mpi.cc
 pi_leap_openmp_SOURCES = pi_leap_openmp.cc
 stl_container_SOURCES = stl_container.cc
@@ -350,6 +354,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_block_mpi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_block_openmp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_block_tbb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_leap_mpi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_leap_openmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plausibility_test.Po@am__quote@
@@ -485,7 +490,9 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean-am: clean-generic clean-libtool mostlyclean-am
+clean: clean-am
+
+clean-am: clean-generic clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -544,7 +551,7 @@ uninstall-am:
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libtool ctags distclean distclean-compile \
+	clean-libtool clean-local ctags distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-dvi install-dvi-am \
@@ -569,6 +576,12 @@ $(pi_block_openmp_OBJECTS): $(pi_block_openmp_SOURCES)
 pi_block_openmp$(EXEEXT): $(pi_block_openmp_OBJECTS) $(pi_block_openmp_DEPENDENCIES)
 	$(CXXLINK) $(OPENMP_CXXFLAGS) $(pi_block_openmp_LDFLAGS) $(pi_block_openmp_OBJECTS) $(pi_block_openmp_LDADD) $(LIBS)
 
+$(pi_block_tbb_OBJECTS): $(pi_block_tbb_SOURCES)
+	$(CXXCOMPILE) -c pi_block_tbb.cc
+
+pi_block_tbb$(EXEEXT): $(pi_block_tbb_OBJECTS) $(pi_block_tbb_DEPENDENCIES)
+	$(CXXLINK) $(pi_block_tbb_LDFLAGS) $(pi_block_tbb_OBJECTS) $(pi_block_tbb_LDADD) $(LIB_TBB) $(LIBS)
+
 $(pi_leap_mpi_OBJECTS): $(pi_leap_mpi_SOURCES)
 	$(MPICXXCOMPILE) -c pi_leap_mpi.cc
 
@@ -583,8 +596,8 @@ pi_leap_openmp$(EXEEXT): $(pi_leap_openmp_OBJECTS) $(pi_leap_openmp_DEPENDENCIES
 
 examples: $(EXTRA_PROGRAMS)
 
-clean:
-	-rm -f $(EXTRA_PROGRAMS) $(EXTRA_OBJECTS)
+clean-local:
+	-rm -f $(EXTRA_PROGRAMS)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

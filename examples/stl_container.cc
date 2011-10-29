@@ -22,7 +22,7 @@
 #include <trng/config.hpp>
 #include <trng/yarn2.hpp>
 #include <trng/uniform_int_dist.hpp>
-#if defined HAVE_BOOST
+#if defined TRNG_HAVE_BOOST
   #include <boost/bind.hpp>
 #else
 
@@ -42,8 +42,8 @@
   // convenience function
   template<typename PRN_dist_t, typename PRN_engine_t>
   inline 
-  binder_cl<PRN_dist_t,  PRN_engine_t> make_binder(PRN_dist_t &dist, PRN_engine_t &engine) {
-    return binder_cl<PRN_dist_t,  PRN_engine_t>(dist, engine);
+  binder_cl<PRN_dist_t, PRN_engine_t> make_binder(PRN_dist_t &dist, PRN_engine_t &engine) {
+    return binder_cl<PRN_dist_t, PRN_engine_t>(dist, engine);
   }
 
 #endif
@@ -66,7 +66,7 @@ int main() {
     v[i]=U(R);
   print_range(v.begin(), v.end());
   std::vector<long> w(12);
-#if defined HAVE_BOOST
+#if defined TRNG_HAVE_BOOST
   std::cout << "random number generation by std::generate\n";
   std::generate(w.begin(), w.end(), boost::bind(U, boost::ref(R)));
   print_range(w.begin(), w.end());

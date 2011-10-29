@@ -16,7 +16,7 @@
 //
 
 #include <trng/config.hpp>
-#if defined HAVE_OPENMP
+#if defined TRNG_HAVE_OPENMP
 
 #include <cstdlib>
 #include <iostream>

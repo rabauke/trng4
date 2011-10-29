@@ -100,7 +100,7 @@ int f(long long x){return 1;}
  AC_LANG_RESTORE
 ])
 if test "$ac_cv_cxx_long_long" = yes; then
-   AC_DEFINE(HAVE_LONG_LONG,,[Define to 1 if long long is a built-in type.])
+   AC_DEFINE(TRNG_HAVE_LONG_LONG,,[Define to 1 if long long is a built-in type.])
  else
    echo ""
    echo "Sorry, your compiler does not support the built-in type long long."
@@ -214,6 +214,6 @@ else
   if test "x$ax_cv_[]_AC_LANG_ABBREV[]_openmp" != "xnone"; then
     OPENMP_[]_AC_LANG_PREFIX[]FLAGS=$ax_cv_[]_AC_LANG_ABBREV[]_openmp
   fi
-  m4_default([$1], [AC_DEFINE(HAVE_OPENMP,1,[Define if OpenMP is enabled])])
+  m4_default([$1], [AC_DEFINE(TRNG_HAVE_OPENMP,1,[Define if OpenMP is enabled])])
 fi
 ])dnl AX_OPENMP

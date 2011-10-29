@@ -23,7 +23,7 @@
 #include <trng/config.hpp>
 #include <trng/limits.hpp>
 
-#if HAVE_BOOST
+#if TRNG_HAVE_BOOST
 #include <boost/static_assert.hpp>
 #else 
 #define BOOST_STATIC_ASSERT(foo) 

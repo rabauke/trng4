@@ -16,7 +16,7 @@
 //
 
 #include <trng/config.hpp>
-#if defined HAVE_MPI
+#if defined TRNG_HAVE_MPI
 
 #include <cstdlib>
 #include <iostream>

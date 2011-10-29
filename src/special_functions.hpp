@@ -2,6 +2,7 @@
 
 #define TRNG_SPECIAL_FUNCTIONS_HPP
 
+#include <trng/config.hpp>
 #include <trng/limits.hpp>
 #include <trng/math.hpp>
 #include <trng/constants.hpp>
@@ -179,7 +180,7 @@ namespace trng {
     
     }
 
-#if !(defined(HAVE_LGAMMAF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if !(defined(TRNG_HAVE_LGAMMAF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
     inline float ln_Gamma(float x) {
       if (x>0.0f)
 	return detail::ln_Gamma(x);
@@ -194,7 +195,7 @@ namespace trng {
     }
 #endif
   
-#if !(defined(HAVE_LGAMMA) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if !(defined(TRNG_HAVE_LGAMMA) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
     inline double ln_Gamma(double x) {
       if (x>0.0)
 	return detail::ln_Gamma(x);
@@ -209,7 +210,7 @@ namespace trng {
     }
 #endif
  
-#if !(defined(HAVE_LGAMMAL) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if !(defined(TRNG_HAVE_LGAMMAL) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
     inline long double ln_Gamma(long double x) {
       if (x>0.0l)
 	return detail::ln_Gamma(x);
@@ -372,7 +373,7 @@ namespace trng {
 
     }
 
-#if !(defined(HAVE_TGAMMAF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if !(defined(TRNG_HAVE_TGAMMAF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
     inline float Gamma(float x) {
       if (x>0.0f)
 	return detail::Gamma(x);
@@ -387,7 +388,7 @@ namespace trng {
     }
 #endif
 
-#if !(defined(HAVE_TGAMMA) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if !(defined(TRNG_HAVE_TGAMMA) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
     inline double Gamma(double x) {
       if (x>0.0)
 	return detail::Gamma(x);
@@ -402,7 +403,7 @@ namespace trng {
     }
 #endif
 
-#if !(defined(HAVE_TGAMMAL) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if !(defined(TRNG_HAVE_TGAMMAL) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
     inline long double Gamma(long double x) {
       if (x>0.0l)
 	return detail::Gamma(x);
@@ -846,7 +847,7 @@ namespace trng {
 
     // --- error function ----------------------------------------------
 
-#if !(defined(HAVE_ERFF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if !(defined(TRNG_HAVE_ERFF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
     inline float erf(float x) {
       return x<0.0f ? -GammaP(0.5f, x*x) : GammaP(0.5f, x*x);
     }
@@ -856,7 +857,7 @@ namespace trng {
     }
 #endif
 
-#if !(defined(HAVE_ERF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if !(defined(TRNG_HAVE_ERF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
     inline double erf(double x) {
       return x<0.0 ? -GammaP(0.5, x*x) : GammaP(0.5, x*x);
     }
@@ -866,7 +867,7 @@ namespace trng {
     }
 #endif
   
-#if !(defined(HAVE_ERFL) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if !(defined(TRNG_HAVE_ERFL) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
     inline long double erf(long double x) {
       return x<0.0l ? -GammaP(0.5l, x*x) : GammaP(0.5l, x*x);
     }
@@ -878,7 +879,7 @@ namespace trng {
 
     // --- complementary error function --------------------------------
 
-#if !(defined(HAVE_ERFCF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if !(defined(TRNG_HAVE_ERFCF) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
     inline float erfc(float x) {
       return x<0.0f ? 1.0f+GammaP(0.5f, x*x) : GammaQ(0.5f, x*x);
     }
@@ -888,7 +889,7 @@ namespace trng {
     }
 #endif
 
-#if !(defined(HAVE_ERFC) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if !(defined(TRNG_HAVE_ERFC) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
     inline double erfc(double x) {
       return x<0.0 ? 1.0+GammaP(0.5, x*x) : GammaQ(0.5, x*x);
     }
@@ -898,7 +899,7 @@ namespace trng {
     }
 #endif
   
-#if !(defined(HAVE_ERFCL) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
+#if !(defined(TRNG_HAVE_ERFCL) || defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
     inline long double erfc(long double x) {
       return x<0.0l ? 1.0l+GammaP(0.5l, x*x) : GammaQ(0.5l, x*x);
     }

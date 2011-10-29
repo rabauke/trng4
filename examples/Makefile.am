@@ -1,12 +1,10 @@
 AUTOMAKE_OPTIONS = gnu
 
-INCLUDES = -I$(top_builddir)
-
+AM_CPPFLAGS = -I$(top_builddir)
 AM_LDFLAGS = -L../src/.libs -ltrng4 -static
 AM_MPILDFLAGS = -L../src/.libs -ltrng4
 
-EXTRA_PROGRAMS = hello_world sample_output time pi pi_block_mpi pi_block_openmp pi_leap_mpi pi_leap_openmp stl_container distributions plausibility_test Ising_model correlated_normal_dist discrete_dist discrete_dist_c_style bernoulli_dist
-EXTRA_OBJECTS = $(addsuffix .o, $(EXTRA_PROGRAMS))
+EXTRA_PROGRAMS = hello_world sample_output time pi pi_block_mpi pi_block_openmp pi_block_tbb pi_leap_mpi pi_leap_openmp stl_container distributions plausibility_test Ising_model correlated_normal_dist discrete_dist discrete_dist_c_style bernoulli_dist
 
 MPICXXCOMPILE = $(MPICXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 MPICXXLD = $(MPICXX)
@@ -23,6 +21,8 @@ pi_SOURCES = pi.cc
 pi_block_mpi_SOURCES = pi_block_mpi.cc
 
 pi_block_openmp_SOURCES = pi_block_openmp.cc
+
+pi_block_tbb_SOURCES = pi_block_tbb.cc
 
 pi_leap_mpi_SOURCES = pi_leap_mpi.cc
 
@@ -50,13 +50,17 @@ $(pi_block_mpi_OBJECTS): $(pi_block_mpi_SOURCES)
 pi_block_mpi$(EXEEXT): $(pi_block_mpi_OBJECTS) $(pi_block_mpi_DEPENDENCIES)
 	$(MPICXXLINK) $(pi_block_mpi_LDFLAGS) $(pi_block_mpi_OBJECTS) $(pi_block_mpi_LDADD) $(LIBS)
 
-
 $(pi_block_openmp_OBJECTS): $(pi_block_openmp_SOURCES)
 	$(CXXCOMPILE) $(OPENMP_CXXFLAGS) -c pi_block_openmp.cc
 
 pi_block_openmp$(EXEEXT): $(pi_block_openmp_OBJECTS) $(pi_block_openmp_DEPENDENCIES)
 	$(CXXLINK) $(OPENMP_CXXFLAGS) $(pi_block_openmp_LDFLAGS) $(pi_block_openmp_OBJECTS) $(pi_block_openmp_LDADD) $(LIBS)
 
+$(pi_block_tbb_OBJECTS): $(pi_block_tbb_SOURCES)
+	$(CXXCOMPILE) -c pi_block_tbb.cc
+
+pi_block_tbb$(EXEEXT): $(pi_block_tbb_OBJECTS) $(pi_block_tbb_DEPENDENCIES)
+	$(CXXLINK) $(pi_block_tbb_LDFLAGS) $(pi_block_tbb_OBJECTS) $(pi_block_tbb_LDADD) $(LIB_TBB) $(LIBS)
 
 $(pi_leap_mpi_OBJECTS): $(pi_leap_mpi_SOURCES)
 	$(MPICXXCOMPILE) -c pi_leap_mpi.cc
@@ -73,5 +77,5 @@ pi_leap_openmp$(EXEEXT): $(pi_leap_openmp_OBJECTS) $(pi_leap_openmp_DEPENDENCIES
 
 examples: $(EXTRA_PROGRAMS)
 
-clean:
-	-rm -f $(EXTRA_PROGRAMS) $(EXTRA_OBJECTS)
+clean-local:
+	-rm -f $(EXTRA_PROGRAMS)

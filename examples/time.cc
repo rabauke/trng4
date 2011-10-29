@@ -43,7 +43,7 @@
 #include <trng/lagfib4xor.hpp>
 #include <trng/lagfib4plus.hpp>
 
-#if defined HAVE_BOOST
+#if defined TRNG_HAVE_BOOST
 # include <boost/random/linear_congruential.hpp>
 # include <boost/random/additive_combine.hpp>
 # include <boost/random/inversive_congruential.hpp>
@@ -227,7 +227,7 @@ int main() {
     // { trng::lagfib4xor_19937_ull  r;  time_main(r, "trng::lagfib4xor_19937_ull"); }
     // { trng::lagfib4plus_19937_ull r;  time_main(r, "trng::lagfib2plus_19937_ull"); }
     // { trng::lagfib2plus_19937_ull r;  time_main(r, "trng::lagfib4plus_19937_ull"); }
-// #if defined HAVE_BOOST
+// #if defined TRNG_HAVE_BOOST
 //     { boost::minstd_rand    r; time_boost(r, "boost::minstd_rand"); }
 //     { boost::ecuyer1988     r; time_boost(r, "boost::ecuyer1988"); }
 //     { boost::kreutzer1986   r; time_boost(r, "boost::kreutzer1986"); }

@@ -20,3 +20,6 @@ Implement:
 * Rayleight distribution
 
 * and other distributions
+
+
+undefine VERSERON macro in config.hpp

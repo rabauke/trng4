@@ -83,6 +83,7 @@ LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIB_TBB = @LIB_TBB@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
@@ -255,9 +256,13 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean-am: clean-generic clean-libtool mostlyclean-am
+clean: clean-am
 
-distclean-am: clean-am distclean-generic
+clean-am: clean-generic clean-libtool clean-local mostlyclean-am
+
+distclean: distclean-am
+	-rm -f Makefile
+distclean-am: clean-am distclean-generic distclean-local
 
 dvi: dvi-am
 
@@ -308,15 +313,16 @@ uninstall-am:
 .MAKE: install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
-	distclean distclean-generic distclean-libtool distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am
+	clean-local distclean distclean-generic distclean-libtool \
+	distclean-local distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	uninstall uninstall-am
 
 header-links: remove-links
 	HEADERLIST="$(top_srcdir)/src/*.hpp"; \
@@ -330,9 +336,9 @@ remove-links:
 
 all: all-am header-links
 
-clean: clean-am remove-links
+clean-local: clean-am remove-links
 
-distclean: distclean-am remove-links
+distclean-local: distclean-am remove-links
 	-rm -f Makefile
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

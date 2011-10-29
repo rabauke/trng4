@@ -120,6 +120,7 @@ LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIB_TBB = @LIB_TBB@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
@@ -195,7 +196,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = gnu
 lib_LTLIBRARIES = libtrng4.la
-INCLUDES = -I$(top_builddir)
+AM_CPPFLAGS = -I$(top_builddir)
 libtrng4_la_SOURCES = utility.cc minstd.cc \
                       lcg64.cc lcg64_shift.cc \
 		      mt19937.cc mt19937_64.cc \
@@ -451,6 +452,7 @@ installdirs:
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
+uninstall: uninstall-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
@@ -528,7 +530,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES uninstall-pkgincludeHEADERS
+uninstall-am: uninstall-libLTLIBRARIES uninstall-local \
+	uninstall-pkgincludeHEADERS
 
 .MAKE: install-am install-strip
 
@@ -545,11 +548,11 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-pkgincludeHEADERS
 	installdirs maintainer-clean maintainer-clean-generic \
 	mostlyclean mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-libLTLIBRARIES \
+	uninstall-am uninstall-libLTLIBRARIES uninstall-local \
 	uninstall-pkgincludeHEADERS
 
 
-uninstall: uninstall-am 
+uninstall-local: uninstall-am 
 	-rmdir ${includedir}/trng
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

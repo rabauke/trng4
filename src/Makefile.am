@@ -2,7 +2,7 @@ AUTOMAKE_OPTIONS = gnu
 
 lib_LTLIBRARIES = libtrng4.la
 
-INCLUDES= -I$(top_builddir)
+AM_CPPFLAGS = -I$(top_builddir)
 
 libtrng4_la_SOURCES = utility.cc minstd.cc \
                       lcg64.cc lcg64_shift.cc \
@@ -27,5 +27,5 @@ pkginclude_HEADERS = config.hpp utility.hpp uniformxx.hpp generate_canonical.hpp
 
 libtrng4_la_LDFLAGS = -version-info 0:0:0
 
-uninstall: uninstall-am 
+uninstall-local: uninstall-am 
 	-rmdir ${includedir}/trng
