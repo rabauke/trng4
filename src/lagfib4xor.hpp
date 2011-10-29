@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2010, Heiko Bauke
+// Copyright (c) 2000-2011, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -62,8 +62,10 @@ namespace trng {
       step();  
       return S.r[S.index];
     }
-    static const result_type min=0;
-    static const result_type max=~result_type(0);
+    static const result_type min_=0;
+    static const result_type max_=~result_type(0);
+    static const result_type min=min_;
+    static const result_type max=max_;
     
     // Parameter and status classes
     class status_type;
@@ -163,7 +165,7 @@ namespace trng {
         result_type r=0;
         for (unsigned int j=0; j<std::numeric_limits<result_type>::digits; ++j) {
           r<<=1;
-	  if (g()-gen::min>gen::max/2)
+	  if (g()-gen::min_>gen::max_/2)
             ++r;
         }
         S.r[i]=r;

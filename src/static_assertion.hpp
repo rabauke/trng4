@@ -29,63 +29,41 @@
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
+//  
 
-#if !(defined TRNG_GENERATE_CANONICAL_HPP)
+#if !(defined TRNG_STATIC_ASSERTION_HPP)
 
-#define TRNG_GENERATE_CANONICAL_HPP
-
-#include <trng/cuda.hpp>
-#include <trng/limits.hpp>
-#include <trng/math.hpp>
-#include <trng/utility.hpp>
+#define TRNG_STATIC_ASSERTION_HPP
 
 namespace trng {
   
-  template<typename result_type, typename R>
-  result_type generate_canonical(R &);
-
   namespace detail {
+    
+    template<bool> 
+    struct static_assertion_failure;
+    
+    template<> 
+    struct static_assertion_failure<true> {
+    };
+    
+    template<bool test>
+    inline void static_assertion() {
+      std::size_t x=sizeof(static_assertion_failure<test>);
+      x*=2;
+    }
 
-    template<typename result_type, typename R, typename category>
-    result_type generate_canonical_impl(R &, result_type, category);
-    
-    class integer_tag { };
-    class float_tag { };
-    
-    template<bool>
-    struct integer_float_traits;
-    
-    template<>
-    struct integer_float_traits<false> {
-      typedef float_tag cat;
+    template<typename T1, typename T2>
+    struct sametype {
+      enum { result = false };
+    };
+
+    template<typename T>
+    struct sametype<T, T> {
+      enum { result = true };
     };
     
-    template<>
-    struct integer_float_traits<true> {
-      typedef integer_tag cat;
-    };
-    
-    template<typename result_type, typename R>
-    TRNG_CUDA_ENABLE
-    inline result_type generate_canonical_impl(R &r, result_type, float_tag) {
-      return utility::uniformoo<result_type>(r);
-    }
-  
-    template<typename result_type, typename R>
-    TRNG_CUDA_ENABLE
-    inline result_type generate_canonical_impl(R &r, result_type, integer_tag) {
-      return static_cast<result_type>(math::floor(utility::uniformco<double>(r)*(static_cast<double>(R::max)-static_cast<double>(R::min)+1.0)));
-    }
-    
   }
-  
-  template<typename result_type, typename R>
-  TRNG_CUDA_ENABLE
-  result_type generate_canonical(R &g) {
-    return detail::generate_canonical_impl(g, result_type(), 
-					   typename detail::integer_float_traits<math::numeric_limits<result_type>::is_integer>::cat());
-  }
-  
+
 }
 
 #endif

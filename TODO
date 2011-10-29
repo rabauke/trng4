@@ -23,3 +23,10 @@ Implement:
 * ISAAC generator
   http://burtleburtle.net/bob/rand/isaacafa.html
 
+* TEA generator
+  http://portal.acm.org/citation.cfm?id=1921500
+  http://www.cs.umbc.edu/~olano/papers/GPUTEA.pdf
+  http://en.wikipedia.org/wiki/Tiny_Encryption_Algorithm
+
+* check GCC C++ X0 <random>
+

@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2010, Heiko Bauke
+// Copyright (c) 2000-2011, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -66,8 +66,10 @@ namespace trng {
     // Uniform random number generator concept
     typedef unsigned long long result_type;
     result_type operator()() const;  
-    static const result_type min=0;
-    static const result_type max=18446744073709551615ull;
+    static const result_type min_=0;
+    static const result_type max_=18446744073709551615ull;
+    static const result_type min=min_;
+    static const result_type max=max_;
   private:
     static const int N=312;
     static const int M=156;

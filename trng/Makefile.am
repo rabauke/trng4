@@ -1,3 +1,5 @@
+AM_CXXFLAGS = @BOOST_CXXFLAGS@ @CXXFLAGS@
+
 header-links: remove-links
 	HEADERLIST="$(top_srcdir)/src/*.hpp"; \
 	for h in $$HEADERLIST; do \

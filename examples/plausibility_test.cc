@@ -108,10 +108,10 @@ template<typename R>
 class generator_max {
 public:
   typedef typename R::result_type result_type;
-  static const result_type min=R::min;
-  static const result_type max=R::max;
+  static const result_type min_=R::min_;
+  static const result_type max_=R::max_;
   result_type operator()() const {
-    return max;
+    return max_;
   }
 };
 
@@ -120,10 +120,10 @@ template<typename R>
 class generator_min {
 public:
   typedef typename R::result_type result_type;
-  static const result_type min=R::min;
-  static const result_type max=R::max;
+  static const result_type min_=R::min_;
+  static const result_type max_=R::max_;
   result_type operator()() const {
-    return max;
+    return min_;
   }
 };
 

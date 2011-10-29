@@ -53,4 +53,4 @@
 #define TRNG_HAVE_TGAMMAL 1
 
 /* TRNG version number. */
-#define TRNG_VERSION 4.12
+#define TRNG_VERSION 4.13

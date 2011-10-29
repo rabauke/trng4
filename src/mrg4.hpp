@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2010, Heiko Bauke
+// Copyright (c) 2000-2011, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -55,8 +55,10 @@ namespace trng {
   private:
     static const result_type modulus=2147483647l;
   public:
-    static const result_type min=0l;
-    static const result_type max=modulus-1;
+    static const result_type min_=0l;
+    static const result_type max_=modulus-1;
+    static const result_type min=min_;
+    static const result_type max=max_;
 
     // Parameter and status classes
     class parameter_type;

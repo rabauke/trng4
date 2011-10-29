@@ -11,7 +11,7 @@ libtrng4_la_SOURCES = minstd.cc \
 		      mrg2.cc mrg3.cc mrg3s.cc mrg4.cc mrg5.cc mrg5s.cc \
                       yarn2.cc yarn3.cc yarn3s.cc yarn4.cc yarn5.cc yarn5s.cc
 
-pkginclude_HEADERS = config.hpp cuda.hpp utility.hpp uniformxx.hpp \
+pkginclude_HEADERS = config.hpp cuda.hpp utility.hpp uniformxx.hpp static_assertion.hpp \
 		     generate_canonical.hpp minstd.hpp \
                      limits.hpp math.hpp int_math.hpp special_functions.hpp constants.hpp \
 		     lcg64.hpp lcg64_shift.hpp \

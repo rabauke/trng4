@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2010, Heiko Bauke
+// Copyright (c) 2000-2011, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -39,12 +39,7 @@
 #include <trng/config.hpp>
 #include <trng/cuda.hpp>
 #include <trng/limits.hpp>
-
-#if TRNG_HAVE_BOOST
-#include <boost/static_assert.hpp>
-#else 
-#define BOOST_STATIC_ASSERT(foo) 
-#endif
+#include <trng/static_assertion.hpp>
 
 namespace trng {
 
@@ -111,12 +106,8 @@ namespace trng {
       typedef return_type ret_t;
       typedef typename prng_t::result_type result_type;
 
-      BOOST_STATIC_ASSERT(prng_t::min>=0 and prng_t::max>prng_t::min); // min and/or max out of spec?
-      BOOST_STATIC_ASSERT((prng_t::max-prng_t::min) <= ~0ULL); // Bits, Holes incorrect otherwise
-      BOOST_STATIC_ASSERT(not math::numeric_limits<return_type>::is_integer);
-
       // Casting up from "simpler" types may yield better low level code sequences.
-      static const result_type domain_max0=prng_t::max-prng_t::min;
+      static const result_type domain_max0=prng_t::max_-prng_t::min_;
       static const unsigned int domain_bits=Bits<domain_max0>::result;
       static const unsigned int domain_full_bits=domain_bits-(Holes<domain_max0>::result > 0);
       static const bool int_ok=domain_bits < static_cast<unsigned int>(math::numeric_limits<unsigned int>::digits);
@@ -127,7 +118,6 @@ namespace trng {
       static const unsigned int bits0=(requested_bits < ret_bits) ? requested_bits : ret_bits;
       static const unsigned int bits=(bits0 < 1) ? 1 : bits0;
       static const std::size_t calls_needed=(bits/domain_full_bits) + ((bits % domain_full_bits) != 0);
-      BOOST_STATIC_ASSERT(calls_needed > 0 and calls_needed <= bits);
 
       // a ((long long)(val >> 1)) cast may give us better performance (~4X using lcg on Core2 x86-64)
       // the lost bit will not usually be missed as it is ~30dB down typically (53 bit mantissa from
@@ -137,7 +127,7 @@ namespace trng {
 
       TRNG_CUDA_ENABLE
       static ret_t addin(const prng_t &r) {
-	result_type x=r()-prng_t::min;
+	result_type x=r()-prng_t::min_;
 	if (int_ok) 
 	  return static_cast<int>(x);
 	else if (long_ok) 
@@ -160,6 +150,10 @@ namespace trng {
       }
       TRNG_CUDA_ENABLE
       static ret_t variate(const prng_t &r) {
+	detail::static_assertion<(prng_t::min_>=0 and prng_t::max_>prng_t::min_)>(); // min and/or max out of spec?
+	detail::static_assertion<(prng_t::max_-prng_t::min_) <= ~0ULL>(); // Bits, Holes incorrect otherwise
+	detail::static_assertion<not math::numeric_limits<return_type>::is_integer>();
+	detail::static_assertion<(calls_needed > 0 and calls_needed <= bits)>();
 	const ret_t scale_per_step(ret_t(domain_max) + 1);
 	ret_t ret(addin(r));
 	for (std::size_t i(1); i<calls_needed; ++i)
