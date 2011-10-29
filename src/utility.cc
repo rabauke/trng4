@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -17,6 +17,8 @@
 
 #include <trng/utility.hpp>
 #include <cmath>
+#include <cassert>
+#include <algorithm>
 #include <stdexcept>
 
 namespace trng {
@@ -155,7 +157,7 @@ namespace trng {
 	c[j]=static_cast<long>(t);
       }
     }
-    
+        
   }
 
 }

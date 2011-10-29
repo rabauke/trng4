@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -20,9 +20,6 @@
 namespace trng {
 
   // Uniform random number generator concept
-  const mrg5s::result_type mrg5s::modulus=2147461007l;  // 2^31 - 22641
-  const mrg5s::result_type mrg5s::min=0l;
-  const mrg5s::result_type mrg5s::max=2147461006l;
   
   // Parameter and status classes
   

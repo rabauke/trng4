@@ -251,6 +251,30 @@ namespace trng {
     using ::std::ldexp;
     using ::std::log;
 
+    template<typename T>
+    inline T log2_floor(T x) {
+      T y(0);
+      while (x>0) {
+	x>>=1;
+	++y;
+      };
+      --y;
+      return y;
+    }
+    
+    template<typename T>
+    inline T log2_ceil(T x) {
+      T y(log2_floor(x));
+      if ((T(1)<<y)<x)
+        ++y;
+      return y;
+    }
+    
+    template<typename T>
+    inline T pow2(T x) {
+      return T(1) << x;
+    }
+    
     inline float ln(float x) {
       return log(x);
     }

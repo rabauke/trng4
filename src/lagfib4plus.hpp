@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -211,16 +211,6 @@ namespace trng {
     long operator()(long x) const {
       return static_cast<long>(utility::uniformco(*this)*x);
     }
-//     bool boolean() const;
-//     bool boolean(double) const;
-//     double uniformco() const;
-//     double uniformco(double, double) const;
-//     double uniformoc() const;
-//     double uniformoc(double, double) const;
-//     double uniformoo() const;
-//     double uniformoo(double, double) const;
-//     double uniformcc() const;
-//     double uniformcc(double, double) const;
     
   private:
     mutable status_type S;
@@ -252,6 +242,7 @@ namespace trng {
   typedef lagfib4plus<unsigned long long,  471, 2032,  4064,  9689> lagfib4plus_9689_ull;
   typedef lagfib4plus<unsigned long,      3860, 7083, 11580, 19937> lagfib4plus_19937_ul;
   typedef lagfib4plus<unsigned long long, 3860, 7083, 11580, 19937> lagfib4plus_19937_ull;
+
 }
 
 #endif

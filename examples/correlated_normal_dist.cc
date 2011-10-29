@@ -1,4 +1,4 @@
-// Copyright (C) 2007 Heiko Bauke <heiko.bauke@physics.ox.ac.uk>
+// Copyright (C) 2008 Heiko Bauke <heiko.bauke@physics.ox.ac.uk>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in

@@ -1,4 +1,4 @@
-// Copyright (C) 2001-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2001-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -39,13 +39,15 @@ int main(int argc, char *argv[]) {
     rx.split(size, rank);               // choose sub-stream no. rank out of size streams
     ry.split(size, rank);               // choose sub-stream no. rank out of size streams
     trng::uniform01_dist u;             // random number distribution
+    long in_local=0l;
     // throw random points into square 
     for (long i=rank; i<samples; i+=size) {
       double x=u(rx), y=u(ry);          // choose random x- and y-coordinates
       if (x*x+y*y<=1.0)                 // is point in circle?
-#pragma omp critical
-	++in;                           // increase counter
+	++in_local;                     // increase thread-local counter
     }
+#pragma omp critical
+    in+=in_local;                       // increase global counter
   }
   // print result
   std::cout << "pi = " << 4.0*in/samples << std::endl;

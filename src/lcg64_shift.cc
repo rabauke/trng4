@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -20,8 +20,6 @@
 namespace trng {
 
   // Uniform random number generator concept
-  const lcg64_shift::result_type lcg64_shift::min=0;
-  const lcg64_shift::result_type lcg64_shift::max=18446744073709551615ull;
 
   // Parameter and status classes
 

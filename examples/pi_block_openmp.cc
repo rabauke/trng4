@@ -1,4 +1,4 @@
-// Copyright (C) 2001-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2001-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -35,13 +35,15 @@ int main(int argc, char *argv[]) {
     int rank=omp_get_thread_num();      // get rank of current process
     trng::uniform01_dist u;             // random number distribution
     r.jump(2*(rank*samples/size));      // jump ahead
+    long in_local=0l;
     // throw random points into square 
     for (long i=rank*samples/size; i<(rank+1)*samples/size; ++i) {
       double x=u(r), y=u(r);            // choose random x- and y-coordinates
       if (x*x+y*y<=1.0)                 // is point in circle?
-#pragma omp critical
-	++in;                           // increase counter
+	++in_local;                     // increase thread-local counter
     }
+#pragma omp critical
+    in+=in_local;                       // increase global counter
   }
   // print result
   std::cout << "pi = " << 4.0*in/samples << std::endl;

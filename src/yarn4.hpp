@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -35,10 +35,10 @@ namespace trng {
     typedef long result_type;
     result_type operator()() const;
   private:
-    static const result_type modulus;
+    static const result_type modulus=2147483647l;
   public:
-    static const result_type min;
-    static const result_type max;
+    static const result_type min=0l;
+    static const result_type max=2147483646l;
 
     // Parameter and status classes
     class parameter_type;
@@ -223,16 +223,6 @@ namespace trng {
     // Other useful methods
     static const char * name();
     long operator()(long) const;
-//     bool boolean() const;
-//     bool boolean(double) const;
-//     double uniformco() const;
-//     double uniformco(double, double) const;
-//     double uniformoc() const;
-//     double uniformoc(double, double) const;
-//     double uniformoo() const;
-//     double uniformoo(double, double) const;
-//     double uniformcc() const;
-//     double uniformcc(double, double) const;
 
   private:
     parameter_type P;
@@ -272,46 +262,6 @@ namespace trng {
   inline long yarn4::operator()(long x) const {
     return static_cast<long>(utility::uniformco(*this)*x);
   }
-
-//   inline bool yarn4::boolean() const {
-//     return operator()()<=modulus/2;
-//   }
-
-//   inline bool yarn4::boolean(double p) const {
-//     return operator()()<modulus*p;
-//   }
-
-//   inline double yarn4::uniformco() const {
-//     return static_cast<double>(operator()())/static_cast<double>(modulus);
-//   }
-
-//   inline double yarn4::uniformco(double a, double b) const {
-//     return uniformco()*(b-a)+a;
-//   }
-
-//   inline double yarn4::uniformoc() const {
-//     return (static_cast<double>(operator()())+1.0)/static_cast<double>(modulus);
-//   }
-
-//   inline double yarn4::uniformoc(double a, double b) const {
-//     return uniformoc()*(b-a)+a;
-//   }
-
-//   inline double yarn4::uniformoo() const {
-//     return (static_cast<double>(operator()())+1.0)/(static_cast<double>(modulus)+1.0);
-//   }
-
-//   inline double yarn4::uniformoo(double a, double b) const {
-//     return uniformoo()*(b-a)+a;
-//   }
-
-//   inline double yarn4::uniformcc() const {
-//     return static_cast<double>(operator()())/(static_cast<double>(modulus)-1.0);
-//   }
-
-//   inline double yarn4::uniformcc(double a, double b) const {
-//     return uniformcc()*(b-a)+a;
-//   }
 
 }
   

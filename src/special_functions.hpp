@@ -6,6 +6,7 @@
 #include <trng/math.hpp>
 #include <trng/constants.hpp>
 #include <cerrno>
+#include <algorithm>
 
 namespace trng {
 
@@ -419,15 +420,15 @@ namespace trng {
     // --- Beta function -----------------------------------------------
 
     inline float Beta(float x, float y) {
-      return exp(ln_Gamma(x)+ln_Gamma(x)-ln_Gamma(x+y));
+      return exp(ln_Gamma(x)+ln_Gamma(y)-ln_Gamma(x+y));
     }
 
     inline double Beta(double x, double y) {
-      return exp(ln_Gamma(x)+ln_Gamma(x)-ln_Gamma(x+y));
+      return exp(ln_Gamma(x)+ln_Gamma(y)-ln_Gamma(x+y));
     }
   
-    inline double Beta(long double x, long double y) {
-      return exp(ln_Gamma(x)+ln_Gamma(x)-ln_Gamma(x+y));
+    inline long double Beta(long double x, long double y) {
+      return exp(ln_Gamma(x)+ln_Gamma(y)-ln_Gamma(x+y));
     }
 
     // --- Pochhammer function -----------------------------------------
@@ -593,6 +594,249 @@ namespace trng {
   
     inline long double cinc_gamma(long double a, long double x) {
       return detail::GammaQ(a, x, false);
+    }
+
+    namespace detail {
+      
+      template<typename T>
+      T invGammaP(T a, T p) {
+        const T eps=sqrt(numeric_limits<T>::epsilon()),
+          a1=a-T(1), glna=ln_Gamma(a), 
+          lna1=ln(a1), afac=exp(a1*(lna1-T(1))-glna);
+        T x, t;
+        // initial guess
+        if (a>T(1)) {
+          const T pp=p<T(1)/T(2) ? p : T(1)-p;
+          t=sqrt(-T(2)*ln(pp));
+          x=static_cast<T>((2.30753+t*0.27061)/(1.0+t*(0.99229+t*0.04481))-t);
+          x=p<T(1)/T(2) ? -x : x;
+          x=std::max(T(1)/T(1000),
+		     a*pow(T(1)-T(1)/(T(9)*a)-x/(T(3)*sqrt(a)), T(3)));
+        } else {
+          t=static_cast<T>(1.0-a*(0.253+a*0.12));
+          x=p<t ? (pow(p/t, T(1)/a)) : (T(1)-ln(T(1)-(p-t)/(T(1)-t)));
+        }
+        // refinement by Halley's method
+        for (int i=0; i<16; ++i) {
+          if (x<T(0)) {
+            x=T(0);
+            break;
+          }
+          const T err=GammaP(a, x, true)-p;
+          if (a>T(1)) 
+            t=afac*exp(-(x-a1)+a1*(ln(x)-lna1));
+          else
+            t=exp(-x+a1*ln(x)-glna);
+          const T u=err/t;
+          t=u/(T(1)-std::min(T(1), u*((a-T(1))/x-T(1)))/T(2));
+          x-=t;
+          x=x<=T(0) ? (x+t)/T(2) : x;
+          if (abs(t)<eps*x)
+            break;
+        }
+        return x;
+      }
+      
+    }
+
+    // inverse of GammaP
+    inline float invGammaP(float a, float p) {
+      return detail::invGammaP(a, p);
+    }
+
+    // inverse of GammaP
+    inline double invGammaP(double a, double p) {
+      return detail::invGammaP(a, p);
+    }
+
+    // inverse of GammaP
+    inline long double invGammaP(long double a, long double p) {
+      return detail::invGammaP(a, p);
+    }
+
+    // --- regularized incomplete Beta function ------------------------
+
+    // see Applied Statistics (1973), vol.22, no.3, pp.409--411
+    // algorithm AS 63 
+    namespace detail {
+      
+      template<typename T>
+      T Beta_I(T x, T p, T q, T norm) {
+        if (p<=0 || q<=0 || x<0 || x>1) {
+          errno=EDOM;
+          return numeric_limits<T>::quiet_NaN();
+        }
+        const T eps=4*numeric_limits<T>::epsilon();
+        T psq=p+q, cx=1-x;
+        bool flag;
+        if (flag=(p<psq*x)) {
+          // use  I(x, p, q) = 1-I(1-x, q, p)
+	  std::swap(x, cx);
+	  std::swap(p, q);
+        }
+        T term=1, i=1, y=1, rx=x/cx, temp=q-i;
+        int s=static_cast<int>(q+cx*psq);
+        if (s==0)
+          rx=x;
+        while (true) {
+          term*=temp*rx/(p+i);
+          y+=term;
+          temp=abs(term);
+          if (temp<=eps && temp<=eps*y)
+            break;
+          i++;
+          s--;
+          if (s>=0) {
+            temp=q-i;
+            if (s==0)
+              rx=x;
+          } else {
+            temp=psq;
+            psq++;
+          }
+        }
+        y*=exp(p*ln(x)+(q-1)*ln(cx))/p/norm;
+        if (flag)
+          y=1-y;
+        return y;
+      }
+      
+    }
+    
+    inline float Beta_I(float x, float p, float q, float norm) {
+      return detail::Beta_I(x, p, q, norm);
+    }
+
+    inline float Beta_I(float x, float p, float q) {
+      return detail::Beta_I(x, p, q, Beta(p, q));
+    }
+
+    inline double Beta_I(double x, double p, double q, double norm) {
+      return detail::Beta_I(x, p, q, norm);
+    }
+
+    inline double Beta_I(double x, double p, double q) {
+      return detail::Beta_I(x, p, q, Beta(p, q));
+    }
+
+    inline long double Beta_I(long double x, long double p, long double q, long double norm) {
+      return detail::Beta_I(x, p, q, norm);
+    }
+
+    inline long double Beta_I(long double x, long double p, long double q) {
+      return detail::Beta_I(x, p, q, Beta(p, q));
+    }
+
+    // --- inverse of regularized incomplete Beta function -------------
+
+    // see Applied Statistics (1973), vol.22, no.3, pp.411--414
+    // algorithm AS 64
+    namespace detail {
+
+      inline float inv_Beta_I_approx(float x, float p, float q, float norm) {
+        float r=sqrt(-2.0f*ln(x));
+        float y=r-(2.30753f+0.27061f*r)/(1.0f+(0.99229f+0.04481f*r)*r);
+        r=q+q;
+        float t=1.0f/(9.0f*q);
+        t=r*(1.0f-t+y*sqrt(t)); 
+        t=t*t*t;
+        if (t>0.0f) {
+          t=(4.0f*p+r-2.0f)/t;
+          if (t>1.0f)
+            y=1.0f-2.0f/(t+1.0f);
+          else
+            y=exp(ln(x*p*norm)/p);
+        } else
+          y=1.0f-exp(ln((1.0f-x)*q*norm)/q);
+        return y;
+      }
+
+      inline double inv_Beta_I_approx(double x, double p, double q, double norm) {
+        double r=sqrt(-2.0*ln(x));
+        double y=r-(2.30753+0.27061*r)/(1.0+(0.99229+0.04481*r)*r);
+        r=q+q;
+        double t=1.0/(9.0*q);
+        t=r*(1.0-t+y*sqrt(t)); 
+        t=t*t*t;
+        if (t>0.0) {
+          t=(4.0*p+r-2.0)/t;
+          if (t>1.0)
+            y=1.0-2.0/(t+1.0);
+          else
+            y=exp(ln(x*p*norm)/p);
+        } else
+          y=1.0-exp(ln((1.0-x)*q*norm)/q);
+        return y;
+      }
+
+      inline long double inv_Beta_I_approx(long double x, long double p, long double q, long double norm) {
+        long double r=sqrt(-2.0l*ln(x));
+        long double y=r-(2.30753l+0.27061l*r)/(1.0l+(0.99229l+0.04481l*r)*r);
+        r=q+q;
+        long double t=1.0l/(9.0l*q);
+        t=r*(1.0l-t+y*sqrt(t)); 
+        t=t*t*t;
+        if (t>0.0l) {
+          t=(4.0l*p+r-2.0l)/t;
+          if (t>1.0l)
+            y=1.0l-2.0l/(t+1.0l);
+          else
+            y=exp(ln(x*p*norm)/p);
+        } else
+          y=1.0l-exp(ln((1.0l-x)*q*norm)/q);
+        return y;
+      }
+
+      template<typename T>
+      T inv_Beta_I(T x, T p, T q, T norm) {
+        if (p<=0 || q<=0 || x<0 || x>1) {
+          errno=EDOM;
+          return numeric_limits<T>::quiet_NaN();
+        }
+        const T eps=4*numeric_limits<T>::epsilon();
+        bool flag;
+        if (flag=(2*x<1)) {
+          // use  I(x, p, q) = 1-I(1-x, q, p)
+          x=1-x;
+	  std::swap(p, q);
+        }
+        // initial approximation
+        T y=inv_Beta_I_approx(x, p, q, norm);     
+        // Newton-Rapson iteration
+        T r=1-p, t=1-q, yy;
+        do {
+          yy=Beta_I(y, p, q, norm);
+          yy=(yy-x)*norm*exp(r*ln(y)+t*ln(1-y));
+          y-=yy;
+        } while (abs(yy)>eps);
+        if (flag)
+          y=1-y;
+        return y;
+      }
+    }
+
+    inline float inv_Beta_I(float x, float p, float q, float norm) {
+      return detail::inv_Beta_I(x, p, q, norm);
+    }
+
+    inline float inv_Beta_I(float x, float p, float q) {
+      return detail::inv_Beta_I(x, p, q, Beta(p, q));
+    }
+
+    inline double inv_Beta_I(double x, double p, double q, double norm) {
+      return detail::inv_Beta_I(x, p, q, norm);
+    }
+
+    inline double inv_Beta_I(double x, double p, double q) {
+      return detail::inv_Beta_I(x, p, q, Beta(p, q));
+    }
+
+    inline long double inv_Beta_I(long double x, long double p, long double q, long double norm) {
+      return detail::inv_Beta_I(x, p, q, norm);
+    }
+
+    inline long double inv_Beta_I(long double x, long double p, long double q) {
+      return detail::inv_Beta_I(x, p, q, Beta(p, q));
     }
 
     // --- error function ----------------------------------------------

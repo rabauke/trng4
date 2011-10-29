@@ -5,7 +5,7 @@ INCLUDES = -I$(top_builddir)
 AM_LDFLAGS = -L../src/.libs -ltrng4 -static
 AM_MPILDFLAGS = -L../src/.libs -ltrng4
 
-EXTRA_PROGRAMS = hello_world test time pi pi_block_mpi pi_block_openmp pi_leap_mpi pi_leap_openmp stl_container distributions implementation_test Ising_model correlated_normal_dist discrete_dist
+EXTRA_PROGRAMS = hello_world test time pi pi_block_mpi pi_block_openmp pi_leap_mpi pi_leap_openmp stl_container distributions implementation_test Ising_model correlated_normal_dist discrete_dist discrete_dist_c_style bernoulli_dist
 EXTRA_OBJECTS = $(addsuffix .o, $(EXTRA_PROGRAMS))
 
 MPICXXCOMPILE = $(MPICXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -40,6 +40,9 @@ correlated_normal_dist_SOURCES = correlated_normal_dist.cc
 
 discrete_dist_SOURCES = discrete_dist.cc
 
+discrete_dist_c_style_SOURCES = discrete_dist_c_style.cc
+
+bernoulli_dist_SOURCES = bernoulli_dist.cc
 
 $(pi_block_mpi_OBJECTS): $(pi_block_mpi_SOURCES)
 	$(MPICXXCOMPILE) -c pi_block_mpi.cc

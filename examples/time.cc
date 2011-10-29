@@ -1,4 +1,4 @@
-// Copyright (C) 2001-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2001-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -19,6 +19,7 @@
 #include <iostream>
 #include <exception>
 #include <string>
+#include <sstream>
 #include <trng/config.hpp>
 #include <trng/lcg64.hpp>
 #include <trng/lcg64_shift.hpp>
@@ -54,7 +55,14 @@
 # include <sys/times.h>
 #else
 # include <ctime>
-#endif
+#endif 
+
+template<typename T>
+std::string to_string(const T &x) {
+  std::ostringstream temp;
+  temp << x;
+  return temp.str();
+}
 
 class timer {
 private:
@@ -84,22 +92,101 @@ public:
 };
 
 template<typename R>
-typename R::result_type time_main(R &r, std::string name) {
+typename R::result_type time_main_plain(R &r) {
   typename R::result_type s(0);
   timer T;
   long max(1l<<26);
   for (long i(0); i<max; ++i)
     s+=r();
-  while (name.length()<32)
-    name+=' ';
-  std::cout << name << 1e-6*max/T.time() << '\n';
+  std::string res(to_string(1e-6*max/T.time()));
+  while (res.length()<10)
+    res+=' ';
+  std::cout << res;
   return s;
 }
 
+template<typename R>
+double time_main_cc(R &r) {
+  double s(0);
+  timer T;
+  long max(1l<<26);
+  for (long i(0); i<max; ++i)
+    s+=trng::utility::uniformcc(r);
+  std::string res(to_string(1e-6*max/T.time()));
+  while (res.length()<10)
+    res+=' ';
+  std::cout << res;
+  return s;
+}
+
+template<typename R>
+double time_main_oc(R &r) {
+  double s(0);
+  timer T;
+  long max(1l<<26);
+  for (long i(0); i<max; ++i)
+    s+=trng::utility::uniformoc(r);
+  std::string res(to_string(1e-6*max/T.time()));
+  while (res.length()<10)
+    res+=' ';
+  std::cout << res;
+  return s;
+}
+
+template<typename R>
+double time_main_co(R &r) {
+  double s(0);
+  timer T;
+  long max(1l<<26);
+  for (long i(0); i<max; ++i)
+    s+=trng::utility::uniformco(r);
+  std::string res(to_string(1e-6*max/T.time()));
+  while (res.length()<10)
+    res+=' ';
+  std::cout << res;
+  return s;
+}
+
+template<typename R>
+double time_main_oo(R &r) {
+  double s(0);
+  timer T;
+  long max(1l<<26);
+  for (long i(0); i<max; ++i)
+    s+=trng::utility::uniformoo(r);
+  std::string res(to_string(1e-6*max/T.time()));
+  while (res.length()<10)
+    res+=' ';
+  std::cout << res;
+  return s;
+}
+
+template<typename R>
+void time_main(R &r, std::string name) {
+   while (name.length()<32)
+     name+=' ';
+   std::cout << name;
+   time_main_plain(r);
+   time_main_cc(r);
+   time_main_co(r);
+   time_main_oc(r);
+   time_main_oo(r);
+   std::cout << std::endl;
+}
+
+template<typename R>
+void time_boost(R &r, std::string name) {
+   while (name.length()<32)
+     name+=' ';
+   std::cout << name;
+   time_main_plain(r);
+   std::cout << std::endl;
+}
+
 int main() {
-  std::cout << "                                10^6 random numbers\n"
-            << "generator                       per second\n"
-	    << "===================================================\n";
+  std::cout << "                                        10^6 random numbers per second\n"
+            << "generator                       [min,max] [0,1]     [0,1)     (0,1]     (0,1)\n"
+	    << "=================================================================================\n";
   std::cout.flush();
   try {
     { trng::lcg64       r;  time_main(r, "trng::lcg64"); }
@@ -121,21 +208,21 @@ int main() {
     { trng::lagfib4plus_19937_ull r;  time_main(r, "trng::lagfib2plus_19937_ull"); }
     { trng::lagfib2plus_19937_ull r;  time_main(r, "trng::lagfib4plus_19937_ull"); }
 #if defined HAVE_BOOST
-    { boost::minstd_rand    r; time_main(r, "boost::minstd_rand"); }
-    { boost::ecuyer1988     r; time_main(r, "boost::ecuyer1988"); }
-    { boost::kreutzer1986   r; time_main(r, "boost::kreutzer1986"); }
-    { boost::hellekalek1995 r; time_main(r, "boost::hellekalek1995"); }
-    { boost::mt11213b       r; time_main(r, "boost::mt11213b"); }
-    { boost::mt19937        r; time_main(r, "boost::mt19937"); }
-    { boost::lagged_fibonacci607   r; time_main(r, "boost::lagged_fibonacci607"); }
-    { boost::lagged_fibonacci1279  r; time_main(r, "boost::lagged_fibonacci1279"); }
-    { boost::lagged_fibonacci2281  r; time_main(r, "boost::lagged_fibonacci2281"); }
-    { boost::lagged_fibonacci3217  r; time_main(r, "boost::lagged_fibonacci3217"); }
-    { boost::lagged_fibonacci4423  r; time_main(r, "boost::lagged_fibonacci4423"); }
-    { boost::lagged_fibonacci9689  r; time_main(r, "boost::lagged_fibonacci9689"); }
-    { boost::lagged_fibonacci19937 r; time_main(r, "boost::lagged_fibonacci19937"); }
-    { boost::lagged_fibonacci23209 r; time_main(r, "boost::lagged_fibonacci23209"); }
-    { boost::lagged_fibonacci44497 r; time_main(r, "boost::lagged_fibonacci44497"); }
+    { boost::minstd_rand    r; time_boost(r, "boost::minstd_rand"); }
+    { boost::ecuyer1988     r; time_boost(r, "boost::ecuyer1988"); }
+    { boost::kreutzer1986   r; time_boost(r, "boost::kreutzer1986"); }
+    { boost::hellekalek1995 r; time_boost(r, "boost::hellekalek1995"); }
+    { boost::mt11213b       r; time_boost(r, "boost::mt11213b"); }
+    { boost::mt19937        r; time_boost(r, "boost::mt19937"); }
+    { boost::lagged_fibonacci607   r; time_boost(r, "boost::lagged_fibonacci607"); }
+    { boost::lagged_fibonacci1279  r; time_boost(r, "boost::lagged_fibonacci1279"); }
+    { boost::lagged_fibonacci2281  r; time_boost(r, "boost::lagged_fibonacci2281"); }
+    { boost::lagged_fibonacci3217  r; time_boost(r, "boost::lagged_fibonacci3217"); }
+    { boost::lagged_fibonacci4423  r; time_boost(r, "boost::lagged_fibonacci4423"); }
+    { boost::lagged_fibonacci9689  r; time_boost(r, "boost::lagged_fibonacci9689"); }
+    { boost::lagged_fibonacci19937 r; time_boost(r, "boost::lagged_fibonacci19937"); }
+    { boost::lagged_fibonacci23209 r; time_boost(r, "boost::lagged_fibonacci23209"); }
+    { boost::lagged_fibonacci44497 r; time_boost(r, "boost::lagged_fibonacci44497"); }
 #endif
   } 
   catch (std::exception &err) {

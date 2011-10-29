@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -87,7 +87,7 @@ namespace trng {
     double pdf(const T &x) const {
       if (x==P.head())
 	return P.p();
-      else if (x==P.head())
+      else if (x==P.tail())
 	return 1.0-P.p();
       return 0.0;
     }
@@ -95,7 +95,7 @@ namespace trng {
     double cdf(const T &x) const {
       if (x==P.head())
 	return P.p();
-      else if (x==P.head())
+      else if (x==P.tail())
 	return 1.0;
       return 0.0;
     }

@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -36,8 +36,8 @@ namespace trng {
     // Uniform random number generator concept
     typedef unsigned long result_type;
     result_type operator()() const;  
-    static const result_type min;
-    static const result_type max;
+    static const result_type min=1l;
+    static const result_type max=2147483646l;
 
     // Parameter and status classes
     class status_type;
@@ -143,16 +143,6 @@ namespace trng {
     // Other useful methods
     static const char * name();
     long operator()(long) const;
-//     bool boolean() const;
-//     bool boolean(double) const;
-//     double uniformco() const;
-//     double uniformco(double, double) const;
-//     double uniformoc() const;
-//     double uniformoc(double, double) const;
-//     double uniformoo() const;
-//     double uniformoo(double, double) const;
-//     double uniformcc() const;
-//     double uniformcc(double, double) const;
     
   private:
     mutable status_type S;
@@ -179,57 +169,7 @@ namespace trng {
   inline long minstd::operator()(long x) const {
     return static_cast<long>(utility::uniformco(*this)*x);
   }
-
-//   inline bool minstd::boolean() const {
-//     step();
-//     return S.r<9223372036854775808ull;
-//   }
   
-//   inline bool minstd::boolean(double p) const {
-//     step();
-//     return S.r<18446744073709551616.0*p;
-//   }
-  
-//   inline double minstd::uniformco() const {
-//     step();
-//     double t(S.r/18446744073709551616.0);
-//     return t<1.0 ? t : 1.0-math::numeric_limits<double>::epsilon();
-//   }
-  
-//   inline double minstd::uniformco(double a, double b) const {
-//     return uniformco()*(b-a)+a;
-//     }
-  
-//   inline double minstd::uniformoc() const {
-//     step();
-//     double t(S.r/18446744073709551616.0);
-//     return  t>0.0 ? t : math::numeric_limits<double>::epsilon();
-//     }
-  
-//   inline double minstd::uniformoc(double a, double b) const {
-//     return uniformoc()*(b-a)+a;
-//   }
-  
-//   inline double minstd::uniformoo() const {
-//     step();
-//     double t(S.r/18446744073709551616.0+
-// 	     math::numeric_limits<double>::epsilon());
-//     return t<1.0 ? t : 1.0-math::numeric_limits<double>::epsilon();
-//   }
-  
-//   inline double minstd::uniformoo(double a, double b) const {
-//     return uniformoo()*(b-a)+a;
-//   }
-  
-//   inline double minstd::uniformcc() const {
-//     step();
-//     return S.r/18446744073709551615.0;
-//   }
-  
-//   inline double minstd::uniformcc(double a, double b) const {
-//     return uniformcc()*(b-a)+a;
-//   }
-
 }
 
 #endif

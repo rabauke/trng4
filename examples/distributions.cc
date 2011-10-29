@@ -1,4 +1,4 @@
-// Copyright (C) 2001-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2001-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -33,6 +33,8 @@
 #include <trng/extreme_value_dist.hpp>
 #include <trng/gamma_dist.hpp>
 #include <trng/chi_square_dist.hpp>
+#include <trng/student_t_dist.hpp>
+#include <trng/snedecor_f_dist.hpp>
 #include <trng/rayleigh_dist.hpp>
 #include <trng/bernoulli_dist.hpp>
 #include <trng/binomial_dist.hpp>
@@ -133,6 +135,18 @@ void distribution_test() {
     std::cout << "Chi-square distribution\n" 
 	      << "-----------------------\n";
     std::cout << "double    (10)\t" << g(R) << "\n\n";
+  }
+  {
+    trng::student_t_dist g(10);
+    std::cout << "Student-t distribution\n" 
+	      << "----------------------\n";
+    std::cout << "double    (10)\t" << g(R) << "\n\n";
+  }
+  {
+    trng::snedecor_f_dist g(10, 8);
+    std::cout << "F-distribution\n" 
+	      << "--------------\n";
+    std::cout << "double    (10, 8)\t" << g(R) << "\n\n";
   }
   {
     trng::rayleigh_dist g(4);

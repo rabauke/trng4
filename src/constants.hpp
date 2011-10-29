@@ -32,6 +32,9 @@ namespace trng {
       static T sqrt_2() throw () {
 	return T(0);
       }
+      static T sqrt_2pi() throw () {
+	return T(0);
+      }
       static T one_over_sqrt_2() throw () {
 	return T(0);
       }

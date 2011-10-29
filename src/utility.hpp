@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -19,6 +19,7 @@
 
 #define TRNG_UTILITY_HPP
 
+#include <cassert>
 #include <istream>
 #include <ostream>
 #include <iomanip>
@@ -259,154 +260,87 @@ namespace trng {
       }
       return i2;
     }
-    
-    // -----------------------------------------------------------------
-
-    template<typename R>
-    inline double uniformcc_impl(R &r, long) {
-      return static_cast<double>(r()-R::min)/
-	static_cast<double>(R::max-R::min);
-    }
-    
-    template<typename R>
-    inline double uniformcc_impl(R &r, unsigned long) {
-      return static_cast<double>(r()-R::min)/
-	static_cast<double>(R::max-R::min);
-    }
-
-    template<typename R>
-    inline double uniformcc_impl(R &r, long long) {
-      return static_cast<double>(r()-R::min)/
-	static_cast<double>(R::max-R::min);
-    }
-
-    template<typename R>
-    inline double uniformcc_impl(R &r, unsigned long long) {
-      return static_cast<double>(r()-R::min)/
-	static_cast<double>(R::max-R::min);
-    }
-
-    template<typename R>
-    inline double uniformcc(R &r) {
-      return uniformcc_impl(r, typename R::result_type());
-    }
-
-    // ---------------------------------------------------------------------
-
-    template<typename R>
-    inline double uniformoo_impl(R &r, long) {
-      return (1.0+static_cast<double>(r()-R::min))/
-	(2.0+static_cast<double>(R::max-R::min));
-    }
-
-    template<typename R>
-    inline double uniformoo_impl(R &r, unsigned long) {
-      return (1.0+static_cast<double>(r()-R::min))/
-	(2.0+static_cast<double>(R::max-R::min));
-    }
-
-    template<typename R>
-    inline double uniformoo_impl(R &r, long long) {
-      double t=static_cast<double>(r()-R::min)/
-	static_cast<double>(R::max-R::min);
-      if (t==0.0)
-	return math::numeric_limits<double>::epsilon();
-      if (t==1.0)
-	return 1.0-math::numeric_limits<double>::epsilon();
-      return t;
-    }
-
-    template<typename R>
-    inline double uniformoo_impl(R &r, unsigned long long) {
-      double t=static_cast<double>(r()-R::min)/
-	static_cast<double>(R::max-R::min);
-      if (t==0.0)
-	return math::numeric_limits<double>::epsilon();
-      if (t==1.0)
-	return 1.0-math::numeric_limits<double>::epsilon();
-      return t;
-    }
-
-    template<typename R>
-    inline double uniformoo(R &r) {
-      return uniformoo_impl(r, typename R::result_type());
-    }
 
     // -----------------------------------------------------------------
-
-    template<typename R>
-    inline double uniformco_impl(R &r, long) {
-      return static_cast<double>(r()-R::min)/
-	(1.0+static_cast<double>(R::max-R::min));
-    }
-
-    template<typename R>
-    inline double uniformco_impl(R &r, unsigned long) {
-      return static_cast<double>(r()-R::min)/
-	(1.0+static_cast<double>(R::max-R::min));
-    }
-
-    template<typename R>
-    inline double uniformco_impl(R &r, long long) {
-      double t=static_cast<double>(r()-R::min)/
-	static_cast<double>(R::max-R::min);
-      if (t==1.0)
-	return 1.0-math::numeric_limits<double>::epsilon();
-      return t;
-    }
-
-    template<typename R>
-    inline double uniformco_impl(R &r, unsigned long long) {
-      double t=static_cast<double>(r()-R::min)/
-	static_cast<double>(R::max-R::min);
-      if (t==1.0)
-	return 1.0-math::numeric_limits<double>::epsilon();
-      return t;
-    }
-
-    template<typename R>
-    inline double uniformco(R &r) {
-      return uniformco_impl(r, typename R::result_type());
-    }
-
+    //
+    // Thanks to Bruce Carneal for suggesting the following 
+    // implementation of uniformcoXX utility functions (with 
+    // modifications by Heiko Bauke).
+    // 
     // -----------------------------------------------------------------
 
-    template<typename R>
-    inline double uniformoc_impl(R &r, long) {
-      return (1.0+static_cast<double>(r()-R::min))/
-	(1.0+static_cast<double>(R::max-R::min));
-    }
+    // Most of the code below can be reduced at compile time via constant folding.
+    // In practice, g++ run at -O or higher will produce very tight straight
+    // line code sequences for the intended interface routines:
+    // cc(), co(), oc(), and oo().
+    template<typename T, T Min, T Max, typename R>
+    struct u01_traits {
+      typedef R result_type;
+      
+      static result_type val(T ival) {
+    	const long long llmask( ~(1LL << math::numeric_limits<result_type>::digits));
+    	const bool more_bits_than_needed((((Max - Min) & llmask) == llmask)
+    					 && (math::numeric_limits<long long>::digits > math::numeric_limits<result_type>::digits));
+    	return
+    	  more_bits_than_needed
+    	  ? static_cast<result_type>(static_cast<long long>((ival - T(Min)) & llmask))
+    	  : (((Max - Min) < 0) // does this range overflow?
+    	     ? static_cast<result_type>(ival) - Min
+    	     : static_cast<result_type>(ival - Min));
+      }
 
-    template<typename R>
-    inline double uniformoc_impl(R &r, unsigned long) {
-      return static_cast<double>(r()-R::min)/
-	(1.0+static_cast<double>(R::max-R::min));
-    }
+      static result_type domain_len() { 
+    	return val(Max); 
+      }
+      static result_type reciprocal() { 
+    	return result_type(1.0)/domain_len(); 
+      }
+      static result_type epsilon() {
+    	return (reciprocal() > math::numeric_limits<result_type>::epsilon()) ?
+    	  reciprocal() : math::numeric_limits<result_type>::epsilon();
+      }
+      static inline result_type cc(T ival) {
+    	return val(ival) / domain_len();
+      }
+      static inline result_type co(T ival) {
+    	const result_type eps_factor(result_type(1.0) - epsilon());
+    	const result_type combo_factor(eps_factor * reciprocal());
+    	const bool combo_OK((domain_len() * combo_factor) < 1.0);
+    	return combo_OK ? (val(ival) * combo_factor) : (cc(ival) * eps_factor);
+      }
+      static inline result_type oc(T ival) { 
+    	return result_type(1.0)-co(ival); 
+      }
+      static inline result_type oo(T ival) {
+    	const result_type eps(epsilon());
+    	const result_type two_eps_factor(1.0 - (eps + eps));
+    	const result_type combo_factor(two_eps_factor * reciprocal());
+    	const bool combo_OK(((combo_factor * domain_len()) + eps) < result_type(1.0));
+    	return eps + (combo_OK ? (val(ival) * combo_factor) : (cc(ival) * two_eps_factor));
+      }
+    };
 
-    template<typename R>
-    inline double uniformoc_impl(R &r, long long) {
-      double t=static_cast<double>(r()-R::min)/
-	static_cast<double>(R::max-R::min);
-      if (t==0.0)
-	return math::numeric_limits<double>::epsilon();
-      return t;
-    }
-
-    template<typename R>
-    inline double uniformoc_impl(R &r, unsigned long long) {
-      double t=static_cast<double>(r()-R::min)/
-	static_cast<double>(R::max-R::min);
-      if (t==0.0)
-	return math::numeric_limits<double>::epsilon();
-      return t;
-    }
-
-    template<typename R>
-    inline double uniformoc(R &r) {
-      return uniformoc_impl(r, typename R::result_type());
+    template<typename T> 
+    inline double uniformcc(T &r) { 
+      return u01_traits<typename T::result_type, T::min, T::max, double>::cc(r());
     }
     
-  }
+    template<typename T> 
+    inline double uniformco(T &r) { 
+      return u01_traits<typename T::result_type, T::min, T::max, double>::co(r());
+    }
+    
+    template<typename T> 
+    inline double uniformoc(T &r) { 
+      return u01_traits<typename T::result_type, T::min, T::max, double>::oc(r());
+    }
+    
+    template<typename T> 
+    inline double uniformoo(T &r) { 
+      return u01_traits<typename T::result_type, T::min, T::max, double>::oo(r());
+    }
+        
+  }  
   
 }
 

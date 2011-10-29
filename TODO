@@ -1,12 +1,22 @@
-* Maxwell-Verteilung einbauen
+Implement:
+
+* F-distribution
+
+* Beta distribution
+
+* Kolmogorov-Smirnov distribution
+
+* Maxwell distribution
   http://mathworld.wolfram.com/MaxwellDistribution.html
 
-* Lévy distribution einbauen
+* Levy distribution
   http://en.wikipedia.org/wiki/L%C3%A9vy_distribution
 
-* Zipf-Verteilung einbauen
+* Zipf distribution
   http://en.wikipedia.org/wiki/Zipf%27s_law
 
-* Hypergeometrische Verteilung
+* Hypergeometric distribution
 
-* Rayleight Verteilung
+* Rayleight distribution
+
+* and other distributions

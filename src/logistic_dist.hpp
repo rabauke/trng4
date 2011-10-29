@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
+// Copyright (C) 2000-2008 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -85,13 +85,14 @@ namespace trng {
     void eta(double eta_new) { p.eta(eta_new); }
     // probability density function  
     double pdf(double x) const {
-      double t1(math::exp(-(x-p.eta())/p.theta()));
+      double t1(math::exp(-math::abs((x-p.eta())/p.theta())));
       double t2(1.0+t1);
       return t1/(p.theta()*t2*t2);
     }
     // cumulative density function 
     double cdf(double x) const {
-      return 1.0/(1.0+math::exp(-(x-p.eta())/p.theta()));
+      double t1(math::exp(-math::abs((x-p.eta())/p.theta())));
+      return x>=p.eta() ? (1.0/(1.0+t1)) : (t1/(1.0+t1));
     }
     // inverse cumulative density function 
     double icdf(double x) const {
