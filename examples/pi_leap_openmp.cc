@@ -1,4 +1,4 @@
-// Copyright (C) 2006 Heiko Bauke <heiko.bauke@physik.uni-magdeburg.de>
+// Copyright (C) 2001-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in

@@ -1,4 +1,4 @@
-// Copyright (C) 2006 Heiko Bauke <heiko.bauke@physik.uni-magdeburg.de>
+// Copyright (C) 2001-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -20,6 +20,7 @@
 #include <limits>
 #include <sstream>
 #include <trng/lcg64.hpp>
+#include <trng/lcg64_shift.hpp>
 #include <trng/mrg2.hpp>
 #include <trng/mrg3.hpp>
 #include <trng/mrg3s.hpp>
@@ -94,22 +95,23 @@ void implemtation_test() {
 
 
 int main() {
-  implemtation_test<trng::lcg64>();  
-  implemtation_test<trng::mrg2>();  
-  implemtation_test<trng::mrg3>();  
-  implemtation_test<trng::mrg3s>();  
-  implemtation_test<trng::mrg4>();  
-  implemtation_test<trng::mrg5>();  
-  implemtation_test<trng::mrg5s>();  
-  implemtation_test<trng::yarn2>();  
-  implemtation_test<trng::yarn3>();  
-  implemtation_test<trng::yarn3s>();  
-  implemtation_test<trng::yarn4>();  
-  implemtation_test<trng::yarn5>();  
-  implemtation_test<trng::yarn5s>();  
-  implemtation_test<trng::lagfib2xor_521_ul>();  
-  implemtation_test<trng::lagfib4xor_521_ul>();  
-  implemtation_test<trng::lagfib2plus_521_ul>();  
-  implemtation_test<trng::lagfib4plus_521_ul>();  
+  implemtation_test<trng::lcg64>();
+  implemtation_test<trng::lcg64_shift>();
+  implemtation_test<trng::mrg2>();
+  implemtation_test<trng::mrg3>();
+  implemtation_test<trng::mrg3s>();
+  implemtation_test<trng::mrg4>();
+  implemtation_test<trng::mrg5>();
+  implemtation_test<trng::mrg5s>();
+  implemtation_test<trng::yarn2>();
+  implemtation_test<trng::yarn3>();
+  implemtation_test<trng::yarn3s>();
+  implemtation_test<trng::yarn4>();
+  implemtation_test<trng::yarn5>();
+  implemtation_test<trng::yarn5s>();
+  implemtation_test<trng::lagfib2xor_521_ul>();
+  implemtation_test<trng::lagfib4xor_521_ul>();
+  implemtation_test<trng::lagfib2plus_521_ul>();
+  implemtation_test<trng::lagfib4plus_521_ul>();
   return EXIT_SUCCESS;
 }

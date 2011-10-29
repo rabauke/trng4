@@ -1,4 +1,4 @@
-// Copyright (C) 2006 Heiko Bauke <heiko.bauke@physik.uni-magdeburg.de>
+// Copyright (C) 2000-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -26,8 +26,38 @@
 #include <iomanip>
 #include <istream>
 #include <vector>
+#include <algorithm>
+#include <numeric>
 
 namespace trng {
+
+  namespace detail {
+
+    template<typename T>
+    inline T log2_floor(T x) {
+      T y(0);
+      while (x>0) {
+	x>>=1;
+	++y;
+      };
+      --y;
+      return y;
+    }
+    
+    template<typename T>
+    inline T log2_ceil(T x) {
+      T y(log2_floor(x));
+      if ((T(1)<<y)<x)
+        ++y;
+      return y;
+    }
+    
+    template<typename T>
+    inline T pow2(T x) {
+      return T(1) << x;
+    }
+    
+  }
 
   // non-uniform random number generator class
   class discrete_dist {
@@ -37,22 +67,53 @@ namespace trng {
     
     class param_type {
     private:
+      typedef std::vector<double>::size_type size_type;
       std::vector<double> P_;
-
-      void calc_probabilities() {
-        // build list with cumulative density function
-        for (std::vector<double>::size_type i(1); i<P_.size(); ++i)
-          P_[i]+=P_[i-1];
-        for (std::vector<double>::size_type i(0); i<P_.size(); ++i)
-          P_[i]/=P_.back();
-      }
-
+      size_type N, offset, layers;
+      
     public:
       template<typename iter>
-      explicit param_type(iter first, iter last) :
+      param_type(iter first, iter last) :
 	P_(first, last) {
-	calc_probabilities();
+	N=P_.size();
+	layers=detail::log2_ceil(N);
+	offset=detail::pow2(layers)-1;
+	P_.resize(N+offset);
+	std::copy_backward(P_.begin(), P_.begin()+N, P_.end());
+	std::fill(P_.begin(), P_.begin()+N, 0);
+	update_all_layers();
       }
+      explicit param_type(int n) :
+	P_(n, 1.0) {
+	N=P_.size();
+	layers=detail::log2_ceil(N);
+	offset=detail::pow2(layers)-1;
+	P_.resize(N+offset);
+	std::copy_backward(P_.begin(), P_.begin()+N, P_.end());
+	std::fill(P_.begin(), P_.begin()+N, 0);
+	update_all_layers();
+      }
+    private:
+      void update_layer(size_type layer, size_type n) {
+	size_type first=detail::pow2(layer)-1, last=first+n;
+	for (size_type i=first; i<last; ++i, ++i) 
+	  if (i+1<last)
+	    P_[(i-1)/2]=P_[i]+P_[i+1];
+	  else
+	    P_[(i-1)/2]=P_[i];
+      }
+      void update_all_layers() {
+	size_type layer=layers;
+	if (layer>0) {
+	  update_layer(layer, N);
+	  --layer;
+	}
+	while (layer>0) {
+	  update_layer(layer, detail::pow2(layer));
+	  --layer;
+	}
+      }
+    public:
       friend class discrete_dist;
       friend bool operator==(const param_type &, const param_type &);
       template<typename char_t, typename traits_t>
@@ -71,7 +132,9 @@ namespace trng {
   public:
     // constructor
     template<typename iter>
-    explicit discrete_dist(iter first, iter last) : P(first, last) {
+    discrete_dist(iter first, iter last) : P(first, last) {
+    }
+    explicit discrete_dist(int N) : P(N) {
     }
     explicit discrete_dist(const param_type &P) : P(P) {
     }
@@ -80,8 +143,17 @@ namespace trng {
     // random numbers
     template<typename R>
     int operator()(R &r) {
-      return utility::discrete(utility::uniformco(r), 
-			       P.P_.begin(), P.P_.end());
+      double u=utility::uniformco(r)*P.P_[0];
+      int x=0;
+      while (x<P.offset) {
+	if (u<P.P_[2*x+1]) {
+	  x=2*x+1;
+	} else {
+	  u-=P.P_[2*x+1];
+	  x=2*x+2;
+	}
+      }
+      return x-P.offset;
     }
     template<typename R>
     int operator()(R &r, const param_type &p) {
@@ -90,23 +162,29 @@ namespace trng {
     }
     // property methods
     int min() const { return 0; }
-    int max() const { return P.P_.size()-1; }
+    int max() const { return P.N-1; }
     param_type param() const { return P; }
     void param(const param_type &P_new) { P=P_new; }
+    void param(int x, double p) {
+      x+=P.offset;
+      P.P_[x]=p;
+      if (x>0) {
+	do {
+	  x=(x-1)/2;
+	  P.P_[x]=P.P_[2*x+1]+P.P_[2*x+2];
+	} while (x>0);
+      }
+    }
     // probability density function  
     double pdf(int x) const {
-      if (x<0 || x>=P.P_.size())
-        return 0.0;
-      if (x==0)
-        return P.P_[0];
-      return P.P_[x]-P.P_[x-1];
+      return (x<0 || x>=static_cast<int>(P.N)) ? 0.0 : P.P_[x+P.offset]/P.P_[0];
     }
     // cumulative density function 
     double cdf(int x) const {
       if (x<0)
-        return 0.0;
-      if (x<P.P_.size())
-        return P.P_[x];
+	return 0.0;
+      if (x<static_cast<int>(P.N))
+	return std::accumulate(&P.P_[P.offset], &P.P_[x+P.offset+1], 0.0)/P.P_[0];
       return 1.0;
     }
   };
@@ -131,8 +209,8 @@ namespace trng {
     std::ios_base::fmtflags flags(out.flags());
     out.flags(std::ios_base::dec | std::ios_base::fixed |
 	      std::ios_base::left);
-    out << '(' << P.P_.size() << ' ';
-    for (std::vector<double>::size_type i=0; i<P.P_.size(); ++i) {
+    out << '(' << P.N << ' ';
+    for (std::vector<double>::size_type i=P.offset; i<P.P_.size(); ++i) {
       out << std::setprecision(17) << P.P_[i];
       if (i+1<P.P_.size())
 	out << ' ';
@@ -211,4 +289,3 @@ namespace trng {
 }
 
 #endif
-

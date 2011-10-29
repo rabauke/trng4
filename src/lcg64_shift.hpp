@@ -15,9 +15,9 @@
 // 02111-1307, USA.
 //  
 
-#if !(defined TRNG_LCG64_HPP)
+#if !(defined TRNG_LCG64_SHIFT_HPP)
 
-#define TRNG_LCG64_HPP
+#define TRNG_LCG64_SHIFT_HPP
 
 #include <trng/limits.hpp>
 #include <climits>
@@ -29,9 +29,9 @@
 
 namespace trng {
   
-  class lcg64;
+  class lcg64_shift;
   
-  class lcg64 {
+  class lcg64_shift {
   public:
 
     // Uniform random number generator concept
@@ -52,7 +52,7 @@ namespace trng {
       parameter_type(result_type a, result_type b) :
 	a(a), b(b) { };
 
-      friend class lcg64;
+      friend class lcg64_shift;
 
       // Equality comparable concept
       friend bool operator==(const parameter_type &, const parameter_type &);
@@ -98,7 +98,7 @@ namespace trng {
       status_type() : r(0) { };
       explicit status_type(result_type r) : r(r) { };
       
-      friend class lcg64;
+      friend class lcg64_shift;
 
       // Equality comparable concept
       friend bool operator==(const status_type &, const status_type &);
@@ -143,11 +143,11 @@ namespace trng {
     static const parameter_type LEcuyer3;
 
     // Random number engine concept
-    explicit lcg64(parameter_type=Default); 
-    explicit lcg64(unsigned long, parameter_type=Default); 
+    explicit lcg64_shift(parameter_type=Default); 
+    explicit lcg64_shift(unsigned long, parameter_type=Default); 
     
     template<typename gen>
-    explicit lcg64(gen &g, parameter_type P=Default) : P(P), S() {
+    explicit lcg64_shift(gen &g, parameter_type P=Default) : P(P), S() {
       seed(g);
     }
     
@@ -165,32 +165,32 @@ namespace trng {
     void seed(result_type); 
     
     // Equality comparable concept
-    friend bool operator==(const lcg64 &, const lcg64 &);
-    friend bool operator!=(const lcg64 &, const lcg64 &);
+    friend bool operator==(const lcg64_shift &, const lcg64_shift &);
+    friend bool operator!=(const lcg64_shift &, const lcg64_shift &);
 
     // Streamable concept
     template<typename char_t, typename traits_t>
     friend std::basic_ostream<char_t, traits_t> & 
-    operator<<(std::basic_ostream<char_t, traits_t> &out, const lcg64 &R) {
+    operator<<(std::basic_ostream<char_t, traits_t> &out, const lcg64_shift &R) {
       std::ios_base::fmtflags flags(out.flags());
       out.flags(std::ios_base::dec | std::ios_base::fixed | 
 		std::ios_base::left);
-      out << '[' << lcg64::name() << ' ' << R.P << ' ' << R.S << ']';
+      out << '[' << lcg64_shift::name() << ' ' << R.P << ' ' << R.S << ']';
       out.flags(flags);
       return out;
     }
 
     template<typename char_t, typename traits_t>
     friend std::basic_istream<char_t, traits_t> & 
-    operator>>(std::basic_istream<char_t, traits_t> &in, lcg64 &R) {
-      lcg64::parameter_type P_new;
-      lcg64::status_type S_new;
+    operator>>(std::basic_istream<char_t, traits_t> &in, lcg64_shift &R) {
+      lcg64_shift::parameter_type P_new;
+      lcg64_shift::status_type S_new;
       std::ios_base::fmtflags flags(in.flags());
       in.flags(std::ios_base::dec | std::ios_base::fixed | 
 	       std::ios_base::left);
       in >> utility::ignore_spaces();
       in >> utility::delim('[')
-	 >> utility::delim(lcg64::name()) >> utility::delim(' ')
+	 >> utility::delim(lcg64_shift::name()) >> utility::delim(' ')
 	 >> P_new >> utility::delim(' ')
 	 >> S_new >> utility::delim(']');
       if (in) { 
@@ -231,69 +231,82 @@ namespace trng {
   
   // Inline and template methods
   
-  inline void lcg64::step() const {
+  inline void lcg64_shift::step() const {
     S.r=P.a*S.r+P.b;
 #if ULONG_LONG_MAX>18446744073709551615ull
     S.r&=0xfffffffffffffffful;
 #endif
     }
     
-  inline lcg64::result_type lcg64::operator()() const {
+  inline lcg64_shift::result_type lcg64_shift::operator()() const {
     step();
-    return S.r;
+    unsigned long long t=S.r;
+    t^=(t>>17);
+#if ULONG_LONG_MAX>18446744073709551615ull
+    t&=0xfffffffffffffffful;
+#endif
+    t^=(t<<31);
+#if ULONG_LONG_MAX>18446744073709551615ull
+    t&=0xfffffffffffffffful;
+#endif
+    t^=(t>>8);
+#if ULONG_LONG_MAX>18446744073709551615ull
+    t&=0xfffffffffffffffful;
+#endif
+    return t;
   }
 
-  inline long lcg64::operator()(long x) const {
+  inline long lcg64_shift::operator()(long x) const {
     return static_cast<long>(utility::uniformco(*this)*x);
   }
 
-//   inline bool lcg64::boolean() const {
+//   inline bool lcg64_shift::boolean() const {
 //     step();
 //     return S.r<9223372036854775808ull;
 //   }
   
-//   inline bool lcg64::boolean(double p) const {
+//   inline bool lcg64_shift::boolean(double p) const {
 //     step();
 //     return S.r<18446744073709551616.0*p;
 //   }
   
-//   inline double lcg64::uniformco() const {
+//   inline double lcg64_shift::uniformco() const {
 //     step();
 //     double t(S.r/18446744073709551616.0);
 //     return t<1.0 ? t : 1.0-math::numeric_limits<double>::epsilon();
 //   }
   
-//   inline double lcg64::uniformco(double a, double b) const {
+//   inline double lcg64_shift::uniformco(double a, double b) const {
 //     return uniformco()*(b-a)+a;
 //     }
   
-//   inline double lcg64::uniformoc() const {
+//   inline double lcg64_shift::uniformoc() const {
 //     step();
 //     double t(S.r/18446744073709551616.0);
 //     return  t>0.0 ? t : math::numeric_limits<double>::epsilon();
 //     }
   
-//   inline double lcg64::uniformoc(double a, double b) const {
+//   inline double lcg64_shift::uniformoc(double a, double b) const {
 //     return uniformoc()*(b-a)+a;
 //   }
   
-//   inline double lcg64::uniformoo() const {
+//   inline double lcg64_shift::uniformoo() const {
 //     step();
 //     double t(S.r/18446744073709551616.0+
 // 	     math::numeric_limits<double>::epsilon());
 //     return t<1.0 ? t : 1.0-math::numeric_limits<double>::epsilon();
 //   }
   
-//   inline double lcg64::uniformoo(double a, double b) const {
+//   inline double lcg64_shift::uniformoo(double a, double b) const {
 //     return uniformoo()*(b-a)+a;
 //   }
   
-//   inline double lcg64::uniformcc() const {
+//   inline double lcg64_shift::uniformcc() const {
 //     step();
 //     return S.r/18446744073709551615.0;
 //   }
   
-//   inline double lcg64::uniformcc(double a, double b) const {
+//   inline double lcg64_shift::uniformcc(double a, double b) const {
 //     return uniformcc()*(b-a)+a;
 //   }
 

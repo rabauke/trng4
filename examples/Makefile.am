@@ -2,14 +2,15 @@ AUTOMAKE_OPTIONS = gnu
 
 INCLUDES = -I$(top_builddir)
 
-LDADD = ../src/.libs/libtrng4.a
+AM_LDFLAGS = -L../src/.libs -ltrng4 -static
+AM_MPILDFLAGS = -L../src/.libs -ltrng4
 
-EXTRA_PROGRAMS = hello_world test time pi pi_block_mpi pi_block_openmp pi_leap_mpi pi_leap_openmp stl_container distributions implementation_test Ising_model correlated_normal_dist
+EXTRA_PROGRAMS = hello_world test time pi pi_block_mpi pi_block_openmp pi_leap_mpi pi_leap_openmp stl_container distributions implementation_test Ising_model correlated_normal_dist discrete_dist
 EXTRA_OBJECTS = $(addsuffix .o, $(EXTRA_PROGRAMS))
 
 MPICXXCOMPILE = $(MPICXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 MPICXXLD = $(MPICXX)
-MPICXXLINK = $(MPICXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
+MPICXXLINK = $(MPICXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $(AM_MPILDFLAGS)
 
 hello_world_SOURCES = hello_world.cc
 
@@ -36,6 +37,8 @@ implementation_test_SOURCES = implementation_test.cc
 Ising_model_SOURCES = Ising_model.cc
 
 correlated_normal_dist_SOURCES = correlated_normal_dist.cc
+
+discrete_dist_SOURCES = discrete_dist.cc
 
 
 $(pi_block_mpi_OBJECTS): $(pi_block_mpi_SOURCES)

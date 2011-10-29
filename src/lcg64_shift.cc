@@ -15,65 +15,65 @@
 // 02111-1307, USA.
 //  
 
-#include <trng/lcg64.hpp>
+#include <trng/lcg64_shift.hpp>
 
 namespace trng {
 
   // Uniform random number generator concept
-  const lcg64::result_type lcg64::min=0;
-  const lcg64::result_type lcg64::max=18446744073709551615ull;
+  const lcg64_shift::result_type lcg64_shift::min=0;
+  const lcg64_shift::result_type lcg64_shift::max=18446744073709551615ull;
 
   // Parameter and status classes
 
   // Equality comparable concept
-  bool operator==(const lcg64::parameter_type &P1, 
-		  const lcg64::parameter_type &P2) {
+  bool operator==(const lcg64_shift::parameter_type &P1, 
+		  const lcg64_shift::parameter_type &P2) {
     return P1.a==P2.a && P1.b==P2.b;
   }
 
-  bool operator!=(const lcg64::parameter_type &P1, 
-		  const lcg64::parameter_type &P2) {
+  bool operator!=(const lcg64_shift::parameter_type &P1, 
+		  const lcg64_shift::parameter_type &P2) {
     return !(P1==P2);
   }
   
   // Equality comparable concept
-  bool operator==(const lcg64::status_type &S1, 
-		  const lcg64::status_type &S2) {
+  bool operator==(const lcg64_shift::status_type &S1, 
+		  const lcg64_shift::status_type &S2) {
     return S1.r==S2.r;
   }
 
-  bool operator!=(const lcg64::status_type &S1, 
-		  const lcg64::status_type &S2) {
+  bool operator!=(const lcg64_shift::status_type &S1, 
+		  const lcg64_shift::status_type &S2) {
     return !(S1==S2);
   }
   
-  const lcg64::parameter_type
-  lcg64::Default=parameter_type(18145460002477866997ull, 1ull);
-  const lcg64::parameter_type 
-  lcg64::LEcuyer1=parameter_type(2862933555777941757ull, 1ull);
-  const lcg64::parameter_type 
-  lcg64::LEcuyer2=parameter_type(3202034522624059733ull, 1ull);
-  const lcg64::parameter_type 
-  lcg64::LEcuyer3=parameter_type(3935559000370003845ull, 1ull);
+  const lcg64_shift::parameter_type
+  lcg64_shift::Default=parameter_type(18145460002477866997ull, 1ull);
+  const lcg64_shift::parameter_type 
+  lcg64_shift::LEcuyer1=parameter_type(2862933555777941757ull, 1ull);
+  const lcg64_shift::parameter_type 
+  lcg64_shift::LEcuyer2=parameter_type(3202034522624059733ull, 1ull);
+  const lcg64_shift::parameter_type 
+  lcg64_shift::LEcuyer3=parameter_type(3935559000370003845ull, 1ull);
 
   // Random number engine concept
-  lcg64::lcg64(lcg64::parameter_type P) :
+  lcg64_shift::lcg64_shift(lcg64_shift::parameter_type P) :
     P(P), S() { }
 
-  lcg64::lcg64(unsigned long s, lcg64::parameter_type P) :
+  lcg64_shift::lcg64_shift(unsigned long s, lcg64_shift::parameter_type P) :
     P(P), S() { 
     seed(s);
   }
     
-  void lcg64::seed() {
-    (*this)=lcg64();
+  void lcg64_shift::seed() {
+    (*this)=lcg64_shift();
   }
  
-  void lcg64::seed(unsigned long s) {
+  void lcg64_shift::seed(unsigned long s) {
     S.r=s;
   }
   
-  void lcg64::seed(lcg64::result_type s) {
+  void lcg64_shift::seed(lcg64_shift::result_type s) {
     S.r=s;
 #if ULONG_LONG_MAX>18446744073709551615ull
     S.r&=0xfffffffffffffffful;
@@ -81,20 +81,20 @@ namespace trng {
   }
   
   // Equality comparable concept
-  bool operator==(const lcg64 &R1, const lcg64 &R2) {
+  bool operator==(const lcg64_shift &R1, const lcg64_shift &R2) {
     return R1.P==R2.P && R1.S==R2.S;
   }
 
-  bool operator!=(const lcg64 &R1, const lcg64 &R2) {
+  bool operator!=(const lcg64_shift &R1, const lcg64_shift &R2) {
     return !(R1==R2);
   }
 
   // Parallel random number generator concept
-  void lcg64::split(unsigned int s, unsigned int n) {
+  void lcg64_shift::split(unsigned int s, unsigned int n) {
     if (s<1 || n>=s)
-      throw std::invalid_argument("invalid argument for trng::lcg64::split");
+      throw std::invalid_argument("invalid argument for trng::lcg64_shift::split");
     if (s>1) {
-      lcg64::result_type t1(1ull), t2(0ull);
+      lcg64_shift::result_type t1(1ull), t2(0ull);
       for (unsigned int i(0); i<=n; ++i)
 	step();
       for (unsigned int i(0); i<s; ++i) {
@@ -107,11 +107,11 @@ namespace trng {
     }
   }
 
-  void lcg64::jump2(unsigned int s) {
-    lcg64::result_type t1(P.a);
+  void lcg64_shift::jump2(unsigned int s) {
+    lcg64_shift::result_type t1(P.a);
     for (unsigned int i(0); i<s; ++i)
       t1*=t1;
-    lcg64::result_type t2(1ull), t3(P.a);
+    lcg64_shift::result_type t2(1ull), t3(P.a);
     while (s>0l) {
       t2*=(1ull+t3);
       t3*=t3;
@@ -120,7 +120,7 @@ namespace trng {
     S.r=S.r*t1+t2*P.b;
   }
 
-  void lcg64::jump(unsigned long long s) {
+  void lcg64_shift::jump(unsigned long long s) {
     unsigned int i(0);
     while (s>0) {
       if (s%2u==1u)
@@ -131,13 +131,13 @@ namespace trng {
   }
   
   // Other usefull methods
-  const char * const lcg64::name_str="lcg64";
+  const char * const lcg64_shift::name_str="lcg64_shift";
   
-  const char * lcg64::name() {
+  const char * lcg64_shift::name() {
     return name_str;
   }
   
-  void lcg64::backward() {
+  void lcg64_shift::backward() {
     for (unsigned int i(0); i<64; ++i)
       jump2(i);
   }

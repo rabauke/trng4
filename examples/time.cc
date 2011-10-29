@@ -1,4 +1,4 @@
-// Copyright (C) 2006 Heiko Bauke <heiko.bauke@physik.uni-magdeburg.de>
+// Copyright (C) 2001-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -21,6 +21,7 @@
 #include <string>
 #include <trng/config.hpp>
 #include <trng/lcg64.hpp>
+#include <trng/lcg64_shift.hpp>
 #include <trng/mrg2.hpp>
 #include <trng/mrg3.hpp>
 #include <trng/mrg3s.hpp>
@@ -33,7 +34,10 @@
 #include <trng/yarn4.hpp>
 #include <trng/yarn5.hpp>
 #include <trng/yarn5s.hpp>
+#include <trng/lagfib2xor.hpp>
+#include <trng/lagfib2plus.hpp>
 #include <trng/lagfib4xor.hpp>
+#include <trng/lagfib4plus.hpp>
 
 #if defined HAVE_BOOST
 # include <boost/random/linear_congruential.hpp>
@@ -83,34 +87,39 @@ template<typename R>
 typename R::result_type time_main(R &r, std::string name) {
   typename R::result_type s(0);
   timer T;
-  long max((1<<26));
+  long max(1l<<26);
   for (long i(0); i<max; ++i)
     s+=r();
-  while (name.length()<20)
+  while (name.length()<32)
     name+=' ';
-  std::cout << name << '\t'
-	    << 1e-6*max/T.time() << '\n';
+  std::cout << name << 1e-6*max/T.time() << '\n';
   return s;
 }
 
 int main() {
-  std::cout << "Generator               10^6 random numbers per second\n"
-	    << "======================================================\n";
+  std::cout << "                                10^6 random numbers\n"
+            << "generator                       per second\n"
+	    << "===================================================\n";
+  std::cout.flush();
   try {
-    { trng::lcg64    r;  time_main(r, "trng::lcg64"); }
-    { trng::mrg2     r;  time_main(r, "trng::mrg2"); }
-    { trng::mrg3     r;  time_main(r, "trng::mrg3"); }
-    { trng::mrg3s    r;  time_main(r, "trng::mrg3s"); }
-    { trng::mrg4     r;  time_main(r, "trng::mrg4"); }
-    { trng::mrg5     r;  time_main(r, "trng::mrg5"); }
-    { trng::mrg5s    r;  time_main(r, "trng::mrg5s"); }
-    { trng::yarn2    r;  time_main(r, "trng::yarn2"); }
-    { trng::yarn3    r;  time_main(r, "trng::yarn3"); }
-    { trng::yarn3s   r;  time_main(r, "trng::yarn3s"); }
-    { trng::yarn4    r;  time_main(r, "trng::yarn4"); }
-    { trng::yarn5    r;  time_main(r, "trng::yarn5"); }
-    { trng::yarn5s   r;  time_main(r, "trng::yarn5s"); }
-    { trng::Ziff_ul  r;  time_main(r, "trng::Ziff_ul"); }
+    { trng::lcg64       r;  time_main(r, "trng::lcg64"); }
+    { trng::lcg64_shift r;  time_main(r, "trng::lcg64_shift"); }
+    { trng::mrg2        r;  time_main(r, "trng::mrg2"); }
+    { trng::mrg3        r;  time_main(r, "trng::mrg3"); }
+    { trng::mrg3s       r;  time_main(r, "trng::mrg3s"); }
+    { trng::mrg4        r;  time_main(r, "trng::mrg4"); }
+    { trng::mrg5        r;  time_main(r, "trng::mrg5"); }
+    { trng::mrg5s       r;  time_main(r, "trng::mrg5s"); }
+    { trng::yarn2       r;  time_main(r, "trng::yarn2"); }
+    { trng::yarn3       r;  time_main(r, "trng::yarn3"); }
+    { trng::yarn3s      r;  time_main(r, "trng::yarn3s"); }
+    { trng::yarn4       r;  time_main(r, "trng::yarn4"); }
+    { trng::yarn5       r;  time_main(r, "trng::yarn5"); }
+    { trng::yarn5s      r;  time_main(r, "trng::yarn5s"); }
+    { trng::lagfib2xor_19937_ull  r;  time_main(r, "trng::lagfib2xor_19937_ull"); }
+    { trng::lagfib4xor_19937_ull  r;  time_main(r, "trng::lagfib4xor_19937_ull"); }
+    { trng::lagfib4plus_19937_ull r;  time_main(r, "trng::lagfib2plus_19937_ull"); }
+    { trng::lagfib2plus_19937_ull r;  time_main(r, "trng::lagfib4plus_19937_ull"); }
 #if defined HAVE_BOOST
     { boost::minstd_rand    r; time_main(r, "boost::minstd_rand"); }
     { boost::ecuyer1988     r; time_main(r, "boost::ecuyer1988"); }
@@ -137,5 +146,3 @@ int main() {
   }
   return EXIT_SUCCESS;
 }
-
-

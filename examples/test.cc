@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <trng/lcg64.hpp>
+#include <trng/lcg64_shift.hpp>
 #include <trng/mrg2.hpp>
 #include <trng/mrg3.hpp>
 #include <trng/mrg3s.hpp>
@@ -28,6 +29,7 @@ void test() {
 
 int main() {
   test<trng::lcg64>();
+  test<trng::lcg64_shift>();
   test<trng::mrg2>();
   test<trng::mrg3>();
   test<trng::mrg3s>();

@@ -1,4 +1,4 @@
-// Copyright (C) 2006 Heiko Bauke <heiko.bauke@physik.uni-magdeburg.de>
+// Copyright (C) 2000-2007 Heiko Bauke <heiko.bauke@mpi-hd.mpg.de>
 //  
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License in
@@ -156,7 +156,7 @@ namespace trng {
     template<long modulus>
     class power {
       long b;
-      unsigned long b_power0[0x10000], b_power1[0x08000];
+      std::vector<unsigned long> b_power0, b_power1;
       
       inline long pow(long n) {
 	long long p(1ll), t(b);
@@ -186,10 +186,10 @@ namespace trng {
 	return b;
       }
 
-      power(const long b=2) : b(b) {
+      power(const long b=2) : b(b), b_power0(0x10000), b_power1(0x08000) {
 	calc_b_power();
       }
-      
+
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> & 
       operator<<(std::basic_ostream<char_t, traits_t> &out, const power &g) {
