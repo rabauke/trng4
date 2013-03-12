@@ -219,6 +219,6 @@ else
   if test "x$ax_cv_[]_AC_LANG_ABBREV[]_openmp" != "xnone"; then
     OPENMP_[]_AC_LANG_PREFIX[]FLAGS=$ax_cv_[]_AC_LANG_ABBREV[]_openmp
   fi
-  m4_default([$1], [AC_DEFINE(HAVE_OPENMP,1,[Define if OpenMP is enabled])])
+  m4_default([$1], [AC_DEFINE(TRNG_HAVE_OPENMP,1,[Define if OpenMP is enabled])])
 fi
 ])dnl AX_OPENMP

@@ -14883,7 +14883,7 @@ else
     OPENMP_CXXFLAGS=$ax_cv_cxx_openmp
   fi
 
-$as_echo "#define HAVE_OPENMP 1" >>confdefs.h
+$as_echo "#define TRNG_HAVE_OPENMP 1" >>confdefs.h
 
 fi
 
