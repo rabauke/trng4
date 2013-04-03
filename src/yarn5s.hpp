@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2011, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -51,15 +51,20 @@ namespace trng {
     // Uniform random number generator concept
     typedef long result_type;
     TRNG_CUDA_ENABLE
-    result_type operator()() const;
+    result_type operator()();
   private:
     static const result_type modulus=2147461007l;  // 2^31 - 22641
     static const result_type gen=889744251l;
-  public:
     static const result_type min_=0l;
     static const result_type max_=modulus-1;
+  public:
+#if __cplusplus>=201103L
+    static constexpr result_type min() {  return min_;  }
+    static constexpr result_type max() {  return max_;  }
+#else
     static const result_type min=min_;
     static const result_type max=max_;
+#endif
 
     // Parameter and status classes
     class parameter_type;
@@ -248,27 +253,29 @@ namespace trng {
     void jump2(unsigned int);
     TRNG_CUDA_ENABLE
     void jump(unsigned long long);
+    TRNG_CUDA_ENABLE
+    void discard(unsigned long long);
 
     // Other useful methods
     static const char * name();
     TRNG_CUDA_ENABLE
-    long operator()(long) const;
+    long operator()(long);
 
   private:
     parameter_type P;
-    mutable status_type S;
+    status_type S;
     static const char * const name_str;
     
     TRNG_CUDA_ENABLE
     void backward();
     TRNG_CUDA_ENABLE
-    void step() const;
+    void step();
   };
     
   // Inline and template methods
 
   TRNG_CUDA_ENABLE
-  inline void yarn5s::step() const {
+  inline void yarn5s::step() {
     unsigned long long t(static_cast<unsigned long long>(P.a1)*
 			 static_cast<unsigned long long>(S.r1)+
 			 static_cast<unsigned long long>(P.a2)*
@@ -285,7 +292,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  inline yarn5s::result_type yarn5s::operator()() const {
+  inline yarn5s::result_type yarn5s::operator()() {
     step();
 #if defined __CUDA_ARCH__
     if (S.r1==0) 
@@ -305,7 +312,7 @@ namespace trng {
   }
   
   TRNG_CUDA_ENABLE
-  inline long yarn5s::operator()(long x) const {
+  inline long yarn5s::operator()(long x) {
     return static_cast<long>(utility::uniformco<double, yarn5s>(*this)*x);
   }
 
@@ -378,6 +385,11 @@ namespace trng {
 	s>>=1;
       }
     }
+  }
+
+  TRNG_CUDA_ENABLE
+  inline void yarn5s::discard(unsigned long long n) {
+    return jump(n);
   }
 
   TRNG_CUDA_ENABLE

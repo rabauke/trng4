@@ -53,3 +53,4 @@
 
 /* TRNG version number. */
 #undef TRNG_VERSION
+

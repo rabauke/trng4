@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2010, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -108,11 +108,19 @@ template<typename R>
 class generator_max {
 public:
   typedef typename R::result_type result_type;
-  static const result_type min_=R::min_;
-  static const result_type max_=R::max_;
+#if __cplusplus>=201103L
+  static constexpr result_type min() {  return R::min();  }
+  static constexpr result_type max() {  return R::max();  }
   result_type operator()() const {
-    return max_;
+    return max();
   }
+#else
+  static const result_type min=R::min;
+  static const result_type max=R::max;
+  result_type operator()() const {
+    return max;
+  }
+#endif
 };
 
 
@@ -120,11 +128,19 @@ template<typename R>
 class generator_min {
 public:
   typedef typename R::result_type result_type;
-  static const result_type min_=R::min_;
-  static const result_type max_=R::max_;
+#if __cplusplus>=201103L
+  static constexpr result_type min() {  return R::min();  }
+  static constexpr result_type max() {  return R::max();  }
   result_type operator()() const {
-    return min_;
+    return min();
   }
+#else
+  static const result_type min=R::min;
+  static const result_type max=R::max;
+  result_type operator()() const {
+    return min;
+  }
+#endif
 };
 
 

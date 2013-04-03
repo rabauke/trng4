@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2011, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -185,7 +185,7 @@ namespace trng {
       T ln_Gamma_Lanczos(T x);
 
       template<>
-      float ln_Gamma_Lanczos<float>(float x) {
+      inline float ln_Gamma_Lanczos<float>(float x) {
 	return ln(+0.299890266072888E-2f/(x+4.0f)
 		  -0.308748865044984E1f/(x+3.0f)
 		  +0.6019440944395479E2f/(x+2.0f)
@@ -196,7 +196,7 @@ namespace trng {
       }
     
       template<>
-      double ln_Gamma_Lanczos<double>(double x) {
+      inline double ln_Gamma_Lanczos<double>(double x) {
 	return ln(-0.1710538478644311E-5/(x+7.0)
 		  +0.8683645856906762E-1/(x+6.0)
 		  -0.1567563009175129E2/(x+5.0)
@@ -210,7 +210,7 @@ namespace trng {
       }
     
       template<>
-      long double ln_Gamma_Lanczos<long double>(long double x) {
+      inline long double ln_Gamma_Lanczos<long double>(long double x) {
 	return ln(-0.1008550193581785E-7l/(x+9.0l)
 		  +0.1349602861619936E-6l/(x+8.0l)
 		  -0.1860783595745135E-1l/(x+7.0l)
@@ -383,7 +383,7 @@ namespace trng {
       T Gamma_Lanczos(T x);
 
       template<>
-      float Gamma_Lanczos<float>(float x) {
+      inline float Gamma_Lanczos<float>(float x) {
 	return (+0.299890266072888E-2f/(x+4.0f)
 		-0.308748865044984E1f/(x+3.0f)
 		+0.6019440944395479E2f/(x+2.0f)
@@ -394,7 +394,7 @@ namespace trng {
       }
 
       template<>
-      double Gamma_Lanczos<double>(double x) {
+      inline double Gamma_Lanczos<double>(double x) {
 	return (-0.1710538478644311E-5/(x+7.0)
 		+0.8683645856906762E-1/(x+6.0)
 		-0.1567563009175129E2/(x+5.0)
@@ -408,7 +408,7 @@ namespace trng {
       }
     
       template<>
-      long double Gamma_Lanczos<long double>(long double x) {
+      inline long double Gamma_Lanczos<long double>(long double x) {
 	return (-0.1008550193581785E-7l/(x+9.0l)
 		+0.1349602861619936E-6l/(x+8.0l)
 		-0.1860783595745135E-1l/(x+7.0l)
@@ -791,8 +791,8 @@ namespace trng {
         }
         const T eps=4*numeric_limits<T>::epsilon();
         T psq=p+q, cx=1-x;
-        bool flag;
-        if (flag=(p<psq*x)) {
+        bool flag=(p<psq*x);
+        if (flag) {
           // use  I(x, p, q) = 1-I(1-x, q, p)
 	  utility::swap(x, cx);
 	  utility::swap(p, q);
@@ -1133,20 +1133,31 @@ namespace trng {
 	    2.445134137142996e+00f,    3.754408661907416e+00f};
 	  return d_[i];
 	}
-	static const float x_low;
-	static const float x_high;
-	static const float zero;
-	static const float one;
-	static const float one_half;
-	static const float minus_two;
+	TRNG_CUDA_ENABLE
+	static float x_low() throw() {
+	  return 0.02425f;
+	}
+	TRNG_CUDA_ENABLE
+	static float x_high() throw() {
+	  return 1.0f-0.02425f;
+	}
+	TRNG_CUDA_ENABLE
+	static float zero() throw() {
+	  return 0.0f;
+	}
+	TRNG_CUDA_ENABLE
+	static float one() throw() {
+	  return 1.0f;
+	}
+	TRNG_CUDA_ENABLE
+	static float one_half() throw() {
+	  return 0.5f;
+	}
+	TRNG_CUDA_ENABLE
+	static float minus_two() throw() {
+	  return -2.0f;
+	}
       };
-
-      const float inv_Phi_traits<float>::x_low=0.02425f;
-      const float inv_Phi_traits<float>::x_high=1.0f-0.02425f;
-      const float inv_Phi_traits<float>::zero=0.0f;
-      const float inv_Phi_traits<float>::one=1.0f;
-      const float inv_Phi_traits<float>::one_half=0.5f;
-      const float inv_Phi_traits<float>::minus_two=-2.0f;
       
       template<>
       struct inv_Phi_traits<double> {
@@ -1181,20 +1192,31 @@ namespace trng {
 	    2.445134137142996e+00,    3.754408661907416e+00};
 	  return d_[i];
 	}
-	static const double x_low;
-	static const double x_high;
-	static const double zero;
-	static const double one;
-	static const double one_half;
-	static const double minus_two;
+	TRNG_CUDA_ENABLE
+	static double x_low() throw() {
+	  return 0.02425;
+	}
+	TRNG_CUDA_ENABLE
+	static double x_high() throw() {
+	  return 1.0-0.02425;
+	}
+	TRNG_CUDA_ENABLE
+	static double zero() throw() {
+	  return 0.0;
+	}
+	TRNG_CUDA_ENABLE
+	static double one() throw() {
+	  return 1.0;
+	}
+	TRNG_CUDA_ENABLE
+	static double one_half() throw() {
+	  return 0.5;
+	}
+	TRNG_CUDA_ENABLE
+	static double minus_two() throw() {
+	  return -2.0;
+	}
       };
-
-      const double inv_Phi_traits<double>::x_low=0.02425;
-      const double inv_Phi_traits<double>::x_high=1.0-0.02425;
-      const double inv_Phi_traits<double>::zero=0.0;
-      const double inv_Phi_traits<double>::one=1.0;
-      const double inv_Phi_traits<double>::one_half=0.5;
-      const double inv_Phi_traits<double>::minus_two=-2.0;
 
       template<>
       struct inv_Phi_traits<long double> {
@@ -1229,70 +1251,80 @@ namespace trng {
 	    2.445134137142996e+00l,    3.754408661907416e+00l};
 	  return d_[i];
 	}
-	static const long double x_low;
-	static const long double x_high;
-	static const long double zero;
-	static const long double one;
-	static const long double one_half;
-	static const long double minus_two;
+	TRNG_CUDA_ENABLE
+	static long double x_low() throw() {
+	  return 0.02425l;
+	}
+	TRNG_CUDA_ENABLE
+	static long double x_high() throw() {
+	  return 1.0l-0.02425l;
+	}
+	TRNG_CUDA_ENABLE
+	static long double zero() throw() {
+	  return 0.0l;
+	}
+	TRNG_CUDA_ENABLE
+	static long double one() throw() {
+	  return 1.0l;
+	}
+	TRNG_CUDA_ENABLE
+	static long double one_half() throw() {
+	  return 0.5l;
+	}
+	TRNG_CUDA_ENABLE
+	static long double minus_two() throw() {
+	  return -2.0l;
+	}
       };
-
-      const long double inv_Phi_traits<long double>::x_low=0.02425l;
-      const long double inv_Phi_traits<long double>::x_high=1.0l-0.02425l;
-      const long double inv_Phi_traits<long double>::zero=0.0l;
-      const long double inv_Phi_traits<long double>::one=1.0l;
-      const long double inv_Phi_traits<long double>::one_half=0.5l;
-      const long double inv_Phi_traits<long double>::minus_two=-2.0l;
 
       template<typename T>
       TRNG_CUDA_ENABLE
       T inv_Phi(T x) {
-	if (x<inv_Phi_traits<T>::zero or x>inv_Phi_traits<T>::one) {
+	if (x<inv_Phi_traits<T>::zero() or x>inv_Phi_traits<T>::one()) {
 #if !(defined __CUDA_ARCH__)
 	  errno=EDOM;
 #endif
 	  return numeric_limits<T>::quiet_NaN();
 	} 
-	if (x==inv_Phi_traits<T>::zero)
+	if (x==inv_Phi_traits<T>::zero())
 	  return -numeric_limits<T>::infinity();
-	if (x==inv_Phi_traits<T>::one)
+	if (x==inv_Phi_traits<T>::one())
 	  return numeric_limits<T>::infinity();
 	T t, q;
-	if (x<inv_Phi_traits<T>::x_low) {
+	if (x<inv_Phi_traits<T>::x_low()) {
 	  // Rational approximation for lower region
-	  q=sqrt(inv_Phi_traits<T>::minus_two*
-		 ln(x));
+	  q=sqrt(inv_Phi_traits<T>::minus_two()*ln(x));
 	  t=(((((inv_Phi_traits<T>::c(0)*q + inv_Phi_traits<T>::c(1))*q +
 		inv_Phi_traits<T>::c(2))*q + inv_Phi_traits<T>::c(3))*q +
 	      inv_Phi_traits<T>::c(4))*q + inv_Phi_traits<T>::c(5)) /
 	    ((((inv_Phi_traits<T>::d(0)*q + inv_Phi_traits<T>::d(1))*q +
 	       inv_Phi_traits<T>::d(2))*q + inv_Phi_traits<T>::d(3))*q +
-	     inv_Phi_traits<T>::one);
-	} else if (x<inv_Phi_traits<T>::x_high) {
+	     inv_Phi_traits<T>::one());
+	} else if (x<inv_Phi_traits<T>::x_high()) {
 	  // Rational approximation for central region
-	  q=x-inv_Phi_traits<T>::one_half;
+	  q=x-inv_Phi_traits<T>::one_half();
 	  T r=q*q;
 	  t=(((((inv_Phi_traits<T>::a(0)*r + inv_Phi_traits<T>::a(1))*r + 
 		inv_Phi_traits<T>::a(2))*r + inv_Phi_traits<T>::a(3))*r + 
 	      inv_Phi_traits<T>::a(4))*r + inv_Phi_traits<T>::a(5))*q /
 	    (((((inv_Phi_traits<T>::b(0)*r + inv_Phi_traits<T>::b(1))*r +
 		inv_Phi_traits<T>::b(2))*r + inv_Phi_traits<T>::b(3))*r +
-	      inv_Phi_traits<T>::b(4))*r + inv_Phi_traits<T>::one);
+	      inv_Phi_traits<T>::b(4))*r + inv_Phi_traits<T>::one());
 	} else {
 	  // Rational approximation for upper region
-	  q=sqrt(inv_Phi_traits<T>::minus_two*ln(1.0-x));
+	  q=sqrt(inv_Phi_traits<T>::minus_two()*ln(1.0-x));
 	  t=-(((((inv_Phi_traits<T>::c(0)*q + inv_Phi_traits<T>::c(1))*q +
 		 inv_Phi_traits<T>::c(2))*q + inv_Phi_traits<T>::c(3))*q +
 	       inv_Phi_traits<T>::c(4))*q + inv_Phi_traits<T>::c(5)) /
 	    ((((inv_Phi_traits<T>::d(0)*q + inv_Phi_traits<T>::d(1))*q +
 	       inv_Phi_traits<T>::d(2))*q + inv_Phi_traits<T>::d(3))*q +
-	     inv_Phi_traits<T>::one);	
+	     inv_Phi_traits<T>::one());	
 	}
 	// refinement by Halley rational method
 	if (numeric_limits<T>::epsilon()<1e-9) {
 	  T e(Phi(t)-x);
-	  T u(e*constants<T>::sqrt_2pi()*exp(t*t*inv_Phi_traits<T>::one_half));
-	  t-=u/(inv_Phi_traits<T>::one+t*u*inv_Phi_traits<T>::one_half);
+	  T u(e*constants<T>::sqrt_2pi()*exp(t*t*inv_Phi_traits<T>::one_half()));
+	  t-=u/(inv_Phi_traits<T>::one()+t*u*inv_Phi_traits<T>::one_half());
 	}
 	return t;
       }

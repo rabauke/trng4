@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2011, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -53,11 +53,18 @@ namespace trng {
     // Uniform random number generator concept
     typedef unsigned long long result_type;
     TRNG_CUDA_ENABLE
-    result_type operator()() const; 
+    result_type operator()(); 
+  private:
     static const result_type min_=0;
     static const result_type max_=18446744073709551615ull;
+  public:
+#if __cplusplus>=201103L
+    static constexpr result_type min() {  return min_;  }
+    static constexpr result_type max() {  return max_;  }
+#else
     static const result_type min=min_;
     static const result_type max=max_;
+#endif
   private:
     // compute floor(log_2(x))
     TRNG_CUDA_ENABLE
@@ -240,27 +247,29 @@ namespace trng {
     void jump2(unsigned int);
     TRNG_CUDA_ENABLE
     void jump(unsigned long long);
+    TRNG_CUDA_ENABLE
+    void discard(unsigned long long);
     
     // Other useful methods
     static const char * name();
     TRNG_CUDA_ENABLE
-    long operator()(long) const;
+    long operator()(long);
 
   private:
     parameter_type P;
-    mutable status_type S;
+    status_type S;
     static const char * const name_str;
     
     TRNG_CUDA_ENABLE
     void backward();
     TRNG_CUDA_ENABLE
-    void step() const;
+    void step();
   };
   
   // Inline and template methods
   
   TRNG_CUDA_ENABLE
-  inline void lcg64::step() const {
+  inline void lcg64::step() {
 #if ULONG_LONG_MAX>18446744073709551615ull
     S.r=(P.a*S.r+P.b) & max;
 #else
@@ -269,13 +278,13 @@ namespace trng {
   }
     
   TRNG_CUDA_ENABLE
-  inline lcg64::result_type lcg64::operator()() const {
+  inline lcg64::result_type lcg64::operator()() {
     step();
     return S.r;
   }
 
   TRNG_CUDA_ENABLE
-  inline long lcg64::operator()(long x) const {
+  inline long lcg64::operator()(long x) {
     return static_cast<long>(utility::uniformco<double, lcg64>(*this)*x);
   }
 
@@ -382,6 +391,11 @@ namespace trng {
 	s>>=1;
       }
     }
+  }
+  
+  TRNG_CUDA_ENABLE
+  inline void lcg64::discard(unsigned long long n) {
+    return jump(n);
   }
 
   TRNG_CUDA_ENABLE

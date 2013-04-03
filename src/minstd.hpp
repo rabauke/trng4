@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2011, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -50,10 +50,19 @@ namespace trng {
 
     // Uniform random number generator concept
     typedef unsigned long result_type;
-    result_type operator()() const;  
+    result_type operator()();
+  private:
     static const result_type min_=1ul;
     static const result_type max_=2147483646ul;
-
+  public:
+#if __cplusplus>=201103L
+    static constexpr result_type min() {  return min_;  }
+    static constexpr result_type max() {  return max_;  }
+#else
+    static const result_type min=min_;
+    static const result_type max=max_;
+#endif
+    
     // Parameter and status classes
     class status_type;
     
@@ -103,7 +112,7 @@ namespace trng {
     };
     
     // Random number engine concept
-    explicit minstd(); 
+    minstd(); 
     explicit minstd(unsigned long); 
     
     template<typename gen>
@@ -121,6 +130,8 @@ namespace trng {
 	  S.r+=2147483647l;
       } while (S.r==0);
     }
+    
+    void discard(unsigned long long);
     
     // Equality comparable concept
     friend bool operator==(const minstd &, const minstd &);
@@ -157,18 +168,18 @@ namespace trng {
         
     // Other useful methods
     static const char * name();
-    long operator()(long) const;
+    long operator()(long);
     
   private:
-    mutable status_type S;
+    status_type S;
     static const char * const name_str;
     
-    void step() const;
+    void step();
   };
   
   // Inline and template methods
   
-  inline void minstd::step() const {
+  inline void minstd::step() {
     unsigned long long t=S.r*16807;
      t=(t&0x7fffffffull)+(t>>31);
      if (t>=2147483647ull)
@@ -176,12 +187,18 @@ namespace trng {
      S.r=static_cast<long>(t);
   }
   
-  inline minstd::result_type minstd::operator()() const {
+  inline minstd::result_type minstd::operator()() {
     step();
     return S.r;
   }
 
-  inline long minstd::operator()(long x) const {
+  inline void minstd::discard(unsigned long long n) {
+    n%=minstd::max_-minstd::min_;
+    for (unsigned long long i(0); i<n; ++i)
+      step();
+  }
+  
+  inline long minstd::operator()(long x) {
     return static_cast<long>(utility::uniformco<double, minstd>(*this)*x);
   }
   

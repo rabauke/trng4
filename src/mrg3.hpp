@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2011, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -51,14 +51,19 @@ namespace trng {
     // Uniform random number generator concept
     typedef long result_type;
     TRNG_CUDA_ENABLE
-    result_type operator()() const;
+    result_type operator()();
   private:
     static const result_type modulus=2147483647l;
-  public:
     static const result_type min_=0l;
     static const result_type max_=modulus-1;
+  public:
+#if __cplusplus>=201103L
+    static constexpr result_type min() {  return min_;  }
+    static constexpr result_type max() {  return max_;  }
+#else
     static const result_type min=min_;
     static const result_type max=max_;
+#endif
     
     // Parameter and status classes
     class parameter_type;
@@ -235,27 +240,29 @@ namespace trng {
     void jump2(unsigned int);
     TRNG_CUDA_ENABLE
     void jump(unsigned long long);
+    TRNG_CUDA_ENABLE
+    void discard(unsigned long long);
 
     // Other useful methods
     static const char * name();
     TRNG_CUDA_ENABLE
-    long operator()(long) const;
+    long operator()(long);
 
   private:
     parameter_type P;
-    mutable status_type S;
+    status_type S;
     static const char * const name_str;
     
     TRNG_CUDA_ENABLE
     void backward();
     TRNG_CUDA_ENABLE
-    void step() const;
+    void step();
   };
     
   // Inline and template methods
 
   TRNG_CUDA_ENABLE
-  inline void mrg3::step() const {
+  inline void mrg3::step() {
     unsigned long long t(static_cast<unsigned long long>(P.a1)*
 			 static_cast<unsigned long long>(S.r1)+
 			 static_cast<unsigned long long>(P.a2)*
@@ -266,13 +273,13 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  inline mrg3::result_type mrg3::operator()() const {
+  inline mrg3::result_type mrg3::operator()() {
     step();
     return S.r1;
   }
   
   TRNG_CUDA_ENABLE
-  inline long mrg3::operator()(long x) const {
+  inline long mrg3::operator()(long x) {
     return static_cast<long>(utility::uniformco<double, mrg3>(*this)*x);
   }
 
@@ -337,6 +344,11 @@ namespace trng {
 	s>>=1;
       }
     }
+  }
+
+  TRNG_CUDA_ENABLE
+  inline void mrg3::discard(unsigned long long n) {
+    return jump(n);
   }
 
   TRNG_CUDA_ENABLE

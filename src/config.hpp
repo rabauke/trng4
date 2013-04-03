@@ -35,7 +35,7 @@
 #define TRNG_HAVE_LONG_LONG /**/
 
 /* Define to 1 if you have a MPI library. */
-#define TRNG_HAVE_MPI 1
+/* #undef TRNG_HAVE_MPI */
 
 /* Define if OpenMP is enabled */
 #define TRNG_HAVE_OPENMP 1
@@ -53,4 +53,5 @@
 #define TRNG_HAVE_TGAMMAL 1
 
 /* TRNG version number. */
-#define TRNG_VERSION 4.13
+#define TRNG_VERSION 4.14
+

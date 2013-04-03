@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2011, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -56,14 +56,21 @@ namespace trng {
     
     // Uniform random number generator concept
     typedef integer_type result_type;
-    result_type operator()() const {
+    result_type operator()() {
       step();  
       return S.r[S.index];
     }
+  private:
     static const result_type min_=0;
     static const result_type max_=~result_type(0);
+  public:
+#if __cplusplus>=201103L
+    static constexpr result_type min() {  return min_;  }
+    static constexpr result_type max() {  return max_;  }
+#else
     static const result_type min=min_;
     static const result_type max=max_;
+#endif
     
     // Parameter and status classes
     class status_type;
@@ -161,9 +168,13 @@ namespace trng {
     void seed(gen &g) {
       for (unsigned int i=0; i<B; ++i) {
         result_type r=0;
-        for (unsigned int j=0; j<std::numeric_limits<result_type>::digits; ++j) {
+        for (int j=0; j<std::numeric_limits<result_type>::digits; ++j) {
           r<<=1;
-	  if (g()-gen::min_>gen::max_/2)
+#if __cplusplus>=201103L
+	  if (g()-gen::min()>gen::max()/2)
+#else
+	  if (g()-gen::min>gen::max/2)
+#endif
             ++r;
         }
         S.r[i]=r;
@@ -171,6 +182,11 @@ namespace trng {
       S.index=B-1;
     }
         
+    void discard(unsigned long long n) {
+      for (unsigned long long i(0); i<n; ++i)
+	step();
+    }
+
     // Equality comparable concept
     friend bool operator==(const lagfib2plus &R1, const lagfib2plus &R2) {
       return R1.S==R2.S;
@@ -226,14 +242,14 @@ namespace trng {
       }
       return name_c_str;
     }
-    long operator()(long x) const {
+    long operator()(long x) {
       return static_cast<long>(utility::uniformco<double, lagfib2plus>(*this)*x);
     }
     
   private:
-    mutable status_type S;
+    status_type S;
     
-    void step() const {
+    void step() {
       S.index++;
       S.index&=utility::mask<B>::result;
       S.r[S.index]=

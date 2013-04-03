@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2010, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,7 @@ private:
   int pos(int);
 public:
   int size(void);
-  void resize(int, int);
+  void resize(int);
   void fill(int);
   void flipp(koord);
   int get(koord);
@@ -127,7 +127,7 @@ int lattice::size(void) {
   return L;
 }
 
-void lattice::resize(int newL, int w=-1) {
+void lattice::resize(int newL) {
   if (newL>0) {
     L=newL;
     L2=L*L;
@@ -175,7 +175,6 @@ double lattice::magnet(void) {
 }
 
 void lattice::print(void) {
-  int i, j;
   for (int i=0; i<L; ++i) {
     for (int j=0; j<L; ++j)
       if (s[i+j*L]<0)

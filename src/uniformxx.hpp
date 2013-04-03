@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2011, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,10 @@ namespace trng {
     template<>
     struct epsilon<float> {
       TRNG_CUDA_ENABLE
-      static float val() {
+#if !(defined __CUDA_ARCH__)
+      static 
+#endif
+      float val() {
 	return FLT_EPSILON;
       }
     };
@@ -83,7 +86,10 @@ namespace trng {
     template<>
     struct epsilon<double> {
       TRNG_CUDA_ENABLE
-      static double val() {
+#if !(defined __CUDA_ARCH__)
+      static 
+#endif
+      double val() {
 	return DBL_EPSILON;
       }
     };
@@ -91,7 +97,10 @@ namespace trng {
     template<>
     struct epsilon<long double> {
       TRNG_CUDA_ENABLE
-      static long double val() {
+#if !(defined __CUDA_ARCH__)
+      static 
+#endif
+      long double val() {
 	return LDBL_EPSILON;
       }
     };    
@@ -107,7 +116,11 @@ namespace trng {
       typedef typename prng_t::result_type result_type;
 
       // Casting up from "simpler" types may yield better low level code sequences.
-      static const result_type domain_max0=prng_t::max_-prng_t::min_;
+#if __cplusplus>=201103L
+      static const result_type domain_max0=prng_t::max()-prng_t::min();
+#else
+      static const result_type domain_max0=prng_t::max-prng_t::min;
+#endif
       static const unsigned int domain_bits=Bits<domain_max0>::result;
       static const unsigned int domain_full_bits=domain_bits-(Holes<domain_max0>::result > 0);
       static const bool int_ok=domain_bits < static_cast<unsigned int>(math::numeric_limits<unsigned int>::digits);
@@ -126,8 +139,12 @@ namespace trng {
       static const result_type domain_max=use_ll_of_shifted ? (domain_max0 >> 1) : domain_max0;
 
       TRNG_CUDA_ENABLE
-      static ret_t addin(const prng_t &r) {
-	result_type x=r()-prng_t::min_;
+      static ret_t addin(prng_t &r) {
+#if __cplusplus>=201103L
+	result_type x=r()-prng_t::min();
+#else
+	result_type x=r()-prng_t::min;
+#endif
 	if (int_ok) 
 	  return static_cast<int>(x);
 	else if (long_ok) 
@@ -149,11 +166,18 @@ namespace trng {
 	return ret;
       }
       TRNG_CUDA_ENABLE
-      static ret_t variate(const prng_t &r) {
-	detail::static_assertion<(prng_t::min_>=0 and prng_t::max_>prng_t::min_)>(); // min and/or max out of spec?
-	detail::static_assertion<(prng_t::max_-prng_t::min_) <= ~0ULL>(); // Bits, Holes incorrect otherwise
+      static ret_t variate(prng_t &r) {
+#if !(defined __CUDA_ARCH__)
+#if __cplusplus>=201103L
+	detail::static_assertion<(prng_t::min()>=0 and prng_t::max()>prng_t::min())>(); // min and/or max out of spec?
+	detail::static_assertion<(prng_t::max()-prng_t::min()) <= ~0ULL>(); // Bits, Holes incorrect otherwise
+#else
+	detail::static_assertion<(prng_t::min>=0 and prng_t::max>prng_t::min)>(); // min and/or max out of spec?
+	detail::static_assertion<(prng_t::max-prng_t::min) <= ~0ULL>(); // Bits, Holes incorrect otherwise
+#endif
 	detail::static_assertion<not math::numeric_limits<return_type>::is_integer>();
-	detail::static_assertion<(calls_needed > 0 and calls_needed <= bits)>();
+	detail::static_assertion<(calls_needed>0 and calls_needed<=bits)>();
+#endif
 	const ret_t scale_per_step(ret_t(domain_max) + 1);
 	ret_t ret(addin(r));
 	for (std::size_t i(1); i<calls_needed; ++i)
@@ -162,7 +186,12 @@ namespace trng {
       }
       TRNG_CUDA_ENABLE
       static ret_t eps() {
+#if defined __CUDA_ARCH__
+	epsilon<ret_t> EPS;
+        const ret_t native_eps(EPS.val());
+#else
         const ret_t native_eps(epsilon<ret_t>::val());
+#endif
         const ret_t domain_eps(ret_t(1)/domain_max);
 	return native_eps>=domain_eps or requested_bits!=1 ? native_eps : domain_eps;
       }
@@ -180,20 +209,20 @@ namespace trng {
       }
     public:
       TRNG_CUDA_ENABLE
-      static return_type cc(const prng_t &r) {
+      static return_type cc(prng_t &r) {
         const bool division_required(variate_max()*cc_norm()!=1);
         return division_required ? variate(r)/variate_max() : variate(r)*cc_norm();
       }
       TRNG_CUDA_ENABLE
-      static return_type co(const prng_t &r) { 
+      static return_type co(prng_t &r) { 
 	return variate(r)*co_norm(); 
       }
       TRNG_CUDA_ENABLE
-      static return_type oc(const prng_t &r) { 
+      static return_type oc(prng_t &r) { 
 	return ret_t(1)-co(r);	
       }
       TRNG_CUDA_ENABLE
-      static return_type oo(const prng_t &r) { 
+      static return_type oo(prng_t &r) { 
 	return variate(r)*oo_norm()+eps(); 
       }
     };
@@ -206,25 +235,25 @@ namespace trng {
 
     template<typename ReturnType, typename PrngType>
     TRNG_CUDA_ENABLE
-    inline ReturnType uniformcc(const PrngType &r) { 
+    inline ReturnType uniformcc(PrngType &r) { 
       return u01xx_traits<ReturnType, 1, PrngType>::cc(r); 
     }
 
     template<typename ReturnType, typename PrngType>
     TRNG_CUDA_ENABLE
-    inline ReturnType uniformco(const PrngType &r) { 
+    inline ReturnType uniformco(PrngType &r) { 
       return u01xx_traits<ReturnType, 1, PrngType>::co(r); 
     }
 
     template<typename ReturnType, typename PrngType>
     TRNG_CUDA_ENABLE
-    inline ReturnType uniformoc(const PrngType &r) { 
+    inline ReturnType uniformoc(PrngType &r) { 
       return u01xx_traits<ReturnType, 1, PrngType>::oc(r); 
     }
 
     template<typename ReturnType, typename PrngType>
     TRNG_CUDA_ENABLE
-    inline ReturnType uniformoo(const PrngType &r) { 
+    inline ReturnType uniformoo(PrngType &r) { 
       return u01xx_traits<ReturnType, 1, PrngType>::oo(r); 
     }
 

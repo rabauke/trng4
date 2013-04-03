@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2011, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,13 @@ namespace trng {
   // Parameter and status classes
 
   // Equality comparable concept
-  bool operator==(const mt19937_64::parameter_type &P1, 
-		  const mt19937_64::parameter_type &P2) {
+  bool operator==(const mt19937_64::parameter_type &, 
+		  const mt19937_64::parameter_type &) {
     return true;
   }
 
-  bool operator!=(const mt19937_64::parameter_type &P1, 
-		  const mt19937_64::parameter_type &P2) {
+  bool operator!=(const mt19937_64::parameter_type &, 
+		  const mt19937_64::parameter_type &) {
     return false;
   }
   

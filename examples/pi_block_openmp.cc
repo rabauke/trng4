@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2010, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 #include <trng/yarn2.hpp>
 #include <trng/uniform01_dist.hpp>
 
-int main(int argc, char *argv[]) {
+int main() {
   const long samples=1000000l;          // total number of points in square
   long in=0l;                           // number of points in circle
   // distribute workload over all processes and make a global reduction 

@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2011, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -65,16 +65,14 @@ namespace trng {
 	  double ln_prob=ln_binom +
 	    static_cast<double>(i   )*ln_p + 
 	    static_cast<double>(n_-i)*ln_1_p;
-	  if (ln_prob>-700)
-	    P_.push_back(ln_binom*math::exp(ln_prob));
-	  else
-	    P_.push_back(0);
+	  P_.push_back(math::exp(ln_prob));
 	  ln_binom+=math::ln(static_cast<double>(n_-i));
 	  ln_binom-=math::ln(static_cast<double>(i+1));
 	}
 	// build list with cumulative density function
 	for (std::vector<double>::size_type i(1); i<P_.size(); ++i)
 	  P_[i]+=P_[i-1];
+	// normailze, just in case of rounding errors
 	for (std::vector<double>::size_type i(0); i<P_.size(); ++i)
 	  P_[i]/=P_.back();
       }

@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2011, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -51,14 +51,19 @@ namespace trng {
     // Uniform random number generator concept
     typedef long result_type;
     TRNG_CUDA_ENABLE
-    result_type operator()() const;
+    result_type operator()();
   private:
     static const result_type modulus=2147461007l;  // 2^31 - 22641
-  public:
     static const result_type min_=0l;
     static const result_type max_=modulus-1;
+  public:
+#if __cplusplus>=201103L
+    static constexpr result_type min() {  return min_;  }
+    static constexpr result_type max() {  return max_;  }
+#else
     static const result_type min=min_;
     static const result_type max=max_;
+#endif
 
     // Parameter and status classes
     class parameter_type;
@@ -250,23 +255,23 @@ namespace trng {
     // Other useful methods
     static const char * name();
     TRNG_CUDA_ENABLE
-    long operator()(long) const;
+    long operator()(long);
 
   private:
     parameter_type P;
-    mutable status_type S;
+    status_type S;
     static const char * const name_str;
     
     TRNG_CUDA_ENABLE
     void backward();
     TRNG_CUDA_ENABLE
-    void step() const;
+    void step();
   };
     
   // Inline and template methods
   
   TRNG_CUDA_ENABLE
-  inline void mrg5s::step() const {
+  inline void mrg5s::step() {
     unsigned long long t(static_cast<unsigned long long>(P.a1)*
 			 static_cast<unsigned long long>(S.r1)+
 			 static_cast<unsigned long long>(P.a2)*
@@ -283,13 +288,13 @@ namespace trng {
   }
   
   TRNG_CUDA_ENABLE
-  inline mrg5s::result_type mrg5s::operator()() const {
+  inline mrg5s::result_type mrg5s::operator()() {
     step();
     return S.r1;
   }
   
   TRNG_CUDA_ENABLE
-  inline long mrg5s::operator()(long x) const {
+  inline long mrg5s::operator()(long x) {
     return static_cast<long>(utility::uniformco<double, mrg5s>(*this)*x);
   }
   

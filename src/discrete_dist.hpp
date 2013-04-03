@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2011, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -131,7 +131,7 @@ namespace trng {
     template<typename R>
     int operator()(R &r) {
       double u=utility::uniformco<double>(r)*P.P[0];
-      int x=0;
+      param_type::size_type x=0;
       while (x<P.offset) {
 	if (u<P.P[2*x+1]) {
 	  x=2*x+1;

@@ -1,7 +1,5 @@
 Implement:
 
-* include faster normal distribution normal2
-
 * more distributions 
 
   * Continous distributions 
@@ -28,5 +26,12 @@ Implement:
   http://www.cs.umbc.edu/~olano/papers/GPUTEA.pdf
   http://en.wikipedia.org/wiki/Tiny_Encryption_Algorithm
 
-* check GCC C++ X0 <random>
+* prime moduli LCGs
+  http://dx.doi.org/10.1016/j.cpc.2011.06.013
 
+* take some ideas from
+  http://www.thesalmons.org/john/random123/papers/random123sc11.pdf
+  Parallel Random Numbers: As Easy as 1, 2, 3
+
+* Intel hardware random number generators 
+  http://software.intel.com/en-us/articles/user-manual-for-the-rdrand-library-linux-version/?cid=sw:ISNnews_87_Eng_7264

@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2011, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -65,11 +65,18 @@ namespace trng {
 
     // Uniform random number generator concept
     typedef unsigned long long result_type;
-    result_type operator()() const;  
+    result_type operator()();
+  private:
     static const result_type min_=0;
     static const result_type max_=18446744073709551615ull;
+  public:
+#if __cplusplus>=201103L
+    static constexpr result_type min() {  return min_;  }
+    static constexpr result_type max() {  return max_;  }
+#else
     static const result_type min=min_;
     static const result_type max=max_;
+#endif
   private:
     static const int N=312;
     static const int M=156;
@@ -95,7 +102,7 @@ namespace trng {
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> & 
       operator<<(std::basic_ostream<char_t, traits_t> &out, 
-		 const parameter_type &P) {
+		 const parameter_type &) {
 	std::ios_base::fmtflags flags(out.flags());
 	out.flags(std::ios_base::dec | std::ios_base::fixed | 
 		  std::ios_base::left);
@@ -193,7 +200,9 @@ namespace trng {
       seed(r);
     }
     void seed(result_type);
-    
+
+    void discard(unsigned long long);
+
     // Equality comparable concept
     friend bool operator==(const mt19937_64 &, const mt19937_64 &);
     friend bool operator!=(const mt19937_64 &, const mt19937_64 &);
@@ -233,18 +242,18 @@ namespace trng {
     
     // Other useful methods
     static const char * name();
-    long operator()(long) const;
+    long operator()(long);
 
   private:
     parameter_type P;
-    mutable status_type S;
+    status_type S;
     static const char * const name_str;
     
   };
   
   // Inline and template methods
     
-  inline mt19937_64::result_type mt19937_64::operator()() const {
+  inline mt19937_64::result_type mt19937_64::operator()() {
     result_type x;
     const result_type mag01[2]={ 0ull, 0xB5026F5AA96619E9ull };
     
@@ -270,7 +279,12 @@ namespace trng {
     return x;
   }
 
-  inline long mt19937_64::operator()(long x) const {
+  inline void mt19937_64::discard(unsigned long long n) {
+    for (unsigned long long i(0); i<n; ++i)
+      this->operator()();
+  }
+
+  inline long mt19937_64::operator()(long x) {
     return static_cast<long>(utility::uniformco<double, mt19937_64>(*this)*x);
   }
 

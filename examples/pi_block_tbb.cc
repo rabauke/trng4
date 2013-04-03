@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2010, Heiko Bauke
+// Copyright (c) 2000-2013, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,8 @@
 
 class parallel_pi {
   trng::uniform01_dist<> u;  // random number distribution
-  long in;
   const trng::yarn2 &r;
+  long in;
 public:
   void operator()(const tbb::blocked_range<long> &range) {
     trng::yarn2 r_local(r);                // local copy of random number engine
@@ -68,7 +68,7 @@ public:
   }
 };
 
-int main(int argc, char *argv[]) {
+int main() {
   tbb::task_scheduler_init init;        // initiallize TBB task scheduler
   const long samples=1000000l;          // total number of points in square
   trng::yarn2 r;                        // random number engine
