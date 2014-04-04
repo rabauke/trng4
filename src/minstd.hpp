@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2013, Heiko Bauke
+// Copyright (c) 2000-2014, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -126,8 +126,6 @@ namespace trng {
     void seed(gen &g) {
       do {
 	S.r=g()%2147483647l;
-	if (S.r<0)
-	  S.r+=2147483647l;
       } while (S.r==0);
     }
     

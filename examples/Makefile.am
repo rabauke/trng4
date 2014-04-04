@@ -11,7 +11,7 @@ EXTRA_DIST = pi_block_cuda.cu pi_leap_cuda.cu
 
 MPICXXCOMPILE = $(MPICXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 MPICXXLD = $(MPICXX)
-MPICXXLINK = $(MPICXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $(AM_MPILDFLAGS)
+MPICXXLINK = $(MPICXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) -o $@ 
 
 hello_world_SOURCES = hello_world.cc
 
@@ -53,7 +53,7 @@ $(pi_block_mpi_OBJECTS): $(pi_block_mpi_SOURCES)
 	$(MPICXXCOMPILE) -c pi_block_mpi.cc
 
 pi_block_mpi$(EXEEXT): $(pi_block_mpi_OBJECTS) $(pi_block_mpi_DEPENDENCIES)
-	$(MPICXXLINK) $(pi_block_mpi_LDFLAGS) $(pi_block_mpi_OBJECTS) $(pi_block_mpi_LDADD) $(LIBS)
+	$(MPICXXLINK) $(pi_block_mpi_OBJECTS) $(AM_MPILDFLAGS) 
 
 $(pi_block_openmp_OBJECTS): $(pi_block_openmp_SOURCES)
 	$(CXXCOMPILE) $(OPENMP_CXXFLAGS) -c pi_block_openmp.cc
@@ -71,7 +71,7 @@ $(pi_leap_mpi_OBJECTS): $(pi_leap_mpi_SOURCES)
 	$(MPICXXCOMPILE) -c pi_leap_mpi.cc
 
 pi_leap_mpi$(EXEEXT): $(pi_leap_mpi_OBJECTS) $(pi_leap_mpi_DEPENDENCIES)
-	$(MPICXXLINK) $(pi_leap_mpi_LDFLAGS) $(pi_leap_mpi_OBJECTS) $(pi_leap_mpi_LDADD) $(LIBS)
+	$(MPICXXLINK) $(pi_leap_mpi_OBJECTS) $(AM_MPILDFLAGS)
 
 $(pi_leap_openmp_OBJECTS): $(pi_leap_openmp_SOURCES)
 	$(CXXCOMPILE) $(OPENMP_CXXFLAGS) -c pi_leap_openmp.cc

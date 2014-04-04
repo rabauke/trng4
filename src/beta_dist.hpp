@@ -30,34 +30,55 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#if !(defined TRNG_UNIFORM01_DIST_HPP)
+#if !(defined TRNG_BETA_DIST_HPP)
 
-#define TRNG_UNIFORM01_DIST_HPP
+#define TRNG_BETA_DIST_HPP
 
 #include <trng/cuda.hpp>
+#include <trng/constants.hpp>
 #include <trng/limits.hpp>
 #include <trng/utility.hpp>
+#include <trng/math.hpp>
+#include <trng/special_functions.hpp>
 #include <ostream>
 #include <istream>
-#include <cerrno>
+#include <iomanip>
 
 namespace trng {
 
   // uniform random number generator class
   template<typename float_t=double>
-  class uniform01_dist {
+  class beta_dist {
   public:
     typedef float_t result_type;
     class param_type;
     
     class param_type {
+    private:
+      result_type alpha_, beta_, norm_;
     public:
       TRNG_CUDA_ENABLE
-      param_type() {
+      result_type alpha() const { return alpha_; }
+      TRNG_CUDA_ENABLE
+      result_type beta() const { return beta_; }
+    private:
+      TRNG_CUDA_ENABLE
+      result_type norm() const { return norm_; }
+    public:
+      TRNG_CUDA_ENABLE
+      void alpha(result_type alpha_new) { alpha_=alpha_new; norm_=math::Beta(alpha, beta); }
+      TRNG_CUDA_ENABLE
+      void beta(result_type beta_new) { beta_=beta_new; norm_=math::Beta(alpha, beta); }
+      param_type() : 
+	alpha_(1), beta_(1), norm_(math::Beta(alpha, beta)) {
       }
-
-      friend class uniform01_dist<float_t>;
-
+      TRNG_CUDA_ENABLE
+      param_type(result_type alpha, result_type beta) : 
+	alpha_(alpha), beta_(beta), norm_(math::Beta(alpha, beta)) {
+      }
+      
+      friend class beta_dist;
+      
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &
@@ -67,36 +88,42 @@ namespace trng {
 	out.flags(std::ios_base::dec | std::ios_base::fixed |
 		  std::ios_base::left);
 	out << '('
+            << std::setprecision(math::numeric_limits<float_t>::digits10+1) 
+	    << p.alpha() << ' ' << p.beta()
 	    << ')';
 	out.flags(flags);
 	return out;
       }
-      
+  
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &
       operator>>(std::basic_istream<char_t, traits_t> &in,
 		 param_type &p) {
+	float_t alpha, beta;
 	std::ios_base::fmtflags flags(in.flags());
 	in.flags(std::ios_base::dec | std::ios_base::fixed |
 		 std::ios_base::left);
 	in >> utility::delim('(')
-	   >> utility::delim(')');
+	   >> alpha >> utility::delim(' ')
+	   >> beta >> utility::delim(')');
+	if (in)
+	  p=param_type(alpha, beta);
 	in.flags(flags);
 	return in;
       }
-      
+
     };
     
   private:
     param_type p;
-    
+   
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    uniform01_dist() {
+    beta_dist(result_type alpha, result_type beta) : p(alpha, beta) {
     }
     TRNG_CUDA_ENABLE
-    explicit uniform01_dist(const param_type &p) {
+    explicit beta_dist(const param_type &p) : p(p) {
     }
     // reset internal state
     TRNG_CUDA_ENABLE
@@ -105,38 +132,46 @@ namespace trng {
     template<typename R>
     TRNG_CUDA_ENABLE
     result_type operator()(R &r) {
-      return utility::uniformco<result_type>(r);
+      return math::inv_Beta_I(utility::uniformoo<result_type>(r), p.alpha(), p.beta(), p.norm());
     }
     template<typename R>
     TRNG_CUDA_ENABLE
     result_type operator()(R &r, const param_type &p) {
-      return utility::uniformco<result_type>(r);
+      beta_dist g(p);
+      return g(r);
     }
     // property methods
-    // min / max
     TRNG_CUDA_ENABLE
-    result_type min() const { return 0; }
+    result_type min() const { return result_type(0); }
     TRNG_CUDA_ENABLE
-    result_type max() const { return 1; }
+    result_type max() const { return result_type(1); }
     TRNG_CUDA_ENABLE
     param_type param() const { return p; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { }
+    void param(const param_type &p_new) { p=p_new; }
+    TRNG_CUDA_ENABLE
+    result_type alpha() const { return p.thata(); }
     // probability density function  
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
-      if (x<0 or x>=1)
+      if (x<0 or x>1)
 	return 0;
-      return 1;
+      if ((x==0 and p.alpha()-1<0) or (x==1 and p.beta()-1<0) ) {
+#if !(defined __CUDA_ARCH__)
+	errno=EDOM;
+#endif
+	return math::numeric_limits<result_type>::quiet_NaN();
+      }
+      return 1/p.norm()*math::pow(x, p.alpha()-1)*math::pow(1-x, p.beta()-1);
     }
     // cumulative density function 
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
-      if (x<0)
+      if (x<=0)
 	return 0;
       if (x>=1)
 	return 1;
-      return x;
+      return math::Beta_I(x, p.alpha(), p.beta(), p.norm());
     }
     // inverse cumulative density function 
     TRNG_CUDA_ENABLE
@@ -147,42 +182,45 @@ namespace trng {
 #endif
 	return math::numeric_limits<result_type>::quiet_NaN();
       }
-      return x; 
+      if (x==0)
+        return 0;
+      if (x==1)
+        return 1;
+      return math::inv_Beta_I(x, p.alpha(), p.beta(), p.norm());
     }
-    
   };
-  
+    
   // -------------------------------------------------------------------
 
-  // Equality comparable concept
+  // EqualityComparable concept
   template<typename float_t>
   TRNG_CUDA_ENABLE
-  inline bool operator==(const typename uniform01_dist<float_t>::param_type &, 
-			 const typename uniform01_dist<float_t>::param_type &) {
-    return true;
+  inline bool operator==(const typename beta_dist<float_t>::param_type &p1, 
+			 const typename beta_dist<float_t>::param_type &p2) {
+    return p1.alpha()==p2.alpha();
   }
 
   template<typename float_t>
   TRNG_CUDA_ENABLE
-  inline bool operator!=(const typename uniform01_dist<float_t>::param_type &, 
-			 const typename uniform01_dist<float_t>::param_type &) {
-    return false;
-  }
-   
-  // -------------------------------------------------------------------
+  inline bool operator!=(const typename beta_dist<float_t>::param_type &p1, 
+			 const typename beta_dist<float_t>::param_type &p2) {
+    return not (p1==p2);
+  }  
   
-  // Equality comparable concept
+  // -------------------------------------------------------------------
+
+  // EqualityComparable concept
   template<typename float_t>
   TRNG_CUDA_ENABLE
-  inline bool operator==(const uniform01_dist<float_t> &g1, 
-			 const uniform01_dist<float_t> &g2) {
+  inline bool operator==(const beta_dist<float_t> &g1, 
+			 const beta_dist<float_t> &g2) {
     return g1.param()==g2.param();
   }
 
   template<typename float_t>
   TRNG_CUDA_ENABLE
-  inline bool operator!=(const uniform01_dist<float_t> &g1, 
-			 const uniform01_dist<float_t> &g2) {
+  inline bool operator!=(const beta_dist<float_t> &g1, 
+			 const beta_dist<float_t> &g2) {
     return g1.param()!=g2.param();
   }
   
@@ -190,11 +228,11 @@ namespace trng {
   template<typename char_t, typename traits_t, typename float_t>
   std::basic_ostream<char_t, traits_t> &
   operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const uniform01_dist<float_t> &g) {
+	     const beta_dist<float_t> &g) {
     std::ios_base::fmtflags flags(out.flags());
     out.flags(std::ios_base::dec | std::ios_base::fixed |
 	      std::ios_base::left);
-    out << "[uniform01 " << g.param() << ']';
+    out << "[beta " << g.param() << ']';
     out.flags(flags);
     return out;
   }
@@ -202,13 +240,13 @@ namespace trng {
   template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &
   operator>>(std::basic_istream<char_t, traits_t> &in,
-	     uniform01_dist<float_t> &g) {
-    typename uniform01_dist<float_t>::param_type p;
+	     beta_dist<float_t> &g) {
+    typename beta_dist<float_t>::param_type p;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed |
 	     std::ios_base::left);
     in >> utility::ignore_spaces()
-       >> utility::delim("[uniform01 ") >> p >> utility::delim(']');
+       >> utility::delim("[beta ") >> p >> utility::delim(']');
     if (in)
       g.param(p);
     in.flags(flags);

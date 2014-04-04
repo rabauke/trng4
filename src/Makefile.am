@@ -22,9 +22,10 @@ pkginclude_HEADERS = config.hpp cuda.hpp utility.hpp uniformxx.hpp static_assert
 		     uniform_dist.hpp uniform01_dist.hpp uniform_int_dist.hpp \
 		     exponential_dist.hpp twosided_exponential_dist.hpp \
 		     normal_dist.hpp truncated_normal_dist.hpp correlated_normal_dist.hpp \
+                     maxwell_dist.hpp \
 		     cauchy_dist.hpp logistic_dist.hpp lognormal_dist.hpp pareto_dist.hpp \
 		     powerlaw_dist.hpp tent_dist.hpp weibull_dist.hpp \
-		     extreme_value_dist.hpp gamma_dist.hpp chi_square_dist.hpp student_t_dist.hpp snedecor_f_dist.hpp\
+		     extreme_value_dist.hpp gamma_dist.hpp beta_dist.hpp chi_square_dist.hpp student_t_dist.hpp snedecor_f_dist.hpp\
 		     rayleigh_dist.hpp \
 		     bernoulli_dist.hpp binomial_dist.hpp hypergeometric_dist.hpp geometric_dist.hpp \
 		     poisson_dist.hpp discrete_dist.hpp fast_discrete_dist.hpp

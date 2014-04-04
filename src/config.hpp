@@ -1,5 +1,5 @@
 /* src/config.hpp.  Generated from config.hpp.in by configure.  */
-/* src/config.hpp.in.  Generated from configure.in by autoheader.  */
+/* src/config.hpp.in.  Generated from configure.ac by autoheader.  */
 
 /* Define to 1 if you have BOOST library. */
 #define TRNG_HAVE_BOOST 1
@@ -53,5 +53,4 @@
 #define TRNG_HAVE_TGAMMAL 1
 
 /* TRNG version number. */
-#define TRNG_VERSION 4.14
-
+#define TRNG_VERSION 4.15

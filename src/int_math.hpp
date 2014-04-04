@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2013, Heiko Bauke
+// Copyright (c) 2000-2014, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -166,7 +166,7 @@ namespace trng {
     template<int n>
     TRNG_CUDA_ENABLE
     void matrix_vec_mult(const long a[n*n], const long b[n],
-		     long c[n], long m) {
+			 long c[n], long m) {
       for (int j(0); j<n; ++j) {
 	long long t(0ll);
 	for (int k(0); k<n; ++k) {

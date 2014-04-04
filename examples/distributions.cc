@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2013, Heiko Bauke
+// Copyright (c) 2000-2014, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <trng/twosided_exponential_dist.hpp>
 #include <trng/normal_dist.hpp>
 #include <trng/truncated_normal_dist.hpp>
+#include <trng/maxwell_dist.hpp>
 #include <trng/cauchy_dist.hpp>
 #include <trng/logistic_dist.hpp>
 #include <trng/lognormal_dist.hpp>
@@ -53,6 +54,7 @@
 #include <trng/weibull_dist.hpp>
 #include <trng/extreme_value_dist.hpp>
 #include <trng/gamma_dist.hpp>
+#include <trng/beta_dist.hpp>
 #include <trng/chi_square_dist.hpp>
 #include <trng/student_t_dist.hpp>
 #include <trng/snedecor_f_dist.hpp>
@@ -109,28 +111,24 @@ simpson_int(iter first, iter last) {
 template<typename dist>
 void continous_dist_test(dist &d, const char *name) {
   typedef typename dist::result_type result_type;
-  bool ok=true;
-
-  int samples=1024*1024;
-  result_type x_min=d.icdf(0.05), x_max=d.icdf(0.95), dx=(x_max-x_min)/samples;
+  
+  int samples=1024*1024*32+1;
+  result_type x_min=d.icdf(0.01), x_max=d.icdf(0.99), dx=(x_max-x_min)/samples;
   std::vector<result_type> y;
   for (int i=0; i<=samples; ++i) 
     y.push_back(d.pdf(x_min+i*dx));
   result_type s=simpson_int(y.begin(), y.end())*dx;
-  if (trng::math::abs(s-0.9)>16*trng::math::numeric_limits<result_type>::epsilon())
-    ok=false;
-  if (ok)
-    std::cout << "\"" << name << "\" distribution test passed\n";
-  else 
-    std::cout << "\"" << name << "\" distribution test not passed " << s << "\n"; 
-
-  ok=true;
+  std::cout << "\"" << name 
+	    << "\" distribution test : Int_x(0.01)^x(0.99) p(x) dx = 0.98 - "
+	    << 0.98-s << '\n';
   result_type dp=result_type(1)/result_type(1024*1024);
+  bool ok(true);
   for (result_type p=dp; p<1; p+=dp) {
     result_type x=d.icdf(p);
     result_type y=d.cdf(x);
     if (trng::math::abs(y-p)>16*trng::math::numeric_limits<result_type>::epsilon()) {
       ok=false;
+      std::cout << x << '\t' << y << '\t' << trng::math::abs(y-p) << '\n';
       break;
     }
   }
@@ -232,6 +230,10 @@ int main() {
     continous_test(d, "truncated normal distribution");
   }
   {
+    trng::maxwell_dist<> d(2.0);
+    continous_test(d, "maxwell distribution");
+  }
+  {
     trng::cauchy_dist<> d(5.0, 2.0);
     continous_test(d, "cauchy distribution");
   }
@@ -262,6 +264,10 @@ int main() {
   {
     trng::gamma_dist<> d(5.0, 2.0);
     continous_test(d, "gamma distribution");
+  }
+  {
+    trng::beta_dist<> d(3.0, 2.0);
+    continous_test(d, "beta distribution");
   }
   {
     trng::chi_square_dist<> d(8);

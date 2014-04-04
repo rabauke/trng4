@@ -1,4 +1,4 @@
-/* src/config.hpp.in.  Generated from configure.in by autoheader.  */
+/* src/config.hpp.in.  Generated from configure.ac by autoheader.  */
 
 /* Define to 1 if you have BOOST library. */
 #undef TRNG_HAVE_BOOST
@@ -53,4 +53,3 @@
 
 /* TRNG version number. */
 #undef TRNG_VERSION
-

@@ -3,10 +3,6 @@ Implement:
 * more distributions 
 
   * Continous distributions 
-    - Beta distribution
-      http://en.wikipedia.org/wiki/Beta_distribution
-    - Maxwell distribution
-      http://mathworld.wolfram.com/MaxwellDistribution.html
     - Kolmogorov-Smirnov distribution
       http://en.wikipedia.org/wiki/Kolmogorov-Smirnov
     - Levy distribution

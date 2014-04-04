@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2013, Heiko Bauke
+// Copyright (c) 2000-2014, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -151,7 +151,7 @@ namespace trng {
     // cumulative density function 
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
-      return x<=0 ? math::exp(x/p.mu()) : 1-math::exp(-x/p.mu()/2);
+      return x<=0 ? math::exp(x/p.mu())/2 : 1-math::exp(-x/p.mu())/2;
     }
     // inverse cumulative density function 
     TRNG_CUDA_ENABLE

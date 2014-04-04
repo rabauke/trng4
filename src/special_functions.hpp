@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2013, Heiko Bauke
+// Copyright (c) 2000-2014, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -44,43 +44,43 @@
 #include <algorithm>
 
 #if defined(TRNG_HAVE_LGAMMAF) and not defined(TRNG_CUDA)
-extern "C" float lgammaf(float) throw();
+extern "C" float lgammaf(float);
 #endif
 #if defined(TRNG_HAVE_LGAMMA) and not defined(TRNG_CUDA)
-extern "C" double lgamma(double) throw();
+extern "C" double lgamma(double);
 #endif
 #if defined(TRNG_HAVE_LGAMMAL) and not defined(TRNG_CUDA)
-extern "C" long double lgammal(long double) throw();
+extern "C" long double lgammal(long double);
 #endif
 
 #if defined(TRNG_HAVE_TGAMMAF) and not defined(TRNG_CUDA)
-extern "C" float tgammaf(float) throw();
+extern "C" float tgammaf(float);
 #endif
 #if defined(TRNG_HAVE_TGAMMA) and not defined(TRNG_CUDA)
-extern "C" double tgamma(double) throw();
+extern "C" double tgamma(double);
 #endif
 #if defined(TRNG_HAVE_TGAMMAL) and not defined(TRNG_CUDA)
-extern "C" long double tgammal(long double) throw();
+extern "C" long double tgammal(long double);
 #endif
 
 #if defined(TRNG_HAVE_ERFF) and not defined(TRNG_CUDA)
-extern "C" float erff(float) throw();
+extern "C" float erff(float);
 #endif
 #if defined(TRNG_HAVE_ERF) and not defined(TRNG_CUDA)
-extern "C" double erf(double) throw();
+extern "C" double erf(double);
 #endif
 #if defined(TRNG_HAVE_ERFL) and not defined(TRNG_CUDA)
-extern "C" long double erfl(long double) throw();
+extern "C" long double erfl(long double);
 #endif
 
 #if defined(TRNG_HAVE_ERFCF) and not defined(TRNG_CUDA)
-extern "C" float erfcf(float) throw();
+extern "C" float erfcf(float);
 #endif
 #if defined(TRNG_HAVE_ERFC) and not defined(TRNG_CUDA)
-extern "C" double erfc(double) throw();
+extern "C" double erfc(double);
 #endif
 #if defined(TRNG_HAVE_ERFCL) and not defined(TRNG_CUDA)
-extern "C" long double erfcl(long double) throw();
+extern "C" long double erfcl(long double);
 #endif
 
 namespace trng {
@@ -960,22 +960,22 @@ namespace trng {
       TRNG_CUDA_ENABLE
       inline T inv_Beta_I(T x, T p, T q, T norm) {
 	// solve via Householder method
-	T y=p/(q+p-1);
+	T y(p/(q+p-1));
 	for (int i=0; i<math::numeric_limits<T>::digits; ++i) {
-	  T f=math::Beta_I(y, p, q, norm)-x;
-	  T df=math::pow(1-y, q-1)*math::pow(y, p-1);
+	  T f(math::Beta_I(y, p, q, norm)-x);
+	  T df(math::pow(1-y, q-1)*math::pow(y, p-1));
 	  df/=norm;
-	  T ddf=-math::pow(1-y, q-1)*(q-1)/(1-y)*math::pow(y, p)+
-	    math::pow(1-y, q-1)*math::pow(y, p)*p/y;
+	  T ddf(-math::pow(1-y, q-1)*(q-1)/(1-y)*math::pow(y, p)+
+		math::pow(1-y, q-1)*math::pow(y, p)*p/y);
 	  ddf/=norm;
-	  T dy=f/df*(1+f*ddf/(2*df*df));
-	  y=y-dy;
+	  T dy(f/df*(1+f*ddf/(2*df*df)));
+	  y-=dy;
 	  if (math::abs(dy)<math::numeric_limits<T>::epsilon())
 	    break;
 	}
 	return y;
       }
-
+      
     }
 
     TRNG_CUDA_ENABLE
