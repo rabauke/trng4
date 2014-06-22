@@ -66,11 +66,11 @@ namespace trng {
       result_type norm() const { return norm_; }
     public:
       TRNG_CUDA_ENABLE
-      void alpha(result_type alpha_new) { alpha_=alpha_new; norm_=math::Beta(alpha, beta); }
+      void alpha(result_type alpha_new) { alpha_=alpha_new; norm_=math::Beta(alpha_, beta_); }
       TRNG_CUDA_ENABLE
-      void beta(result_type beta_new) { beta_=beta_new; norm_=math::Beta(alpha, beta); }
+      void beta(result_type beta_new) { beta_=beta_new; norm_=math::Beta(alpha_, beta_); }
       param_type() : 
-	alpha_(1), beta_(1), norm_(math::Beta(alpha, beta)) {
+	alpha_(1), beta_(1), norm_(math::Beta(alpha_, beta_)) {
       }
       TRNG_CUDA_ENABLE
       param_type(result_type alpha, result_type beta) : 

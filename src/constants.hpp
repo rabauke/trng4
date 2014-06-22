@@ -61,7 +61,7 @@ namespace trng {
       TRNG_NEW_CONSTANT(float, 2.50662827463100050241577f, sqrt_2pi);
       TRNG_NEW_CONSTANT(float, 0.3183098861837906715377676f, one_over_pi);
       TRNG_NEW_CONSTANT(float, .707106781186547524400845f, one_over_sqrt_2);
-      TRNG_NEW_CONSTANT(float, .398942280401432677939946f, one_over_sqrt_2pi)
+      TRNG_NEW_CONSTANT(float, .398942280401432677939946f, one_over_sqrt_2pi);
       TRNG_NEW_CONSTANT(float, .797884560802865355879892f, sqrt_2_over_pi);
     };
   
@@ -77,7 +77,7 @@ namespace trng {
       TRNG_NEW_CONSTANT(double, 2.50662827463100050241577, sqrt_2pi);
       TRNG_NEW_CONSTANT(double, 0.3183098861837906715377676, one_over_pi);
       TRNG_NEW_CONSTANT(double, .707106781186547524400845, one_over_sqrt_2);
-      TRNG_NEW_CONSTANT(double, .398942280401432677939946, one_over_sqrt_2pi)
+      TRNG_NEW_CONSTANT(double, .398942280401432677939946, one_over_sqrt_2pi);
       TRNG_NEW_CONSTANT(double, .797884560802865355879892, sqrt_2_over_pi);
     };
   
@@ -93,7 +93,7 @@ namespace trng {
       TRNG_NEW_CONSTANT(long double, 2.50662827463100050241577l, sqrt_2pi);
       TRNG_NEW_CONSTANT(long double, .707106781186547524400845l, one_over_sqrt_2);
       TRNG_NEW_CONSTANT(long double, 0.3183098861837906715377676l, one_over_pi);
-      TRNG_NEW_CONSTANT(long double, .398942280401432677939946l, one_over_sqrt_2pi)
+      TRNG_NEW_CONSTANT(long double, .398942280401432677939946l, one_over_sqrt_2pi);
       TRNG_NEW_CONSTANT(long double, .797884560802865355879892l, sqrt_2_over_pi);
     };
     

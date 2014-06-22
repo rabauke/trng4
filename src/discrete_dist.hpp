@@ -59,6 +59,8 @@ namespace trng {
       size_type N, offset, layers;
       
     public:
+      param_type() : P(), N(0), offset(0), layers(0) {
+      }
       template<typename iter>
       param_type(iter first, iter last) :
 	P(first, last) {
@@ -67,7 +69,7 @@ namespace trng {
 	offset=math::pow2(layers)-1;
 	P.resize(N+offset);
 	std::copy_backward(P.begin(), P.begin()+N, P.end());
-	std::fill(P.begin(), P.begin()+N, 0);
+	std::fill(P.begin(), P.begin()+offset, 0);
 	update_all_layers();
       }
       explicit param_type(int n) :
@@ -77,7 +79,7 @@ namespace trng {
 	offset=math::pow2(layers)-1;
 	P.resize(N+offset);
 	std::copy_backward(P.begin(), P.begin()+N, P.end());
-	std::fill(P.begin(), P.begin()+N, 0);
+	std::fill(P.begin(), P.begin()+offset, 0);
 	update_all_layers();
       }
     private:
@@ -130,8 +132,10 @@ namespace trng {
     // random numbers
     template<typename R>
     int operator()(R &r) {
-      double u=utility::uniformco<double>(r)*P.P[0];
-      param_type::size_type x=0;
+      if (P.N==0)
+	return -1;
+      double u(utility::uniformco<double>(r)*P.P[0]);
+      param_type::size_type x(0);
       while (x<P.offset) {
 	if (u<P.P[2*x+1]) {
 	  x=2*x+1;

@@ -125,7 +125,7 @@ namespace trng {
 	++num_iterations;
 	y_old=y;
 	result_type f0=math::GammaP(p.kappa(), y)-x;
-	result_type f1=math::pow(y, p.kappa()-1)*math::exp(-y-ln_Gamma_kappa);
+	result_type f1=math::exp((p.kappa()-1)*math::ln(y)-y-ln_Gamma_kappa);
 	result_type f2=f1*(p.kappa()-1-y)/y;
 	y-=f0/f1*(1+f0*f2/(2*f1*f1));
       } while (num_iterations<16 &&
@@ -180,8 +180,7 @@ namespace trng {
 	return 0;
       else {
 	x/=p.theta();
-	return math::pow(x, p.kappa()-1)/
-	  (math::exp(x+math::ln_Gamma(p.kappa()))*p.theta());
+	return math::exp((p.kappa()-1)*math::ln(x)-x-math::ln_Gamma(p.kappa())) /(p.theta());
       }
     }
     // cumulative density function 

@@ -1,18 +1,7 @@
 Implement:
 
-* more distributions 
-
-  * Continous distributions 
-    - Kolmogorov-Smirnov distribution
-      http://en.wikipedia.org/wiki/Kolmogorov-Smirnov
-    - Levy distribution
-      http://en.wikipedia.org/wiki/L%C3%A9vy_distribution
-
-  * and other distributions, see
-    http://en.wikipedia.org/wiki/List_of_probability_distributions
-
-  * multinomial distribution, see
-    - http://en.wikipedia.org/wiki/Multinomial_distribution
+* more distributions, see
+  http://en.wikipedia.org/wiki/List_of_probability_distributions
 
 * ISAAC generator
   http://burtleburtle.net/bob/rand/isaacafa.html
@@ -29,5 +18,4 @@ Implement:
   http://www.thesalmons.org/john/random123/papers/random123sc11.pdf
   Parallel Random Numbers: As Easy as 1, 2, 3
 
-* Intel hardware random number generators 
-  http://software.intel.com/en-us/articles/user-manual-for-the-rdrand-library-linux-version/?cid=sw:ISNnews_87_Eng_7264
+* Intel hardware random number generators (RDRAND)

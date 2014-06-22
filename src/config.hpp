@@ -41,7 +41,7 @@
 #define TRNG_HAVE_OPENMP 1
 
 /* Define to 1 if Intel Threading Building Blocks are available. */
-#define TRNG_HAVE_TBB 1
+/* #undef TRNG_HAVE_TBB */
 
 /* Define to 1 if you have the `tgamma' function. */
 #define TRNG_HAVE_TGAMMA 1
@@ -53,4 +53,4 @@
 #define TRNG_HAVE_TGAMMAL 1
 
 /* TRNG version number. */
-#define TRNG_VERSION 4.15
+#define TRNG_VERSION 4.16

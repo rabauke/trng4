@@ -60,11 +60,12 @@ namespace trng {
 	P_=std::vector<double>();
 	int x=0;
 	double p=0.0;
-	while (p<1.0-1.0/4096.0) {
+	while (p<1.0-512.0/4096.0) {
 	  p=math::GammaQ(x+1.0, mu_);
 	  P_.push_back(p);
 	  ++x;
 	}
+	P_.push_back(1);
       }
       
     public:
@@ -92,9 +93,13 @@ namespace trng {
     int operator()(R &r) {
       double p(utility::uniformco<double>(r));
       int x(utility::discrete(p, P.P_.begin(), P.P_.end()));
-      if (x+1==P.P_.size())
-        while (p>cdf(x))
+      if (x+1==P.P_.size()) {
+	p-=cdf(x);
+        while (p>0) {
           ++x;
+	  p-=pdf(x);
+	}
+      }
       return x;
     }
     template<typename R>
