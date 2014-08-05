@@ -82,6 +82,9 @@ namespace trng {
       void p(double p_new) { p_=p_new;  calc_probabilities(); }
       int n() const { return n_; }
       void n(int n_new) { n_=n_new;  calc_probabilities(); }
+      param_type() :
+	p_(0.5), n_(0) {
+      } 
       param_type(double p, int n) :
 	p_(p), n_(n) {
 	calc_probabilities();

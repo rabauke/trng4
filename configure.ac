@@ -1,10 +1,9 @@
-AC_INIT([trng], [4.16], [trng@mail.de])
+AC_INIT([trng], [4.17], [trng@mail.de])
 AM_INIT_AUTOMAKE()
 
-AC_DEFINE([TRNG_VERSION], [4.16], [TRNG version number.])
+AC_DEFINE([TRNG_VERSION], [4.17], [TRNG version number.])
 
 AC_LANG_CPLUSPLUS
-AC_LANG(C)
 AC_LANG(C++)
 
 # Checks for programs.
@@ -25,6 +24,8 @@ AX_OPENMP
 AC_SUBST(OPENMP_CXXFLAGS)
 AC_LANG_PUSH([C++])
 AC_CHECK_FUNCS(erff, AC_DEFINE(TRNG_HAVE_ERFF, 1, [Define to 1 if you have the `errff' function.]))
+#AC_TRY_COMPILE([#include <cmath>
+#extern "C" float erff(float) throw(); ], [erff(1.f); ], AC_MSG_RESULT(ok), AC_MSG_RESULT(fail) )
 AC_CHECK_FUNCS(erf, AC_DEFINE(TRNG_HAVE_ERF, 1, [Define to 1 if you have the `errf' function.]))
 AC_CHECK_FUNCS(erfl, AC_DEFINE(TRNG_HAVE_ERFL, 1, [Define to 1 if you have the `errfl' function.]))
 AC_CHECK_FUNCS(erfcf, AC_DEFINE(TRNG_HAVE_ERFCF, 1, [Define to 1 if you have the `erfcf' function.]))

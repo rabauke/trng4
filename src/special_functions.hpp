@@ -43,46 +43,6 @@
 #include <cerrno>
 #include <algorithm>
 
-#if defined(TRNG_HAVE_LGAMMAF) and not defined(TRNG_CUDA)
-extern "C" float lgammaf(float);
-#endif
-#if defined(TRNG_HAVE_LGAMMA) and not defined(TRNG_CUDA)
-extern "C" double lgamma(double);
-#endif
-#if defined(TRNG_HAVE_LGAMMAL) and not defined(TRNG_CUDA)
-extern "C" long double lgammal(long double);
-#endif
-
-#if defined(TRNG_HAVE_TGAMMAF) and not defined(TRNG_CUDA)
-extern "C" float tgammaf(float);
-#endif
-#if defined(TRNG_HAVE_TGAMMA) and not defined(TRNG_CUDA)
-extern "C" double tgamma(double);
-#endif
-#if defined(TRNG_HAVE_TGAMMAL) and not defined(TRNG_CUDA)
-extern "C" long double tgammal(long double);
-#endif
-
-#if defined(TRNG_HAVE_ERFF) and not defined(TRNG_CUDA)
-extern "C" float erff(float);
-#endif
-#if defined(TRNG_HAVE_ERF) and not defined(TRNG_CUDA)
-extern "C" double erf(double);
-#endif
-#if defined(TRNG_HAVE_ERFL) and not defined(TRNG_CUDA)
-extern "C" long double erfl(long double);
-#endif
-
-#if defined(TRNG_HAVE_ERFCF) and not defined(TRNG_CUDA)
-extern "C" float erfcf(float);
-#endif
-#if defined(TRNG_HAVE_ERFC) and not defined(TRNG_CUDA)
-extern "C" double erfc(double);
-#endif
-#if defined(TRNG_HAVE_ERFCL) and not defined(TRNG_CUDA)
-extern "C" long double erfcl(long double);
-#endif
-
 namespace trng {
 
   namespace math {
@@ -256,8 +216,10 @@ namespace trng {
 
     TRNG_CUDA_ENABLE
     inline float ln_Gamma(float x) {
-#if defined(TRNG_HAVE_LGAMMAF) or defined(__CUDA_ARCH__)
+#if defined(TRNG_HAVE_LGAMMAF) or defined(TRNG_CUDA)
       return ::lgammaf(x);
+#elif __cplusplus >= 201103L
+      return std::lgamma(x);
 #else
       if (x>0.0f)
 	return detail::ln_Gamma(x);
@@ -270,8 +232,10 @@ namespace trng {
   
     TRNG_CUDA_ENABLE
     inline double ln_Gamma(double x) {
-#if defined(TRNG_HAVE_LGAMMA) or defined(__CUDA_ARCH__)
+#if defined(TRNG_HAVE_LGAMMA) or defined(TRNG_CUDA)
       return ::lgamma(x);
+#elif __cplusplus >= 201103L
+      return std::lgamma(x);
 #else
       if (x>0.0)
 	return detail::ln_Gamma(x);
@@ -286,6 +250,8 @@ namespace trng {
     inline long double ln_Gamma(long double x) {
 #if defined(TRNG_HAVE_LGAMMAL)
       return ::lgammal(x);
+#elif __cplusplus >= 201103L
+      return std::lgamma(x);
 #else
       if (x>0.0l)
 	return detail::ln_Gamma(x);
@@ -447,8 +413,10 @@ namespace trng {
 
     TRNG_CUDA_ENABLE
     inline float Gamma(float x) {
-#if defined(TRNG_HAVE_TGAMMAF) or defined(__CUDA_ARCH__)
+#if defined(TRNG_HAVE_TGAMMAF) or defined(TRNG_CUDA)
       return ::tgammaf(x);
+#elif __cplusplus >= 201103L
+      return std::tgamma(x);
 #else
       if (x>0.0f)
 	return detail::Gamma(x);
@@ -461,8 +429,10 @@ namespace trng {
 
     TRNG_CUDA_ENABLE
     inline double Gamma(double x) {
-#if defined(TRNG_HAVE_TGAMMA) or defined(__CUDA_ARCH__)
+#if defined(TRNG_HAVE_TGAMMA) or defined(TRNG_CUDA)
       return ::tgamma(x);
+#elif __cplusplus >= 201103L
+      return std::tgamma(x);
 #else
       if (x>0.0)
 	return detail::Gamma(x);
@@ -477,6 +447,8 @@ namespace trng {
     inline long double Gamma(long double x) {
 #if defined(TRNG_HAVE_TGAMMAL)
       return ::tgammal(x);
+#elif __cplusplus >= 201103L
+      return std::tgamma(x);
 #else
       if (x>0.0l)
 	return detail::Gamma(x);
@@ -1010,67 +982,73 @@ namespace trng {
 
     // --- error function ----------------------------------------------
 
+    TRNG_CUDA_ENABLE
+    inline float erf(float x) {
 #if defined(TRNG_HAVE_ERFF) or defined(TRNG_CUDA)
-    TRNG_CUDA_ENABLE
-    inline float erf(float x) {
       return ::erff(x);
-    }
+#elif __cplusplus >= 201103L
+      return std::erf(x);
 #else
-    inline float erf(float x) {
       return x<0.0f ? -GammaP(0.5f, x*x) : GammaP(0.5f, x*x);
-    }
 #endif
+    }
 
-#if defined(TRNG_HAVE_ERF) or defined(TRNG_CUDA)
     TRNG_CUDA_ENABLE
     inline double erf(double x) {
+#if defined(TRNG_HAVE_ERF) or defined(TRNG_CUDA)
       return ::erf(x);
-    }
+#elif __cplusplus >= 201103L
+      return std::erf(x);
 #else
-    inline double erf(double x) {
       return x<0.0 ? -GammaP(0.5, x*x) : GammaP(0.5, x*x);
-    }
 #endif
+    }
   
+#if !(defined __CUDA_ARCH__)
+    inline long double erf(long double x) {
 #if defined(TRNG_HAVE_ERFL)
-    inline long double erf(long double x) {
       return ::erfl(x);
-    }
+#elif __cplusplus >= 201103L
+      return std::erf(x);
 #else
-    inline long double erf(long double x) {
       return x<0.0l ? -GammaP(0.5l, x*x) : GammaP(0.5l, x*x);
+#endif
     }
 #endif
-
+    
     // --- complementary error function --------------------------------
 
-#if defined(TRNG_HAVE_ERFCF)
+    TRNG_CUDA_ENABLE
     inline float erfc(float x) {
+#if defined(TRNG_HAVE_ERFCF) or defined(TRNG_CUDA)
       return ::erfcf(x);
-    }
+#elif __cplusplus >= 201103L
+      return std::erfc(x);
 #else
-    inline float erfc(float x) {
       return x<0.0f ? 1.0f+GammaP(0.5f, x*x) : GammaQ(0.5f, x*x);
-    }
 #endif
+    }
 
-#if defined(TRNG_HAVE_ERFC)
+    TRNG_CUDA_ENABLE
     inline double erfc(double x) {
+#if defined(TRNG_HAVE_ERFC) or defined(TRNG_CUDA)
       return ::erfc(x);
-    }
+#elif __cplusplus >= 201103L
+      return std::erfc(x);
 #else
-    inline double erfc(double x) {
       return x<0.0 ? 1.0+GammaP(0.5, x*x) : GammaQ(0.5, x*x);
-    }
 #endif
-  
-#if defined(TRNG_HAVE_ERFCL)
-    inline long double erfc(long double x) {
-      return ::erfcl(x);
     }
-#else
+  
+#if !(defined __CUDA_ARCH__)
     inline long double erfc(long double x) {
+#if defined(TRNG_HAVE_ERFCL)
+      return ::erfcl(x);
+#elif __cplusplus >= 201103L
+      return std::erfc(x);
+#else
       return x<0.0l ? 1.0l+GammaP(0.5l, x*x) : GammaQ(0.5l, x*x);
+#endif
     }
 #endif
 

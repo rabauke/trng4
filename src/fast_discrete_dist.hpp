@@ -67,6 +67,8 @@ namespace trng {
       size_type N;
       
     public:
+      param_type() : P(), F(), L(), N(0) {
+      }
       template<typename iter>
       param_type(iter first, iter last) :
 	P(first, last), F(P.size()), L(P.size()), N(P.size()) {

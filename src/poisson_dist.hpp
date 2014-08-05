@@ -71,6 +71,8 @@ namespace trng {
     public:
       double mu() const { return mu_; }
       void mu(double mu_new) { mu_=mu_new;  calc_probabilities(); }
+      param_type() : mu_(0) {
+      }
       explicit param_type(double mu) : mu_(mu) {
 	calc_probabilities();
       }
