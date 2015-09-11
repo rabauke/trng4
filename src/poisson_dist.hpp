@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2014, Heiko Bauke
+// Copyright (c) 2000-2015, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@ namespace trng {
 	P_=std::vector<double>();
 	int x=0;
 	double p=0.0;
-	while (p<1.0-512.0/4096.0) {
+	while (x<7 or x <2*mu_) {
 	  p=math::GammaQ(x+1.0, mu_);
 	  P_.push_back(p);
 	  ++x;
