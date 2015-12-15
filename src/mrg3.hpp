@@ -39,6 +39,7 @@
 #include <stdexcept>
 #include <trng/cuda.hpp>
 #include <trng/utility.hpp>
+#include <trng/int_types.hpp>
 #include <trng/int_math.hpp>
 
 namespace trng {
@@ -49,12 +50,12 @@ namespace trng {
   public:
     
     // Uniform random number generator concept
-    typedef long result_type;
+    typedef int32_t result_type;
     TRNG_CUDA_ENABLE
     result_type operator()();
   private:
-    static const result_type modulus=2147483647l;
-    static const result_type min_=0l;
+    static const result_type modulus=2147483647;
+    static const result_type min_=0;
     static const result_type max_=modulus-1;
   public:
 #if __cplusplus>=201103L
@@ -184,12 +185,9 @@ namespace trng {
     void seed(unsigned long);
     template<typename gen>
     void seed(gen &g) {
-      result_type r1=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      result_type r2=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      result_type r3=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
+      result_type r1=static_cast<uint32_t>(g())%static_cast<uint32_t>(modulus);
+      result_type r2=static_cast<uint32_t>(g())%static_cast<uint32_t>(modulus);
+      result_type r3=static_cast<uint32_t>(g())%static_cast<uint32_t>(modulus);
       S.r1=r1;
       S.r2=r2;
       S.r3=r3;
@@ -263,12 +261,9 @@ namespace trng {
 
   TRNG_CUDA_ENABLE
   inline void mrg3::step() {
-    unsigned long long t(static_cast<unsigned long long>(P.a1)*
-			 static_cast<unsigned long long>(S.r1)+
-			 static_cast<unsigned long long>(P.a2)*
-			 static_cast<unsigned long long>(S.r2)+
-			 static_cast<unsigned long long>(P.a3)*
-			 static_cast<unsigned long long>(S.r3));
+    uint64_t t(static_cast<uint64_t>(P.a1)*static_cast<uint64_t>(S.r1)+
+	       static_cast<uint64_t>(P.a2)*static_cast<uint64_t>(S.r2)+
+	       static_cast<uint64_t>(P.a3)*static_cast<uint64_t>(S.r3));
     S.r3=S.r2;  S.r2=S.r1;  S.r1=int_math::modulo<modulus, 3>(t);
   }
 
@@ -291,13 +286,13 @@ namespace trng {
       utility::throw_this(std::invalid_argument("invalid argument for trng::mrg3::split"));
 #endif
     if (s>1) {
-      jump(n+1);  long q0=S.r1;
-      jump(s);    long q1=S.r1;
-      jump(s);    long q2=S.r1;
-      jump(s);    long q3=S.r1;
-      jump(s);    long q4=S.r1;
-      jump(s);    long q5=S.r1;
-      long a[3], b[9];
+      jump(n+1);  int32_t q0=S.r1;
+      jump(s);    int32_t q1=S.r1;
+      jump(s);    int32_t q2=S.r1;
+      jump(s);    int32_t q3=S.r1;
+      jump(s);    int32_t q4=S.r1;
+      jump(s);    int32_t q5=S.r1;
+      int32_t a[3], b[9];
       a[0]=q3;  b[0]=q2;  b[1]=q1;  b[2]=q0;
       a[1]=q4;  b[3]=q3;  b[4]=q2;  b[5]=q1;
       a[2]=q5;  b[6]=q4;  b[7]=q3;  b[8]=q2;
@@ -311,11 +306,11 @@ namespace trng {
   
   TRNG_CUDA_ENABLE
   inline void mrg3::jump2(unsigned int s) {
-    long b[9], c[9], d[3], r[3];
-    long t1(P.a1), t2(P.a2), t3(P.a3);
+    int32_t b[9], c[9], d[3], r[3];
+    int32_t t1(P.a1), t2(P.a2), t3(P.a3);
     b[0]=P.a1;  b[1]=P.a2;  b[2]=P.a3;
-    b[3]=1l;    b[4]=0l;    b[5]=0l;
-    b[6]=0l;    b[7]=1l;    b[8]=0l;
+    b[3]=1;     b[4]=0;     b[5]=0;
+    b[6]=0;     b[7]=1;     b[8]=0;
     for (unsigned int i(0); i<s; ++i)
       if ((i&1)==0)
 	int_math::matrix_mult<3>(b, b, c, modulus);
@@ -353,39 +348,36 @@ namespace trng {
 
   TRNG_CUDA_ENABLE
   inline void mrg3::backward() {
-    long t;
-    if (P.a3!=0l) {
+    result_type t;
+    if (P.a3!=0) {
       t=S.r1;
-      t-=static_cast<long>((static_cast<long long>(P.a1)*
-			    static_cast<long long>(S.r2))%modulus);
-      if (t<0l)
+      t-=static_cast<result_type>((static_cast<int64_t>(P.a1)*
+				   static_cast<int64_t>(S.r2))%modulus);
+      if (t<0)
 	t+=modulus;
-      t-=static_cast<long>((static_cast<long long>(P.a2)*
-			    static_cast<long long>(S.r3))%modulus);
-    if (t<0l)
-      t+=modulus;
-    t=static_cast<long>((static_cast<long long>(t)*
-                         static_cast<long long>
-                         (int_math::modulo_invers(P.a3, modulus)))%modulus);
-    } else if (P.a2!=0l) {
+      t-=static_cast<result_type>((static_cast<int64_t>(P.a2)*
+				   static_cast<int64_t>(S.r3))%modulus);
+      if (t<0)
+	t+=modulus;
+      t=static_cast<result_type>((static_cast<int64_t>(t)*
+				  static_cast<int64_t>(int_math::modulo_invers(P.a3, modulus)))%modulus);
+    } else if (P.a2!=0) {
       t=S.r2;
-      t-=static_cast<long>((static_cast<long long>(P.a1)*
-			    static_cast<long long>(S.r3))%modulus);
-      if (t<0l)
+      t-=static_cast<result_type>((static_cast<int64_t>(P.a1)*
+				   static_cast<int64_t>(S.r3))%modulus);
+      if (t<0)
 	t+=modulus;
-      t=static_cast<long>((static_cast<long long>(t)*
-			   static_cast<long long>
-			   (int_math::modulo_invers(P.a2, modulus)))%modulus);
-    } else if (P.a1!=0l) {
+      t=static_cast<result_type>((static_cast<int64_t>(t)*
+				  static_cast<int64_t>(int_math::modulo_invers(P.a2, modulus)))%modulus);
+    } else if (P.a1!=0) {
       t=S.r3;
-      t=static_cast<long>((static_cast<long long>(t)*
-			   static_cast<long long>
-			   (int_math::modulo_invers(P.a1, modulus)))%modulus);
+      t=static_cast<result_type>((static_cast<int64_t>(t)*
+				  static_cast<int64_t>(int_math::modulo_invers(P.a1, modulus)))%modulus);
     } else
-      t=0l;
+      t=0;
     S.r1=S.r2;  S.r2=S.r3;  S.r3=t;
   }
   
 }
-  
+
 #endif

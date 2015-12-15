@@ -85,10 +85,10 @@ int main() {
     { trng::yarn5s      r;  sample_output(r, "trng::yarn5s"); }
     // { trng::mt19937     r;  sample_output(r, "trng::mt19937"); }
     // { trng::mt19937_64  r;  sample_output(r, "trng::mt19937_64"); }
-    { trng::lagfib2xor_19937_ull  r;  sample_output(r, "trng::lagfib2xor_19937_ull"); }
-    { trng::lagfib4xor_19937_ull  r;  sample_output(r, "trng::lagfib4xor_19937_ull"); }
-    { trng::lagfib4plus_19937_ull r;  sample_output(r, "trng::lagfib2plus_19937_ull"); }
-    { trng::lagfib2plus_19937_ull r;  sample_output(r, "trng::lagfib4plus_19937_ull"); }
+    { trng::lagfib2xor_19937_64  r;  sample_output(r, "trng::lagfib2xor_19937_64"); }
+    { trng::lagfib4xor_19937_64  r;  sample_output(r, "trng::lagfib4xor_19937_64"); }
+    { trng::lagfib4plus_19937_64 r;  sample_output(r, "trng::lagfib2plus_19937_64"); }
+    { trng::lagfib2plus_19937_64 r;  sample_output(r, "trng::lagfib4plus_19937_64"); }
   } 
   catch (std::exception &err) {
     std::cerr << err.what() << std::endl;

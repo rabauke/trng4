@@ -399,10 +399,10 @@ int main() {
     { plausibility_main<trng::yarn4>(); }
     { plausibility_main<trng::yarn5>(); }
     { plausibility_main<trng::yarn5s>(); }
-    { plausibility_main<trng::lagfib2xor_521_ul>(); }
-    { plausibility_main<trng::lagfib4xor_521_ul>(); }
-    { plausibility_main<trng::lagfib2plus_521_ul>(); }
-    { plausibility_main<trng::lagfib4plus_521_ul>(); }
+    { plausibility_main<trng::lagfib2xor_521_32>(); }
+    { plausibility_main<trng::lagfib4xor_521_32>(); }
+    { plausibility_main<trng::lagfib2plus_521_32>(); }
+    { plausibility_main<trng::lagfib4plus_521_32>(); }
     { plausibility_main<trng::mt19937>(); }
     { plausibility_main<trng::mt19937_64>(); }
   } 

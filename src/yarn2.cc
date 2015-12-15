@@ -61,9 +61,9 @@ namespace trng {
   }
 
   const yarn2::parameter_type 
-  yarn2::LEcuyer1=parameter_type(1498809829l, 1160990996l);
+  yarn2::LEcuyer1=parameter_type(1498809829, 1160990996);
   const yarn2::parameter_type 
-  yarn2::LEcuyer2=parameter_type(46325l, 1084587l);
+  yarn2::LEcuyer2=parameter_type(46325, 1084587);
   
   // Random number engine concept
   yarn2::yarn2(yarn2::parameter_type P) :
@@ -79,7 +79,7 @@ namespace trng {
   }
 
   void yarn2::seed(unsigned long s) {
-    long long t=s;
+    int64_t t=s;
     t%=modulus;
     if (t<0)
       t+=modulus;

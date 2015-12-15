@@ -39,6 +39,7 @@
 #include <stdexcept>
 #include <trng/cuda.hpp>
 #include <trng/utility.hpp>
+#include <trng/int_types.hpp>
 #include <trng/int_math.hpp>
 
 namespace trng {
@@ -49,13 +50,13 @@ namespace trng {
   public:
   
     // Uniform random number generator concept
-    typedef long result_type;
+    typedef int32_t result_type;
     TRNG_CUDA_ENABLE
     result_type operator()();
   private:
-    static const result_type modulus=2147483647l;
-    static const result_type gen=123567893l;
-    static const result_type min_=0l;
+    static const result_type modulus=2147483647;
+    static const result_type gen=123567893;
+    static const result_type min_=0;
     static const result_type max_=modulus-1;
   public:
 #if __cplusplus>=201103L
@@ -181,10 +182,8 @@ namespace trng {
     void seed(unsigned long);
     template<typename gen>
     void seed(gen &g) {
-      result_type r1=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      result_type r2=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
+      result_type r1=static_cast<uint32_t>(g())%static_cast<uint32_t>(modulus);
+      result_type r2=static_cast<uint32_t>(g())%static_cast<uint32_t>(modulus);
       S.r1=r1;
       S.r2=r2;
     }
@@ -257,10 +256,8 @@ namespace trng {
 
   TRNG_CUDA_ENABLE
   inline void yarn2::step() {
-    unsigned long long t(static_cast<unsigned long long>(P.a1)*
-			 static_cast<unsigned long long>(S.r1)+
-			 static_cast<unsigned long long>(P.a2)*
-			 static_cast<unsigned long long>(S.r2));
+    uint64_t t(static_cast<uint64_t>(P.a1)*static_cast<uint64_t>(S.r1)+
+	       static_cast<uint64_t>(P.a2)*static_cast<uint64_t>(S.r2));
     S.r2=S.r1;  S.r1=int_math::modulo<modulus, 2>(t);
   }
 
@@ -271,7 +268,7 @@ namespace trng {
     if (S.r1==0) 
       return 0;
     yarn2::result_type n=S.r1;
-    long long p(1ll), t(gen);
+    int64_t p(1), t(gen);
     while (n>0) {
       if ((n&0x1)==0x1)
 	p=int_math::modulo<modulus, 1>(p*t);
@@ -297,11 +294,11 @@ namespace trng {
       utility::throw_this(std::invalid_argument("invalid argument for trng::yarn2::split"));
 #endif
     if (s>1) {
-      jump(n+1);  long q0=S.r1;
-      jump(s);    long q1=S.r1;
-      jump(s);    long q2=S.r1;
-      jump(s);    long q3=S.r1;
-      long a[2], b[4];
+      jump(n+1);  int32_t q0=S.r1;
+      jump(s);    int32_t q1=S.r1;
+      jump(s);    int32_t q2=S.r1;
+      jump(s);    int32_t q3=S.r1;
+      int32_t a[2], b[4];
       a[0]=q2;  b[0]=q1;  b[1]=q0;
       a[1]=q3;  b[2]=q2;  b[3]=q1;
       int_math::gauss<2>(b, a, modulus);
@@ -314,10 +311,10 @@ namespace trng {
 
   TRNG_CUDA_ENABLE
   inline void yarn2::jump2(unsigned int s) {
-    long b[4], c[4], d[2], r[2];
-    long t1(P.a1), t2(P.a2);
+    int32_t b[4], c[4], d[2], r[2];
+    int32_t t1(P.a1), t2(P.a2);
     b[0]=P.a1;  b[1]=P.a2;
-    b[2]=1l;    b[3]=0l;
+    b[2]=1;     b[3]=0;
     for (unsigned int i(0); i<s; ++i)
       if ((i&1)==0)
 	int_math::matrix_mult<2>(b, b, c, modulus);
@@ -355,23 +352,18 @@ namespace trng {
 
   TRNG_CUDA_ENABLE
   inline void yarn2::backward() {
-    long t;
-    if (P.a2!=0l) {
+    result_type t;
+    if (P.a2!=0) {
       t=S.r1;
-      t-=static_cast<long>((static_cast<long long>(P.a1)*
-			    static_cast<long long>(S.r2))%modulus);
-      if (t<0l)
+      t-=static_cast<result_type>((static_cast<int64_t>(P.a1)*static_cast<int64_t>(S.r2))%modulus);
+      if (t<0)
 	t+=modulus;
-      t=static_cast<long>((static_cast<long long>(t)*
-			   static_cast<long long>
-			   (int_math::modulo_invers(P.a2, modulus)))%modulus);
-    } else if (P.a1!=0l) {
+      t=static_cast<result_type>((static_cast<int64_t>(t)*static_cast<int64_t>(int_math::modulo_invers(P.a2, modulus)))%modulus);
+    } else if (P.a1!=0) {
       t=S.r2;
-      t=static_cast<long>((static_cast<long long>(t)*
-			   static_cast<long long>
-			   (int_math::modulo_invers(P.a1, modulus)))%modulus);
+      t=static_cast<result_type>((static_cast<int64_t>(t)*static_cast<int64_t>(int_math::modulo_invers(P.a1, modulus)))%modulus);
     } else
-      t=0l;
+      t=0;
     S.r1=S.r2;  S.r2=t;
   }
 

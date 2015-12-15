@@ -61,11 +61,11 @@ namespace trng {
   }
 
   const mrg3::parameter_type
-  mrg3::LEcuyer1=parameter_type(2021422057l, 1826992351l, 1977753457l);
+  mrg3::LEcuyer1=parameter_type(2021422057, 1826992351, 1977753457);
   const mrg3::parameter_type
-  mrg3::LEcuyer2=parameter_type(1476728729l, 0l, 1155643113l);
+  mrg3::LEcuyer2=parameter_type(1476728729l, 0, 1155643113);
   const mrg3::parameter_type
-  mrg3::LEcuyer3=parameter_type(65338l, 0l, 64636l);
+  mrg3::LEcuyer3=parameter_type(65338, 0, 64636);
   
   // Random number engine concept
   mrg3::mrg3(mrg3::parameter_type P) :

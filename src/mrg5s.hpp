@@ -39,6 +39,7 @@
 #include <stdexcept>
 #include <trng/cuda.hpp>
 #include <trng/utility.hpp>
+#include <trng/int_types.hpp>
 #include <trng/int_math.hpp>
 
 namespace trng {
@@ -49,12 +50,12 @@ namespace trng {
   public:
   
     // Uniform random number generator concept
-    typedef long result_type;
+    typedef int32_t result_type;
     TRNG_CUDA_ENABLE
     result_type operator()();
   private:
-    static const result_type modulus=2147461007l;  // 2^31 - 22641
-    static const result_type min_=0l;
+    static const result_type modulus=2147461007;  // 2^31 - 22641
+    static const result_type min_=0;
     static const result_type max_=modulus-1;
   public:
 #if __cplusplus>=201103L
@@ -189,16 +190,11 @@ namespace trng {
     void seed(unsigned long);
     template<typename gen>
     void seed(gen &g) {
-      result_type r1=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      result_type r2=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      result_type r3=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      result_type r4=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
-      result_type r5=static_cast<unsigned long>(g())%
-        static_cast<unsigned long>(modulus);
+      result_type r1=static_cast<uint32_t>(g())%static_cast<uint32_t>(modulus);
+      result_type r2=static_cast<uint32_t>(g())%static_cast<uint32_t>(modulus);
+      result_type r3=static_cast<uint32_t>(g())%static_cast<uint32_t>(modulus);
+      result_type r4=static_cast<uint32_t>(g())%static_cast<uint32_t>(modulus);
+      result_type r5=static_cast<uint32_t>(g())%static_cast<uint32_t>(modulus);
       S.r1=r1;
       S.r2=r2;
       S.r3=r3;
@@ -272,18 +268,14 @@ namespace trng {
   
   TRNG_CUDA_ENABLE
   inline void mrg5s::step() {
-    unsigned long long t(static_cast<unsigned long long>(P.a1)*
-			 static_cast<unsigned long long>(S.r1)+
-			 static_cast<unsigned long long>(P.a2)*
-			 static_cast<unsigned long long>(S.r2)+
-			 static_cast<unsigned long long>(P.a3)*
-			 static_cast<unsigned long long>(S.r3)+
-			 static_cast<unsigned long long>(P.a4)*
-			 static_cast<unsigned long long>(S.r4));
-    if (t>=2ull*modulus*modulus)
-      t-=2ull*modulus*modulus;
-    t+=static_cast<unsigned long long>(P.a5)*
-      static_cast<unsigned long long>(S.r5);
+    uint64_t t(static_cast<uint64_t>(P.a1)*static_cast<uint64_t>(S.r1)+
+	       static_cast<uint64_t>(P.a2)*static_cast<uint64_t>(S.r2)+
+	       static_cast<uint64_t>(P.a3)*static_cast<uint64_t>(S.r3)+
+	       static_cast<uint64_t>(P.a4)*static_cast<uint64_t>(S.r4));
+    if (t>=static_cast<uint64_t>(2u)*modulus*modulus)
+      t-=static_cast<uint64_t>(2u)*modulus*modulus;
+    t+=static_cast<uint64_t>(P.a5)*
+      static_cast<uint64_t>(S.r5);
     S.r5=S.r4;  S.r4=S.r3;  S.r3=S.r2;  S.r2=S.r1;  S.r1=int_math::modulo<modulus, 5>(t);
   }
   
@@ -306,17 +298,17 @@ namespace trng {
       utility::throw_this(std::invalid_argument("invalid argument for trng::mrg5s::split"));
 #endif
     if (s>1) {
-      jump(n+1);  long q0=S.r1;
-      jump(s);    long q1=S.r1;
-      jump(s);    long q2=S.r1;
-      jump(s);    long q3=S.r1;
-      jump(s);    long q4=S.r1;
-      jump(s);    long q5=S.r1;
-      jump(s);    long q6=S.r1;
-      jump(s);    long q7=S.r1;
-      jump(s);    long q8=S.r1;
-      jump(s);    long q9=S.r1;
-      long a[5], b[25];
+      jump(n+1);  int32_t q0=S.r1;
+      jump(s);    int32_t q1=S.r1;
+      jump(s);    int32_t q2=S.r1;
+      jump(s);    int32_t q3=S.r1;
+      jump(s);    int32_t q4=S.r1;
+      jump(s);    int32_t q5=S.r1;
+      jump(s);    int32_t q6=S.r1;
+      jump(s);    int32_t q7=S.r1;
+      jump(s);    int32_t q8=S.r1;
+      jump(s);    int32_t q9=S.r1;
+      int32_t a[5], b[25];
       a[ 0]=q5;  b[ 0]=q4;  b[ 1]=q3;  b[ 2]=q2;  b[ 3]=q1;  b[ 4]=q0;
       a[ 1]=q6;  b[ 5]=q5;  b[ 6]=q4;  b[ 7]=q3;  b[ 8]=q2;  b[ 9]=q1;
       a[ 2]=q7;  b[10]=q6;  b[11]=q5;  b[12]=q4;  b[13]=q3;  b[14]=q2;
@@ -332,13 +324,13 @@ namespace trng {
   
   TRNG_CUDA_ENABLE
   inline void mrg5s::jump2(unsigned int s) {
-    long b[25], c[25], d[5], r[5];
-    long t1(P.a1), t2(P.a2), t3(P.a3), t4(P.a4), t5(P.a5);
+    int32_t b[25], c[25], d[5], r[5];
+    int32_t t1(P.a1), t2(P.a2), t3(P.a3), t4(P.a4), t5(P.a5);
     b[ 0]=P.a1;  b[ 1]=P.a2;  b[ 2]=P.a3;  b[ 3]=P.a4;  b[ 4]=P.a5;
-    b[ 5]=1l;    b[ 6]=0l;    b[ 7]=0l;    b[ 8]=0l;    b[ 9]=0l;
-    b[10]=0l;    b[11]=1l;    b[12]=0l;    b[13]=0l;    b[14]=0l;
-    b[15]=0l;    b[16]=0l;    b[17]=1l;    b[18]=0l;    b[19]=0l;
-    b[20]=0l;    b[21]=0l;    b[22]=0l;    b[23]=1l;    b[24]=0l;
+    b[ 5]=1;     b[ 6]=0;     b[ 7]=0;     b[ 8]=0;     b[ 9]=0; 
+    b[10]=0;     b[11]=1;     b[12]=0;     b[13]=0;     b[14]=0; 
+    b[15]=0;     b[16]=0;     b[17]=1;     b[18]=0;     b[19]=0; 
+    b[20]=0;     b[21]=0;     b[22]=0;     b[23]=1;     b[24]=0; 
     for (unsigned int i(0); i<s; ++i)
       if ((i&1)==0)
 	int_math::matrix_mult<5>(b, b, c, modulus);
@@ -371,74 +363,55 @@ namespace trng {
 
   TRNG_CUDA_ENABLE
   inline void mrg5s::backward() {
-    long t;
-    if (P.a5!=0l) {
+    result_type t;
+    if (P.a5!=0) {
       t=S.r1;
-      t-=static_cast<long>((static_cast<long long>(P.a1)*
-			    static_cast<long long>(S.r2))%modulus);
-      if (t<0l)
+      t-=static_cast<result_type>((static_cast<int64_t>(P.a1)*static_cast<int64_t>(S.r2))%modulus);
+      if (t<0)
 	t+=modulus;
-      t-=static_cast<long>((static_cast<long long>(P.a2)*
-			    static_cast<long long>(S.r3))%modulus);
-      if (t<0l)
+      t-=static_cast<result_type>((static_cast<int64_t>(P.a2)*static_cast<int64_t>(S.r3))%modulus);
+      if (t<0)
 	t+=modulus;
-      t-=static_cast<long>((static_cast<long long>(P.a3)*
-			    static_cast<long long>(S.r4))%modulus);
-      if (t<0l)
+      t-=static_cast<result_type>((static_cast<int64_t>(P.a3)*static_cast<int64_t>(S.r4))%modulus);
+      if (t<0)
 	t+=modulus;
-      t-=static_cast<long>((static_cast<long long>(P.a4)*
-			    static_cast<long long>(S.r5))%modulus);
-      if (t<0l)
+      t-=static_cast<result_type>((static_cast<int64_t>(P.a4)*static_cast<int64_t>(S.r5))%modulus);
+      if (t<0)
 	t+=modulus;
-      t=static_cast<long>((static_cast<long long>(t)*
-			   static_cast<long long>
-			   (int_math::modulo_invers(P.a5, modulus)))%modulus);
-    } else if (P.a4!=0l) {
+      t=static_cast<result_type>((static_cast<int64_t>(t)*static_cast<int64_t>(int_math::modulo_invers(P.a5, modulus)))%modulus);
+    } else if (P.a4!=0) {
       t=S.r1;
-      t-=static_cast<long>((static_cast<long long>(P.a1)*
-			    static_cast<long long>(S.r2))%modulus);
-      if (t<0l)
+      t-=static_cast<result_type>((static_cast<int64_t>(P.a1)*static_cast<int64_t>(S.r2))%modulus);
+      if (t<0)
 	t+=modulus;
-      t-=static_cast<long>((static_cast<long long>(P.a2)*
-			    static_cast<long long>(S.r3))%modulus);
-      if (t<0l)
+      t-=static_cast<result_type>((static_cast<int64_t>(P.a2)*static_cast<int64_t>(S.r3))%modulus);
+      if (t<0)
 	t+=modulus;
-      t-=static_cast<long>((static_cast<long long>(P.a3)*
-			    static_cast<long long>(S.r4))%modulus);
-      if (t<0l)
+      t-=static_cast<result_type>((static_cast<int64_t>(P.a3)*static_cast<int64_t>(S.r4))%modulus);
+      if (t<0)
 	t+=modulus;
-      t=static_cast<long>((static_cast<long long>(t)*
-			   static_cast<long long>
+      t=static_cast<result_type>((static_cast<int64_t>(t)*static_cast<int64_t>
 			   (int_math::modulo_invers(P.a4, modulus)))%modulus);
-    } else if (P.a3!=0l) {
+    } else if (P.a3!=0) {
       t=S.r2;
-      t-=static_cast<long>((static_cast<long long>(P.a1)*
-			    static_cast<long long>(S.r3))%modulus);
-      if (t<0l)
+      t-=static_cast<result_type>((static_cast<int64_t>(P.a1)*static_cast<int64_t>(S.r3))%modulus);
+      if (t<0)
 	t+=modulus;
-      t-=static_cast<long>((static_cast<long long>(P.a2)*
-			    static_cast<long long>(S.r4))%modulus);
-      if (t<0l)
+      t-=static_cast<result_type>((static_cast<int64_t>(P.a2)*static_cast<int64_t>(S.r4))%modulus);
+      if (t<0)
 	t+=modulus;
-      t=static_cast<long>((static_cast<long long>(t)*
-			   static_cast<long long>
-			   (int_math::modulo_invers(P.a3, modulus)))%modulus);
-    } else if (P.a2!=0l) {
+      t=static_cast<result_type>((static_cast<int64_t>(t)*static_cast<int64_t>(int_math::modulo_invers(P.a3, modulus)))%modulus);
+    } else if (P.a2!=0) {
       t=S.r3;
-      t-=static_cast<long>((static_cast<long long>(P.a1)*
-			    static_cast<long long>(S.r4))%modulus);
-      if (t<0l)
+      t-=static_cast<result_type>((static_cast<int64_t>(P.a1)*static_cast<int64_t>(S.r4))%modulus);
+      if (t<0)
 	t+=modulus;
-      t=static_cast<long>((static_cast<long long>(t)*
-			   static_cast<long long>
-			   (int_math::modulo_invers(P.a2, modulus)))%modulus);
-    } else if (P.a1!=0l) {
+      t=static_cast<result_type>((static_cast<int64_t>(t)*static_cast<int64_t>(int_math::modulo_invers(P.a2, modulus)))%modulus);
+    } else if (P.a1!=0) {
       t=S.r4;
-      t=static_cast<long>((static_cast<long long>(t)*
-			   static_cast<long long>
-			   (int_math::modulo_invers(P.a1, modulus)))%modulus);
+      t=static_cast<result_type>((static_cast<int64_t>(t)*static_cast<int64_t>(int_math::modulo_invers(P.a1, modulus)))%modulus);
     } else
-      t=0l;
+      t=0;
     S.r1=S.r2;  S.r2=S.r3;  S.r3=S.r4;  S.r4=S.r5;  S.r5=t;
   }
   

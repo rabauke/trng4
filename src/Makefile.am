@@ -13,7 +13,7 @@ libtrng4_la_SOURCES = minstd.cc \
 
 pkginclude_HEADERS = config.hpp cuda.hpp utility.hpp uniformxx.hpp static_assertion.hpp \
 		     generate_canonical.hpp minstd.hpp \
-		     limits.hpp math.hpp int_math.hpp special_functions.hpp constants.hpp \
+		     limits.hpp math.hpp int_types.hpp int_math.hpp special_functions.hpp constants.hpp \
 		     lcg64.hpp lcg64_shift.hpp \
 		     mt19937.hpp mt19937_64.hpp \
 		     mrg2.hpp mrg3.hpp mrg3s.hpp mrg4.hpp mrg5.hpp mrg5s.hpp \
@@ -31,5 +31,4 @@ pkginclude_HEADERS = config.hpp cuda.hpp utility.hpp uniformxx.hpp static_assert
 		     hypergeometric_dist.hpp geometric_dist.hpp \
 		     poisson_dist.hpp zero_truncated_poisson_dist.hpp discrete_dist.hpp fast_discrete_dist.hpp
 
-libtrng4_la_LDFLAGS = -version-info 0:0:0
-
+libtrng4_la_LDFLAGS = -version-info 19:0:0

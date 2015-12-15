@@ -61,9 +61,9 @@ namespace trng {
   }
 
   const mrg3s::parameter_type
-  mrg3s::trng0=parameter_type(2025213985l, 1112953677l, 2038969601l);
+  mrg3s::trng0=parameter_type(2025213985, 1112953677, 2038969601);
   const mrg3s::parameter_type
-  mrg3s::trng1=parameter_type(1287767370l, 1045931779l, 58150106l);
+  mrg3s::trng1=parameter_type(1287767370, 1045931779, 58150106);
   
   // Random number engine concept
   mrg3s::mrg3s(mrg3s::parameter_type P) :
@@ -79,7 +79,7 @@ namespace trng {
   }
 
   void mrg3s::seed(unsigned long s) {
-    long long t=s;
+    int64_t t=s;
     t%=modulus;
     if (t<0)
       t+=modulus;
@@ -89,7 +89,7 @@ namespace trng {
   }
 
   void mrg3s::seed(mrg3s::result_type s1, mrg3s::result_type s2,
-		  mrg3s::result_type s3) {
+		   mrg3s::result_type s3) {
     S.r1=s1%modulus;
     if (S.r1<0)
       S.r1+=modulus;

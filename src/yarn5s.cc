@@ -52,7 +52,7 @@ namespace trng {
   // Equality comparable concept
   bool operator==(const yarn5s::status_type &S1,
                   const yarn5s::status_type &S2) {
-    return S1.r1==S2.r1 and S1.r2==S2.r2 and S1.r3==S2.r3 and S1.r4==S2.r4  and S1.r5==S2.r5;
+    return S1.r1==S2.r1 and S1.r2==S2.r2 and S1.r3==S2.r3 and S1.r4==S2.r4 and S1.r5==S2.r5;
   }
 
   bool operator!=(const yarn5s::status_type &S1,
@@ -61,9 +61,9 @@ namespace trng {
   }
   
   const yarn5s::parameter_type
-  yarn5s::trng0=parameter_type(1053223373l, 1530818118l, 1612122482l, 133497989l, 573245311l);
+  yarn5s::trng0=parameter_type(1053223373, 1530818118, 1612122482, 133497989, 573245311);
   const yarn5s::parameter_type
-  yarn5s::trng1=parameter_type(2068619238l, 2138332912l, 671754166l, 1442240992l, 1526958817l);
+  yarn5s::trng1=parameter_type(2068619238, 2138332912, 671754166, 1442240992, 1526958817);
   
   // Random number engine concept
   yarn5s::yarn5s(yarn5s::parameter_type P) :
@@ -79,7 +79,7 @@ namespace trng {
   }
 
   void yarn5s::seed(unsigned long s) {
-    long long t=s;
+    int64_t t=s;
     t%=modulus;
     if (t<0)
       t+=modulus;
@@ -91,8 +91,8 @@ namespace trng {
   }
 
   void yarn5s::seed(yarn5s::result_type s1, yarn5s::result_type s2,
-                   yarn5s::result_type s3, yarn5s::result_type s4, 
-		   yarn5s::result_type s5) {
+		    yarn5s::result_type s3, yarn5s::result_type s4, 
+		    yarn5s::result_type s5) {
     S.r1=s1%modulus;
     if (S.r1<0)
       S.r1+=modulus;

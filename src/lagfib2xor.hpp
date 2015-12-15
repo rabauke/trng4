@@ -42,6 +42,7 @@
 #include <sstream>
 #include <trng/utility.hpp>
 #include <trng/minstd.hpp>
+#include <trng/int_types.hpp>
 
 namespace trng {
 
@@ -277,6 +278,25 @@ namespace trng {
   typedef lagfib2xor<unsigned long long, 4187,  9689> lagfib2xor_9689_ull;
   typedef lagfib2xor<unsigned long,      9842, 19937> lagfib2xor_19937_ul;
   typedef lagfib2xor<unsigned long long, 9842, 19937> lagfib2xor_19937_ull;
+
+  typedef lagfib2xor<uint32_t,  103,   250> r250_32;
+  typedef lagfib2xor<uint64_t,  103,   250> r250_64;
+  typedef lagfib2xor<uint32_t,  168,   521> lagfib2xor_521_32;
+  typedef lagfib2xor<uint64_t,  168,   521> lagfib2xor_521_64;
+  typedef lagfib2xor<uint32_t,  273,   607> lagfib2xor_607_32;
+  typedef lagfib2xor<uint64_t,  273,   607> lagfib2xor_607_64;
+  typedef lagfib2xor<uint32_t,  418,  1279> lagfib2xor_1279_32;
+  typedef lagfib2xor<uint64_t,  418,  1279> lagfib2xor_1279_64;
+  typedef lagfib2xor<uint32_t, 1029,  2281> lagfib2xor_2281_32;
+  typedef lagfib2xor<uint64_t, 1029,  2281> lagfib2xor_2281_64;
+  typedef lagfib2xor<uint32_t,  576,  3217> lagfib2xor_3217_32;
+  typedef lagfib2xor<uint64_t,  576,  3217> lagfib2xor_3217_64;
+  typedef lagfib2xor<uint32_t, 2098,  4423> lagfib2xor_4423_32;
+  typedef lagfib2xor<uint64_t, 2098,  4423> lagfib2xor_4423_64;
+  typedef lagfib2xor<uint32_t, 4187,  9689> lagfib2xor_9689_32;
+  typedef lagfib2xor<uint64_t, 4187,  9689> lagfib2xor_9689_64;
+  typedef lagfib2xor<uint32_t, 9842, 19937> lagfib2xor_19937_32;
+  typedef lagfib2xor<uint64_t, 9842, 19937> lagfib2xor_19937_64;
 		       
 }
 

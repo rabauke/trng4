@@ -60,8 +60,8 @@ namespace trng {
     (*this)=minstd();
   }
 
-  void minstd::seed(minstd::result_type s) {
-    S.r=s%2147483647ul;
+  void minstd::seed(unsigned long s) {
+    S.r=s%2147483647;
     if (S.r==0)
       S.r=1;
   }
@@ -83,4 +83,3 @@ namespace trng {
   }
 
 }
-

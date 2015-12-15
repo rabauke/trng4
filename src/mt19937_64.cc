@@ -66,7 +66,7 @@ namespace trng {
   // Random number engine concept
   mt19937_64::mt19937_64() :
     P(), S() { 
-    seed(5489ULL); 
+    seed(5489u); 
   }
 
   mt19937_64::mt19937_64(unsigned long s) :
@@ -79,13 +79,9 @@ namespace trng {
   }
  
   void mt19937_64::seed(unsigned long s) {
-    seed(static_cast<mt19937_64::result_type>(s));
-  }
-  
-  void mt19937_64::seed(mt19937_64::result_type s) {
     S.mt[0]=s;
     for (S.mti=1; S.mti<mt19937_64::status_type::N; ++S.mti) 
-      S.mt[S.mti]=(6364136223846793005ull * (S.mt[S.mti-1] ^ (S.mt[S.mti-1] >> 62)) + S.mti);
+      S.mt[S.mti]=(6364136223846793005u * (S.mt[S.mti-1] ^ (S.mt[S.mti-1] >> 62)) + S.mti);
   }
   
   // Equality comparable concept

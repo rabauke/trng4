@@ -40,6 +40,7 @@
 #include <ostream>
 #include <istream>
 #include <trng/utility.hpp>
+#include <trng/int_types.hpp>
 
 namespace trng {
   
@@ -49,11 +50,11 @@ namespace trng {
   public:
 
     // Uniform random number generator concept
-    typedef unsigned long result_type;
+    typedef uint32_t result_type;
     result_type operator()();
   private:
-    static const result_type min_=1ul;
-    static const result_type max_=2147483646ul;
+    static const result_type min_=1u;
+    static const result_type max_=2147483646u;
   public:
 #if __cplusplus>=201103L
     static constexpr result_type min() {  return min_;  }
@@ -121,11 +122,11 @@ namespace trng {
     }
     
     void seed(); 
-    void seed(result_type); 
+    void seed(unsigned long); 
     template<typename gen>
     void seed(gen &g) {
       do {
-	S.r=g()%2147483647l;
+	S.r=g()%2147483647;
       } while (S.r==0);
     }
     
@@ -178,10 +179,10 @@ namespace trng {
   // Inline and template methods
   
   inline void minstd::step() {
-    unsigned long long t=S.r*16807;
-     t=(t&0x7fffffffull)+(t>>31);
-     if (t>=2147483647ull)
-       t-=2147483647ull;
+    uint64_t t=S.r*16807;
+     t=(t&0x7fffffffu)+(t>>31);
+     if (t>=2147483647u)
+       t-=2147483647u;
      S.r=static_cast<long>(t);
   }
   

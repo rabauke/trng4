@@ -58,6 +58,10 @@
 #include <trng/lagfib4xor.hpp>
 #include <trng/lagfib4plus.hpp>
 
+#if __cplusplus>=201103L
+# include <random>
+#endif
+
 #if defined TRNG_HAVE_BOOST
 # include <boost/random/linear_congruential.hpp>
 # include <boost/random/additive_combine.hpp>
@@ -238,27 +242,38 @@ int main() {
     { trng::yarn5s      r;  time_main(r, "trng::yarn5s"); }
     { trng::mt19937     r;  time_main(r, "trng::mt19937"); }
     { trng::mt19937_64  r;  time_main(r, "trng::mt19937_64"); }
-    { trng::lagfib2xor_19937_ull  r;  time_main(r, "trng::lagfib2xor_19937_ull"); }
-    { trng::lagfib4xor_19937_ull  r;  time_main(r, "trng::lagfib4xor_19937_ull"); }
-    { trng::lagfib4plus_19937_ull r;  time_main(r, "trng::lagfib2plus_19937_ull"); }
-    { trng::lagfib2plus_19937_ull r;  time_main(r, "trng::lagfib4plus_19937_ull"); }
-// #if defined TRNG_HAVE_BOOST
-//     { boost::minstd_rand    r; time_boost(r, "boost::minstd_rand"); }
-//     { boost::ecuyer1988     r; time_boost(r, "boost::ecuyer1988"); }
-//     { boost::kreutzer1986   r; time_boost(r, "boost::kreutzer1986"); }
-//     { boost::hellekalek1995 r; time_boost(r, "boost::hellekalek1995"); }
-//     { boost::mt11213b       r; time_boost(r, "boost::mt11213b"); }
-//     { boost::mt19937        r; time_boost(r, "boost::mt19937"); }
-//     { boost::lagged_fibonacci607   r; time_boost(r, "boost::lagged_fibonacci607"); }
-//     { boost::lagged_fibonacci1279  r; time_boost(r, "boost::lagged_fibonacci1279"); }
-//     { boost::lagged_fibonacci2281  r; time_boost(r, "boost::lagged_fibonacci2281"); }
-//     { boost::lagged_fibonacci3217  r; time_boost(r, "boost::lagged_fibonacci3217"); }
-//     { boost::lagged_fibonacci4423  r; time_boost(r, "boost::lagged_fibonacci4423"); }
-//     { boost::lagged_fibonacci9689  r; time_boost(r, "boost::lagged_fibonacci9689"); }
-//     { boost::lagged_fibonacci19937 r; time_boost(r, "boost::lagged_fibonacci19937"); }
-//     { boost::lagged_fibonacci23209 r; time_boost(r, "boost::lagged_fibonacci23209"); }
-//     { boost::lagged_fibonacci44497 r; time_boost(r, "boost::lagged_fibonacci44497"); }
-// #endif
+    { trng::lagfib2xor_19937_64  r;  time_main(r, "trng::lagfib2xor_19937_64"); }
+    { trng::lagfib4xor_19937_64  r;  time_main(r, "trng::lagfib4xor_19937_64"); }
+    { trng::lagfib2plus_19937_64 r;  time_main(r, "trng::lagfib2plus_19937_64"); }
+    { trng::lagfib4plus_19937_64 r;  time_main(r, "trng::lagfib4plus_19937_64"); }
+#if __cplusplus>=201103L
+    { std::minstd_rand0  r;  time_main(r, "std::minstd_rand0"); }
+    { std::minstd_rand   r;  time_main(r, "std::minstd_rand"); }
+    { std::mt19937       r;  time_main(r, "std::mt19937"); }
+    { std::mt19937_64    r;  time_main(r, "std::mt19937_64"); }
+    { std::ranlux24_base r;  time_main(r, "std::ranlux24_base"); }
+    { std::ranlux48_base r;  time_main(r, "std::ranlux48_base"); }
+    { std::ranlux24      r;  time_main(r, "std::ranlux24"); }
+    { std::ranlux48      r;  time_main(r, "std::ranlux48"); }
+    { std::knuth_b       r;  time_main(r, "std::knuth_b"); }
+#endif
+#if defined TRNG_HAVE_BOOST
+    { boost::minstd_rand    r; time_boost(r, "boost::minstd_rand"); }
+    { boost::ecuyer1988     r; time_boost(r, "boost::ecuyer1988"); }
+    { boost::kreutzer1986   r; time_boost(r, "boost::kreutzer1986"); }
+    { boost::hellekalek1995 r; time_boost(r, "boost::hellekalek1995"); }
+    { boost::mt11213b       r; time_boost(r, "boost::mt11213b"); }
+    { boost::mt19937        r; time_boost(r, "boost::mt19937"); }
+    { boost::lagged_fibonacci607   r; time_boost(r, "boost::lagged_fibonacci607"); }
+    { boost::lagged_fibonacci1279  r; time_boost(r, "boost::lagged_fibonacci1279"); }
+    { boost::lagged_fibonacci2281  r; time_boost(r, "boost::lagged_fibonacci2281"); }
+    { boost::lagged_fibonacci3217  r; time_boost(r, "boost::lagged_fibonacci3217"); }
+    { boost::lagged_fibonacci4423  r; time_boost(r, "boost::lagged_fibonacci4423"); }
+    { boost::lagged_fibonacci9689  r; time_boost(r, "boost::lagged_fibonacci9689"); }
+    { boost::lagged_fibonacci19937 r; time_boost(r, "boost::lagged_fibonacci19937"); }
+    { boost::lagged_fibonacci23209 r; time_boost(r, "boost::lagged_fibonacci23209"); }
+    { boost::lagged_fibonacci44497 r; time_boost(r, "boost::lagged_fibonacci44497"); }
+#endif
   } 
   catch (std::exception &err) {
     std::cerr << err.what() << std::endl;

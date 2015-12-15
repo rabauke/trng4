@@ -61,9 +61,9 @@ namespace trng {
   }
 
   const mrg2::parameter_type 
-  mrg2::LEcuyer1=parameter_type(1498809829l, 1160990996l);
+  mrg2::LEcuyer1=parameter_type(1498809829, 1160990996);
   const mrg2::parameter_type 
-  mrg2::LEcuyer2=parameter_type(46325l, 1084587l);
+  mrg2::LEcuyer2=parameter_type(46325, 1084587);
   
   // Random number engine concept
   mrg2::mrg2(mrg2::parameter_type P) :

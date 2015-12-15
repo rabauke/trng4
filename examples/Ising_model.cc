@@ -437,7 +437,7 @@ int main (int argc, char *argv[]) {
   { trng::yarn4 r;    r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
   { trng::yarn5 r;    r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
   { trng::yarn5s r;   r.split(split, 0);  if (generator==r.name()) wolff_main(r, runs, split, L); }
-  { trng::r250_ul r;  if (generator==r.name()) wolff_main(r, runs, split, L); }
-  { trng::Ziff_ul r;  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::r250_32 r;  if (generator==r.name()) wolff_main(r, runs, split, L); }
+  { trng::Ziff_32 r;  if (generator==r.name()) wolff_main(r, runs, split, L); }
   return EXIT_SUCCESS;
 }

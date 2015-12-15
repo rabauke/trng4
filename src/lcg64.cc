@@ -61,13 +61,13 @@ namespace trng {
   }
   
   const lcg64::parameter_type
-  lcg64::Default=parameter_type(18145460002477866997ull, 1ull);
+  lcg64::Default=parameter_type(18145460002477866997u, 1u);
   const lcg64::parameter_type 
-  lcg64::LEcuyer1=parameter_type(2862933555777941757ull, 1ull);
+  lcg64::LEcuyer1=parameter_type(2862933555777941757u, 1u);
   const lcg64::parameter_type 
-  lcg64::LEcuyer2=parameter_type(3202034522624059733ull, 1ull);
+  lcg64::LEcuyer2=parameter_type(3202034522624059733u, 1u);
   const lcg64::parameter_type 
-  lcg64::LEcuyer3=parameter_type(3935559000370003845ull, 1ull);
+  lcg64::LEcuyer3=parameter_type(3935559000370003845u, 1u);
 
   // Random number engine concept
   lcg64::lcg64(lcg64::parameter_type P) :
@@ -77,22 +77,24 @@ namespace trng {
     P(P), S() { 
     seed(s);
   }
+
+  lcg64::lcg64(unsigned long long s, lcg64::parameter_type P) :
+    P(P), S() { 
+    seed(s);
+  }
     
   void lcg64::seed() {
     (*this)=lcg64();
   }
  
   void lcg64::seed(unsigned long s) {
-    S.r=s;
+    S.r=static_cast<result_type>(s);
   }
   
-  void lcg64::seed(lcg64::result_type s) {
-    S.r=s;
-#if ULONG_LONG_MAX>18446744073709551615ull
-    S.r&=0xfffffffffffffffful;
-#endif
+  void lcg64::seed(unsigned long long s) {
+    S.r=static_cast<result_type>(s);
   }
-  
+    
   // Equality comparable concept
   bool operator==(const lcg64 &R1, const lcg64 &R2) {
     return R1.P==R2.P and R1.S==R2.S;

@@ -61,9 +61,9 @@ namespace trng {
   }
 
   const mrg4::parameter_type
-  mrg4::LEcuyer1=parameter_type(2001982722l, 1412284257l, 1155380217l, 1668339922l);
+  mrg4::LEcuyer1=parameter_type(2001982722, 1412284257, 1155380217, 1668339922);
   const mrg4::parameter_type
-  mrg4::LEcuyer2=parameter_type(64886l, 0l, 0l, 64322l);
+  mrg4::LEcuyer2=parameter_type(64886, 0, 0, 64322);
   
   // Random number engine concept
   mrg4::mrg4(mrg4::parameter_type P) :
@@ -79,7 +79,7 @@ namespace trng {
   }
 
   void mrg4::seed(unsigned long s) {
-    long long t=s;
+    int64_t t=s;
     t%=modulus;
     if (t<0)
       t+=modulus;

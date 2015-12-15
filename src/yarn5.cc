@@ -61,7 +61,7 @@ namespace trng {
   }
   
   const yarn5::parameter_type
-  yarn5::LEcuyer1=parameter_type(107374182l, 0l, 0l, 0l, 104480l);
+  yarn5::LEcuyer1=parameter_type(107374182, 0, 0, 0, 104480);
 
   // Random number engine concept
   yarn5::yarn5(yarn5::parameter_type P) :
@@ -77,7 +77,7 @@ namespace trng {
   }
 
   void yarn5::seed(unsigned long s) {
-    long long t=s;
+    int64_t t=s;
     t%=modulus;
     if (t<0)
       t+=modulus;

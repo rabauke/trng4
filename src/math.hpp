@@ -324,31 +324,13 @@ namespace trng {
     }
 
     inline float log(float b, float x) {
-      static float last_b(2.0f);
-      static float last_log_b(1.0f/log(last_b));
-      if (b!=last_b) {
-	last_b=b;
-	last_log_b=1.0f/log(b);
-      }
-      return log(x)*last_log_b;
+      return log(x)*log(b);
     }
     inline double log(double b, double x) {
-      static double last_b(2.0);
-      static double last_log_b(1.0/log(last_b));
-      if (b!=last_b) {
-	last_b=b;
-	last_log_b=1.0/log(b);
-      }
-      return log(x)*last_log_b;
+      return log(x)*log(b);
     }
     inline long double log(long double b, long double x) {
-      static long double last_b(2.0l);
-      static long double last_log_b(1.0l/log(last_b));
-      if (b!=last_b) {
-	last_b=b;
-	last_log_b=1.0l/log(b);
-      }
-      return log(x)*last_log_b;
+      return log(x)*log(b);
     }
 
     using ::std::log10;

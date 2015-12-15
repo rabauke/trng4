@@ -42,6 +42,7 @@
 #include <sstream>
 #include <trng/utility.hpp>
 #include <trng/minstd.hpp>
+#include <trng/int_types.hpp>
 
 namespace trng {
 
@@ -274,6 +275,23 @@ namespace trng {
   typedef lagfib2plus<unsigned long long, 4187,  9689> lagfib2plus_9689_ull;
   typedef lagfib2plus<unsigned long,      9842, 19937> lagfib2plus_19937_ul;
   typedef lagfib2plus<unsigned long long, 9842, 19937> lagfib2plus_19937_ull;
+
+  typedef lagfib2plus<uint32_t,  168,   521> lagfib2plus_521_32;
+  typedef lagfib2plus<uint64_t,  168,   521> lagfib2plus_521_64;
+  typedef lagfib2plus<uint32_t,  273,   607> lagfib2plus_607_32;
+  typedef lagfib2plus<uint64_t,  273,   607> lagfib2plus_607_64;
+  typedef lagfib2plus<uint32_t,  418,  1279> lagfib2plus_1279_32;
+  typedef lagfib2plus<uint64_t,  418,  1279> lagfib2plus_1279_64;
+  typedef lagfib2plus<uint32_t, 1029,  2281> lagfib2plus_2281_32;
+  typedef lagfib2plus<uint64_t, 1029,  2281> lagfib2plus_2281_64;
+  typedef lagfib2plus<uint32_t,  576,  3217> lagfib2plus_3217_32;
+  typedef lagfib2plus<uint64_t,  576,  3217> lagfib2plus_3217_64;
+  typedef lagfib2plus<uint32_t, 2098,  4423> lagfib2plus_4423_32;
+  typedef lagfib2plus<uint64_t, 2098,  4423> lagfib2plus_4423_64;
+  typedef lagfib2plus<uint32_t, 4187,  9689> lagfib2plus_9689_32;
+  typedef lagfib2plus<uint64_t, 4187,  9689> lagfib2plus_9689_64;
+  typedef lagfib2plus<uint32_t, 9842, 19937> lagfib2plus_19937_32;
+  typedef lagfib2plus<uint64_t, 9842, 19937> lagfib2plus_19937_64;
 
 }
 

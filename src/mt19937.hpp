@@ -50,6 +50,7 @@
 #include <stdexcept>
 #include <ostream>
 #include <istream>
+#include <trng/int_types.hpp>
 #include <trng/utility.hpp>
 #include <trng/generate_canonical.hpp>
 
@@ -61,11 +62,11 @@ namespace trng {
   public:
 
     // Uniform random number generator concept
-    typedef unsigned long result_type;
+    typedef uint32_t result_type;
     result_type operator()();  
   private:
     static const result_type min_=0;
-    static const result_type max_=4294967295ul;
+    static const result_type max_=4294967295u;
   public:
 #if __cplusplus>=201103L
     static constexpr result_type min() {  return min_;  }
@@ -77,8 +78,8 @@ namespace trng {
   private:
     static const int N=624;
     static const int M=397;
-    static const result_type UM=0x80000000ull; // most significant bit
-    static const result_type LM=0x7FFFFFFFull; // least significant 31 bits 
+    static const result_type UM=0x80000000u; // most significant bit
+    static const result_type LM=0x7FFFFFFFu; // least significant 31 bits 
   public:
 
     // Parameter and status classes
@@ -191,7 +192,7 @@ namespace trng {
       result_type r=g();
       seed(r);
     }
-    void seed(result_type);
+    void seed(unsigned long);
 
     void discard(unsigned long long);
 
@@ -247,25 +248,25 @@ namespace trng {
   
   inline mt19937::result_type mt19937::operator()() {
     result_type x;
-    const result_type mag01[2]={ 0ul, 0x9908b0dful };
+    const result_type mag01[2]={ 0u, 0x9908b0dfu };
     if (S.mti>=N) { // generate N words at one time 
         int i;
         for (i=0; i<N-M; ++i) {
 	  x=(S.mt[i]&mt19937::UM)|(S.mt[i+1]&mt19937::LM);
-	  S.mt[i]=S.mt[i+M] ^ (x >> 1) ^ mag01[x & 0x1ul];
+	  S.mt[i]=S.mt[i+M] ^ (x >> 1) ^ mag01[x & 0x1u];
         }
         for (; i<N-1; ++i) {
 	  x=(S.mt[i]&mt19937::UM)|(S.mt[i+1]&LM);
-	  S.mt[i]=S.mt[i+(M-N)] ^ (x >> 1) ^ mag01[x & 0x1ul];
+	  S.mt[i]=S.mt[i+(M-N)] ^ (x >> 1) ^ mag01[x & 0x1u];
         }
         x=(S.mt[N-1]&mt19937::UM)|(S.mt[0]&mt19937::LM);
-        S.mt[N-1]=S.mt[M-1] ^ (x >> 1) ^ mag01[x & 0x1ul];
+        S.mt[N-1]=S.mt[M-1] ^ (x >> 1) ^ mag01[x & 0x1u];
 	S.mti=0;
     }
     x=S.mt[S.mti++];
     x^=(x >> 11);
-    x^=(x << 7) & 0x9d2c5680ul;
-    x^=(x << 15) & 0xefc60000ul;
+    x^=(x << 7) & 0x9d2c5680u;
+    x^=(x << 15) & 0xefc60000u;
     x^=(x >> 18);
     return x;
   }

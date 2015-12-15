@@ -41,6 +41,7 @@
 #include <ostream>
 #include <istream>
 #include <trng/utility.hpp>
+#include <trng/int_types.hpp>
 #include <trng/generate_canonical.hpp>
 
 namespace trng {
@@ -51,12 +52,12 @@ namespace trng {
   public:
 
     // Uniform random number generator concept
-    typedef unsigned long long result_type;
+    typedef uint64_t result_type;
     TRNG_CUDA_ENABLE
     result_type operator()(); 
   private:
     static const result_type min_=0;
-    static const result_type max_=18446744073709551615ull;
+    static const result_type max_=18446744073709551615u;
   public:
 #if __cplusplus>=201103L
     static constexpr result_type min() {  return min_;  }
@@ -184,6 +185,7 @@ namespace trng {
     // Random number engine concept
     explicit lcg64(parameter_type=Default); 
     explicit lcg64(unsigned long, parameter_type=Default); 
+    explicit lcg64(unsigned long long, parameter_type=Default); 
     
     template<typename gen>
     explicit lcg64(gen &g, parameter_type P=Default) : P(P), S() {
@@ -201,7 +203,7 @@ namespace trng {
       }
       S.r=r;
     }
-    void seed(result_type); 
+    void seed(unsigned long long); 
     
     // Equality comparable concept
     friend bool operator==(const lcg64 &, const lcg64 &);
@@ -270,11 +272,7 @@ namespace trng {
   
   TRNG_CUDA_ENABLE
   inline void lcg64::step() {
-#if ULONG_LONG_MAX>18446744073709551615ull
-    S.r=(P.a*S.r+P.b) & max;
-#else
     S.r=(P.a*S.r+P.b);
-#endif
   }
     
   TRNG_CUDA_ENABLE
@@ -321,11 +319,7 @@ namespace trng {
       res*=1+p;
       p*=p;
     }
-#if ULONG_LONG_MAX>18446744073709551615ull
-    return res & 0xffffffffffffffffull;
-#else
     return res;
-#endif
   }
   
   // compute sum(a^i, i=0..s-1)
@@ -338,14 +332,8 @@ namespace trng {
     for (unsigned int l=0; l<=e; ++l) {
       if (((1ull<<l) & s)>0) {
         y=g(l, a)+p*y;
-#if ULONG_LONG_MAX>18446744073709551615ull
-	y&=0xffffffffffffffffull;
-#endif
       }
       p*=p;
-#if ULONG_LONG_MAX>18446744073709551615ull
-      p&=0xffffffffffffffffull;
-#endif
     }
     return y;
   }
@@ -361,9 +349,6 @@ namespace trng {
     if (s>1) {
       jump(n+1);
       P.b*=f(s, P.a);
-#if ULONG_LONG_MAX>18446744073709551615ull
-      P.b&=0xffffffffffffffffull;
-#endif
       P.a=pow(P.a, s);
       backward();
     }
@@ -372,9 +357,6 @@ namespace trng {
   TRNG_CUDA_ENABLE
   inline void lcg64::jump2(unsigned int s) {
     S.r=S.r*pow(P.a, 1ull<<s)+f(1ull<<s, P.a)*P.b;
-#if ULONG_LONG_MAX>18446744073709551615ull
-    S.r&=0xffffffffffffffffull;
-#endif
   }
 
   TRNG_CUDA_ENABLE
