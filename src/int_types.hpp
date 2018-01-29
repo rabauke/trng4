@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2015, Heiko Bauke
+// Copyright (c) 2000-2018, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,31 @@
 
 #define TRNG_INT_TYPES_HPP
 
+#if __cplusplus>=201103L
+
+#include<cstdint>
+
+namespace trng {
+
+  typedef std::int8_t int8_t;
+  typedef std::int16_t int16_t;
+  typedef std::int32_t int32_t;
+  typedef std::int64_t int64_t;
+
+  typedef std::uint8_t uint8_t;
+  typedef std::uint16_t uint16_t;
+  typedef std::uint32_t uint32_t;
+  typedef std::uint64_t uint64_t;
+
+}
+
+#else
+
 #include<climits>
+
+#if CHAR_BIT!=8
+#error "unsupported platform, type char must be of exactly 8 bits"
+#endif
 
 namespace trng {
 
@@ -100,5 +124,7 @@ namespace trng {
   typedef detail::unsigned_integer<64>::type uint64_t;
 
 }
+
+#endif
 
 #endif

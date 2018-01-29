@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2015, Heiko Bauke
+// Copyright (c) 2000-2018, Heiko Bauke
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -229,21 +229,18 @@ namespace trng {
     }
     
     // Other useful methods
+  private:
+    static std::string init_name() {
+      std::stringstream name_str;
+      name_str << "lagfib4plus_" << std::numeric_limits<result_type>::digits << '_'
+               << A << '_' << B << '_' << C << '_' << D;
+      return name_str.str();
+    }
+    
+  public:
     static const char * name() {
-      static char name_c_str[64]={'\0'};
-      if (name_c_str[0]=='\0') {
-	std::stringstream name_str;
-	name_str << "lagfib4plus_"  << std::numeric_limits<result_type>::digits << '_'
-		 << A << '_' << B << '_' << C << '_' << D;
-	int i=0;
-	const char *p=name_str.str().c_str();
-	while (p[i]!='\0' and i<63) {
-	  name_c_str[i]=p[i];
-	  ++i;
-	}
-	name_c_str[i]='\0';
-      }
-      return name_c_str;
+      static const std::string name_str(init_name());
+      return name_str.c_str();
     }
     long operator()(long x) {
       return static_cast<long>(utility::uniformco<double, lagfib4plus>(*this)*x);
