@@ -1,7 +1,7 @@
-AC_INIT([trng], [4.20], [trng@mail.de])
+AC_INIT([trng], [4.21], [trng@mail.de])
 AM_INIT_AUTOMAKE()
 
-AC_DEFINE([TRNG_VERSION], [4.20], [TRNG version number.])
+AC_DEFINE([TRNG_VERSION], [4.21], [TRNG version number.])
 
 AC_LANG_CPLUSPLUS
 AC_LANG(C++)

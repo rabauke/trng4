@@ -31,4 +31,4 @@ pkginclude_HEADERS = config.hpp cuda.hpp utility.hpp uniformxx.hpp static_assert
 		     hypergeometric_dist.hpp geometric_dist.hpp \
 		     poisson_dist.hpp zero_truncated_poisson_dist.hpp discrete_dist.hpp fast_discrete_dist.hpp
 
-libtrng4_la_LDFLAGS = -version-info 19:0:0
+libtrng4_la_LDFLAGS = -version-info 21:0:0

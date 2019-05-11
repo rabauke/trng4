@@ -12,6 +12,8 @@ remove-links:
 
 all: all-am header-links
 
+install: all
+
 clean-local: clean-am remove-links
 
 distclean-local: distclean-am remove-links

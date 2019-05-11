@@ -1,22 +1,22 @@
-// Copyright (c) 2000-2018, Heiko Bauke
+// Copyright (c) 2000-2019, Heiko Bauke
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
-// 
+//
 //   * Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.  
-// 
+//     notice, this list of conditions and the following disclaimer.
+//
 //   * Redistributions in binary form must reproduce the above
 //     copyright notice, this list of conditions and the following
 //     disclaimer in the documentation and/or other materials provided
-//     with the distribution.  
-// 
+//     with the disctribution.
+//
 //   * Neither the name of the copyright holder nor the names of its
 //     contributors may be used to endorse or promote products derived
 //     from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -523,7 +523,7 @@ namespace trng {
       // or
       //
       //  P(a, x) = gamma(a, x) / Gamma(a)
-      // 
+      //
       // by series expansion
       template<typename T, bool by_Gamma_a>
       TRNG_CUDA_ENABLE
@@ -546,11 +546,11 @@ namespace trng {
       }
 
       // compute complementary incomplete Gamma function 
-      // 
+      //
       //  Gamma(a, x) = Int(exp(-t)*t^(a-1), t=x..oo)
       //
       // or
-      // 
+      //
       //  Q(a, x) = Gamma(a, x) / Gamma(a) = 1 - P(a, x)
       //
       // by continued fraction
@@ -763,7 +763,7 @@ namespace trng {
         }
         const T eps=4*numeric_limits<T>::epsilon();
         T psq=p+q, cx=1-x;
-        bool flag=(p<psq*x);
+        const bool flag=(p<psq*x);
         if (flag) {
           // use  I(x, p, q) = 1-I(1-x, q, p)
 	  utility::swap(x, cx);
@@ -791,9 +791,7 @@ namespace trng {
           }
         }
         y*=exp(p*ln(x)+(q-1)*ln(cx))/p/norm;
-        if (flag)
-          y=1-y;
-        return y;
+        return flag ? 1-y : y;
       }
 
     }
@@ -931,19 +929,26 @@ namespace trng {
       template<typename T>
       TRNG_CUDA_ENABLE
       inline T inv_Beta_I(T x, T p, T q, T norm) {
-	// solve via Householder method
-	T y(p/(q+p-1));
+	if (x<math::numeric_limits<T>::epsilon())
+	  return 0;
+	if (1-x<math::numeric_limits<T>::epsilon())
+	  return 1;
+	// solve via Newton method
+	T y(T(1)/T(2));
+	if (2*p>=1 and 2*q>=1)
+	  y=(3*p-1)/(3*p+3*q-2);  // the approximate median
 	for (int i=0; i<math::numeric_limits<T>::digits; ++i) {
-	  T f(math::Beta_I(y, p, q, norm)-x);
-	  T df(math::pow(1-y, q-1)*math::pow(y, p-1));
-	  df/=norm;
-	  T ddf(-math::pow(1-y, q-1)*(q-1)/(1-y)*math::pow(y, p)+
-		math::pow(1-y, q-1)*math::pow(y, p)*p/y);
-	  ddf/=norm;
-	  T dy(f/df*(1+f*ddf/(2*df*df)));
-	  y-=dy;
-	  if (math::abs(dy)<math::numeric_limits<T>::epsilon())
+	  const T f(math::Beta_I(y, p, q, norm)-x);
+	  const T df(math::pow(1-y, q-1)*math::pow(y, p-1)/norm);
+	  T dy(f/df);
+	  if (math::abs(dy)<2*math::numeric_limits<T>::epsilon())
 	    break;
+	  // avoid overshooting
+	  while (y-dy<0 or y-dy>1) {
+	    dy*=3;
+	    dy/=4;
+	  }
+	  y-=dy;
 	}
 	return y;
       }

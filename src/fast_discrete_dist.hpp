@@ -1,22 +1,22 @@
-// Copyright (c) 2000-2018, Heiko Bauke
+// Copyright (c) 2000-2019, Heiko Bauke
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
-// 
+//
 //   * Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.  
-// 
+//     notice, this list of conditions and the following disclaimer.
+//
 //   * Redistributions in binary form must reproduce the above
 //     copyright notice, this list of conditions and the following
 //     disclaimer in the documentation and/or other materials provided
-//     with the distribution.  
-// 
+//     with the disctribution.
+//
 //   * Neither the name of the copyright holder nor the names of its
 //     contributors may be used to endorse or promote products derived
 //     from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -39,7 +39,7 @@
 // Richard A. Kronmal; Arthur V. Peterson, Jr.
 // On the Alias Method for Generating Random Variables from a Discrete Distribution
 // The American Statistician, Vol. 33, No. 4. (Nov., 1979), pp. 214-218.
-// 
+//
 // http://links.jstor.org/sici?sici=0003-1305%28197911%2933%3A4%3C214%3AOTAMFG%3E2.0.CO%3B2-1
 
 #include <trng/utility.hpp>

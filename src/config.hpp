@@ -80,7 +80,7 @@
 #define PACKAGE_NAME "trng"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "trng 4.20"
+#define PACKAGE_STRING "trng 4.21"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "trng"
@@ -89,7 +89,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "4.20"
+#define PACKAGE_VERSION "4.21"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
@@ -146,7 +146,7 @@
 #define TRNG_HAVE_TGAMMAL 1
 
 /* TRNG version number. */
-#define TRNG_VERSION 4.20
+#define TRNG_VERSION 4.21
 
 /* Version number of package */
-#define VERSION "4.20"
+#define VERSION "4.21"
