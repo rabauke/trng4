@@ -77,7 +77,7 @@ simpson_int(iter first, iter last) {
   if (first==last)
     return value_type(0);
   value_type sum1(0), sum2(0);
-  int n=std::distance(first, last);
+  auto n=std::distance(first, last);
   if (n%2==0) { // Pulcherima (3/8 rule) for even number of data points
     sum1+=(*first)*value_type(3)/value_type(8);
     ++first;

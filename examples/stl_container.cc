@@ -34,35 +34,9 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <trng/config.hpp>
+#include <functional>
 #include <trng/yarn2.hpp>
 #include <trng/uniform_int_dist.hpp>
-#if defined TRNG_HAVE_BOOST
-  #include <boost/bind.hpp>
-#else
-
-  // helper class 
-  template<typename PRN_dist_t, typename PRN_engine_t>
-  class binder_cl {
-    PRN_dist_t &dist;
-    PRN_engine_t &engine;
-  public:
-    binder_cl(PRN_dist_t &dist, PRN_engine_t &engine) : dist(dist), engine(engine) {
-    }
-    typename PRN_dist_t::result_type operator()() {
-      return dist(engine);
-    }
-  };
-
-  // convenience function
-  template<typename PRN_dist_t, typename PRN_engine_t>
-  inline 
-  binder_cl<PRN_dist_t, PRN_engine_t> make_binder(PRN_dist_t &dist, PRN_engine_t &engine) {
-    return binder_cl<PRN_dist_t, PRN_engine_t>(dist, engine);
-  }
-
-#endif
-
 
 // print an iterator range to stdout
 template<typename iter>
@@ -81,23 +55,14 @@ int main() {
     v[i]=U(R);
   print_range(v.begin(), v.end());
   std::vector<long> w(12);
-#if defined TRNG_HAVE_BOOST
   std::cout << "random number generation by std::generate\n";
-  std::generate(w.begin(), w.end(), boost::bind(U, boost::ref(R)));
+  std::generate(w.begin(), w.end(), std::bind(U, std::ref(R)));
   print_range(w.begin(), w.end());
   std::cout << "random number generation by std::generate\n";
-  std::generate(w.begin(), w.end(), boost::bind(U, boost::ref(R)));
+  std::generate(w.begin(), w.end(), std::bind(U, std::ref(R)));
   print_range(w.begin(), w.end());
-#else
-  std::cout << "random number generation by std::generate\n";
-  std::generate(w.begin(), w.end(), make_binder(U, R));
-  print_range(w.begin(), w.end());
-  std::cout << "random number generation by std::generate\n";
-  std::generate(w.begin(), w.end(), make_binder(U, R));
-  print_range(w.begin(), w.end());
-#endif
   std::cout << "same sequence as above, but in a random shuffled order\n";
-  std::random_shuffle(w.begin(), w.end(), R);
+  std::shuffle(w.begin(), w.end(), R);
   print_range(w.begin(), w.end());
   return EXIT_SUCCESS;
 }

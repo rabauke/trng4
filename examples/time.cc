@@ -35,7 +35,8 @@
 #include <exception>
 #include <string>
 #include <sstream>
-#include <trng/config.hpp>
+#include <chrono>
+#include <random>
 #include <trng/generate_canonical.hpp>
 #include <trng/lcg64.hpp>
 #include <trng/lcg64_shift.hpp>
@@ -58,10 +59,6 @@
 #include <trng/lagfib4xor.hpp>
 #include <trng/lagfib4plus.hpp>
 
-#if __cplusplus>=201103L
-# include <random>
-#endif
-
 #if defined TRNG_HAVE_BOOST
 # include <boost/random/linear_congruential.hpp>
 # include <boost/random/additive_combine.hpp>
@@ -70,15 +67,6 @@
 # include <boost/random/lagged_fibonacci.hpp>
 # include <boost/random/shuffle_output.hpp>
 #endif
-
-#if defined __unix__
-# include <unistd.h>
-# include <time.h>
-# include <sys/time.h>
-# include <sys/times.h>
-#else
-# include <ctime>
-#endif 
 
 template<typename T>
 std::string to_string(const T &x) {
@@ -90,27 +78,17 @@ std::string to_string(const T &x) {
 class timer {
 private:
   const double _resolution;
-  double _t;
-  double get_time() {
-#if defined __unix__
-    struct timeval  tv;
-    gettimeofday(&tv, NULL);
-    return static_cast<double>(tv.tv_sec)+static_cast<double>(tv.tv_usec)*1e-6;
-#else
-    return static_cast<double>(std::clock())*_resolution;
-#endif
-  }
+  std::chrono::time_point<std::chrono::system_clock> _t;
 public:
-  void reset() { _t=get_time(); }
-  double time() { return get_time()-_t; }
+  void reset() { _t=std::chrono::system_clock::now(); }
+  double time() const {
+    auto now=std::chrono::system_clock::now();
+    return std::chrono::duration_cast<std::chrono::microseconds>(now - _t).count()*1e-6;
+  }
   double resolution() const { return _resolution; }
   timer() :
-#if defined __unix__
-    _resolution(1e-6),
-#else
-    _resolution(1.0/CLOCKS_PER_SEC),
-#endif
-    _t(get_time()) { }
+    _resolution([](){ return 1e-6; }()),
+    _t(std::chrono::system_clock::now()) { }
 };
 
 template<typename R>
@@ -246,7 +224,6 @@ int main() {
     { trng::lagfib4xor_19937_64  r;  time_main(r, "trng::lagfib4xor_19937_64"); }
     { trng::lagfib2plus_19937_64 r;  time_main(r, "trng::lagfib2plus_19937_64"); }
     { trng::lagfib4plus_19937_64 r;  time_main(r, "trng::lagfib4plus_19937_64"); }
-#if __cplusplus>=201103L
     { std::minstd_rand0  r;  time_main(r, "std::minstd_rand0"); }
     { std::minstd_rand   r;  time_main(r, "std::minstd_rand"); }
     { std::mt19937       r;  time_main(r, "std::mt19937"); }
@@ -256,7 +233,6 @@ int main() {
     { std::ranlux24      r;  time_main(r, "std::ranlux24"); }
     { std::ranlux48      r;  time_main(r, "std::ranlux48"); }
     { std::knuth_b       r;  time_main(r, "std::knuth_b"); }
-#endif
 #if defined TRNG_HAVE_BOOST
     { boost::minstd_rand    r; time_boost(r, "boost::minstd_rand"); }
     { boost::ecuyer1988     r; time_boost(r, "boost::ecuyer1988"); }

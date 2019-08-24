@@ -33,7 +33,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <exception>
-#include <trng/config.hpp>
 #include <trng/lcg64.hpp>
 #include <trng/lcg64_shift.hpp>
 #include <trng/mrg2.hpp>

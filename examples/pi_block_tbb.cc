@@ -30,9 +30,6 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <trng/config.hpp>
-#if defined TRNG_HAVE_TBB
-
 #include <cstdlib>
 #include <iostream>
 #include <trng/yarn2.hpp>
@@ -79,15 +76,3 @@ int main() {
   std::cout << "pi = " << 4.0*pi.in_circle()/samples << std::endl;
   return EXIT_SUCCESS;
 }
-
-#else
-
-#include <cstdlib>
-#include <iostream>
-
-int main() {
-  std::cerr << "Sorry, Intel Threading Buildings Blocks are not installed on your system.\n";
-  return EXIT_FAILURE;
-}
-
-#endif

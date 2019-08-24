@@ -1,4 +1,3 @@
-#if __cplusplus > 201100L
 // mix random number generators and distribution from
 // TRNG and the C++11 standard library
 
@@ -21,9 +20,3 @@ int main() {
   }
   return EXIT_SUCCESS;
 }
-#else
-#include <iostream>
-int main() {
-  std::cout << "Not a C++11 compiler.\n";
-}
-#endif

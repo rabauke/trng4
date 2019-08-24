@@ -108,19 +108,11 @@ template<typename R>
 class generator_max {
 public:
   typedef typename R::result_type result_type;
-#if __cplusplus>=201103L
   static constexpr result_type min() {  return R::min();  }
   static constexpr result_type max() {  return R::max();  }
   result_type operator()() const {
     return max();
   }
-#else
-  static const result_type min=R::min;
-  static const result_type max=R::max;
-  result_type operator()() const {
-    return max;
-  }
-#endif
 };
 
 
@@ -128,19 +120,11 @@ template<typename R>
 class generator_min {
 public:
   typedef typename R::result_type result_type;
-#if __cplusplus>=201103L
   static constexpr result_type min() {  return R::min();  }
   static constexpr result_type max() {  return R::max();  }
   result_type operator()() const {
     return min();
   }
-#else
-  static const result_type min=R::min;
-  static const result_type max=R::max;
-  result_type operator()() const {
-    return min;
-  }
-#endif
 };
 
 
@@ -405,7 +389,7 @@ int main() {
     { plausibility_main<trng::lagfib4plus_521_32>(); }
     { plausibility_main<trng::mt19937>(); }
     { plausibility_main<trng::mt19937_64>(); }
-  } 
+  }
   catch (std::exception &err) {
     std::cerr << err.what() << std::endl;
   }
@@ -414,5 +398,3 @@ int main() {
   }
   return EXIT_SUCCESS;
 }
-
-

@@ -63,7 +63,7 @@ int main() {
   for (std::vector<int>::size_type i=0; i<count.size(); ++i) {
     std::cout << std::setprecision(3) 
 	      << i << "\t\t"
-	      << dist.pdf(i) << "\t\t"
+	      << dist.pdf(static_cast<int>(i)) << "\t\t"
 	      << count[i] << "\t\t"
 	      << static_cast<double>(count[i])/samples << '\n';
   }

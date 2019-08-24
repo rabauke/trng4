@@ -30,9 +30,6 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <trng/config.hpp>
-#if defined TRNG_HAVE_MPI
-
 #include <cstdlib>
 #include <iostream>
 #include "mpi.h"
@@ -62,15 +59,3 @@ int main(int argc, char *argv[]) {
   MPI::Finalize();                      // quit MPI
   return EXIT_SUCCESS;
 }
-
-#else
-
-#include <cstdlib>
-#include <iostream>
-
-int main() {
-  std::cerr << "Sorry, no MPI library installed on your computer.\n";
-  return EXIT_FAILURE;
-}
-
-#endif

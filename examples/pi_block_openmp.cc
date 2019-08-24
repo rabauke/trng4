@@ -30,9 +30,6 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <trng/config.hpp>
-#if defined TRNG_HAVE_OPENMP
-
 #include <cstdlib>
 #include <iostream>
 #include <omp.h>
@@ -61,15 +58,3 @@ int main() {
   std::cout << "pi = " << 4.0*in/samples << std::endl;
   return EXIT_SUCCESS;
 }
-
-#else
-
-#include <cstdlib>
-#include <iostream>
-
-int main() {
-  std::cerr << "Sorry, OpenMP is not supported by your compiler.\n";
-  return EXIT_FAILURE;
-}
-
-#endif
