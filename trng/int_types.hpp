@@ -11,7 +11,7 @@
 //   * Redistributions in binary form must reproduce the above
 //     copyright notice, this list of conditions and the following
 //     disclaimer in the documentation and/or other materials provided
-//     with the disctribution.
+//     with the distribution.
 //
 //   * Neither the name of the copyright holder nor the names of its
 //     contributors may be used to endorse or promote products derived
@@ -34,7 +34,7 @@
 
 #define TRNG_INT_TYPES_HPP
 
-#include<cstdint>
+#include <cstdint>
 
 namespace trng {
 
@@ -48,6 +48,6 @@ namespace trng {
   using ::std::uint32_t;
   using ::std::uint64_t;
 
-}
+}  // namespace trng
 
 #endif

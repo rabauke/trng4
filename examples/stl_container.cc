@@ -41,7 +41,8 @@
 // print an iterator range to stdout
 template<typename iter>
 void print_range(iter i1, iter i2) {
-  while (i1!=i2) std::cout << (*(i1++)) << '\t';
+  while (i1 != i2)
+    std::cout << (*(i1++)) << '\t';
   std::cout << "\n\n";
 }
 
@@ -49,10 +50,10 @@ int main() {
   trng::yarn2 R;
   trng::uniform_int_dist U(0, 100);
   std::vector<long> v(10);
-  
+
   std::cout << "random number generation by call operator\n";
-  for (std::vector<long>::size_type i=0; i<v.size(); ++i)
-    v[i]=U(R);
+  for (std::vector<long>::size_type i = 0; i < v.size(); ++i)
+    v[i] = U(R);
   print_range(v.begin(), v.end());
   std::vector<long> w(12);
   std::cout << "random number generation by std::generate\n";

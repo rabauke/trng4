@@ -11,7 +11,7 @@
 //   * Redistributions in binary form must reproduce the above
 //     copyright notice, this list of conditions and the following
 //     disclaimer in the documentation and/or other materials provided
-//     with the disctribution.
+//     with the distribution.
 //
 //   * Neither the name of the copyright holder nor the names of its
 //     contributors may be used to endorse or promote products derived
@@ -39,66 +39,50 @@ namespace trng {
   // Parameter and status classes
 
   // Equality comparable concept
-  bool operator==(const mt19937::parameter_type &, 
-		  const mt19937::parameter_type &) {
+  bool operator==(const mt19937::parameter_type &, const mt19937::parameter_type &) {
     return true;
   }
 
-  bool operator!=(const mt19937::parameter_type &, 
-		  const mt19937::parameter_type &) {
+  bool operator!=(const mt19937::parameter_type &, const mt19937::parameter_type &) {
     return false;
   }
 
   // Equality comparable concept
-  bool operator==(const mt19937::status_type &S1, 
-		  const mt19937::status_type &S2) {
-    for (int i=0; i<mt19937::status_type::N; ++i)
-      if (S1.mt[i]!=S2.mt[i])
-	return false;
+  bool operator==(const mt19937::status_type &S1, const mt19937::status_type &S2) {
+    for (int i = 0; i < mt19937::status_type::N; ++i)
+      if (S1.mt[i] != S2.mt[i])
+        return false;
     return true;
   }
 
-  bool operator!=(const mt19937::status_type &S1, 
-		  const mt19937::status_type &S2) {
-    return not (S1==S2);
+  bool operator!=(const mt19937::status_type &S1, const mt19937::status_type &S2) {
+    return not(S1 == S2);
   }
 
   // Random number engine concept
-  mt19937::mt19937() :
-    P(), S() {
-    seed(5489u); 
-  }
+  mt19937::mt19937() : P(), S() { seed(5489u); }
 
-  mt19937::mt19937(unsigned long s) :
-    P(), S() {
-    seed(s);
-  }
+  mt19937::mt19937(unsigned long s) : P(), S() { seed(s); }
 
-  void mt19937::seed() {
-    (*this)=mt19937();
-  }
+  void mt19937::seed() { (*this) = mt19937(); }
 
   void mt19937::seed(unsigned long s) {
-    S.mt[0]=s & 0xffffffffU;
-    for (S.mti=1; S.mti<mt19937::N; ++S.mti) 
-      S.mt[S.mti]=(1812433253U * (S.mt[S.mti-1] ^ (S.mt[S.mti-1] >> 30)) + S.mti) & 0xffffffffU; 
+    S.mt[0] = s & 0xffffffffU;
+    for (S.mti = 1; S.mti < mt19937::N; ++S.mti)
+      S.mt[S.mti] =
+          (1812433253U * (S.mt[S.mti - 1] ^ (S.mt[S.mti - 1] >> 30)) + S.mti) & 0xffffffffU;
   }
 
   // Equality comparable concept
   bool operator==(const mt19937 &R1, const mt19937 &R2) {
-    return R1.P==R2.P and R1.S==R2.S;
+    return R1.P == R2.P and R1.S == R2.S;
   }
 
-  bool operator!=(const mt19937 &R1, const mt19937 &R2) {
-    return not (R1==R2);
-  }
+  bool operator!=(const mt19937 &R1, const mt19937 &R2) { return not(R1 == R2); }
 
   // Other useful methods
-  const char * const mt19937::name_str="mt19937";
+  const char *const mt19937::name_str = "mt19937";
 
-  const char * mt19937::name() {
-    return name_str;
-  }
+  const char *mt19937::name() { return name_str; }
 
-}
-
+}  // namespace trng

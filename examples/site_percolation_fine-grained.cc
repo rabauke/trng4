@@ -36,49 +36,49 @@
 #include <trng/uniform01_dist.hpp>
 #include "mpi.h"
 
-const int number_of_realizations=1000;
-const int Nx=250, Ny=200;                // grid size
-const double P=0.46;                     // occupation probability
+const int number_of_realizations = 1000;
+const int Nx = 250, Ny = 200;  // grid size
+const double P = 0.46;         // occupation probability
 
 int main(int argc, char *argv[]) {
-  MPI::Init(argc, argv);                 // initialize MPI environment
-  int size=MPI::COMM_WORLD.Get_size();   // get total number of processes
+  MPI::Init(argc, argv);                  // initialize MPI environment
+  int size = MPI::COMM_WORLD.Get_size();  // get total number of processes
   // create a two-dimensional Cartesian communicator
-  int dims[2] = {0, 0};                  // number of processes in each domension 
-  int coords[2];                         // coordinates of current process within the grid
-  bool periods[2] = { false, false };    // no periodic boundary conditions
+  int dims[2] = {0, 0};              // number of processes in each domension
+  int coords[2];                     // coordinates of current process within the grid
+  bool periods[2] = {false, false};  // no periodic boundary conditions
   // calculate a balanced grid partitioning such that  size = dims[0]*dims[1]
   MPI::Compute_dims(MPI::COMM_WORLD.Get_size(), 2, dims);
-  MPI::Cartcomm Comm=MPI::COMM_WORLD.Create_cart(2, dims, periods, true);
-  int rank=Comm.Get_rank();              // get rank of current process
-  Comm.Get_coords(rank, 2, coords);      // get coordinates of current process 
+  MPI::Cartcomm Comm = MPI::COMM_WORLD.Create_cart(2, dims, periods, true);
+  int rank = Comm.Get_rank();        // get rank of current process
+  Comm.Get_coords(rank, 2, coords);  // get coordinates of current process
   // determine section of current process
-  int x0=coords[0]*Nx/dims[0], x1=(coords[0]+1)*Nx/dims[0], Nxl=x1-x0,
-      y0=coords[1]*Ny/dims[1], y1=(coords[1]+1)*Ny/dims[1], Nyl=y1-y0;
-  int *site=new int[Nxl*Nyl];            // allocate memory to storre a sublattice
-  trng::yarn2 R;                         // random number engine
-  trng::uniform01_dist u;                // random number distribution
+  int x0 = coords[0] * Nx / dims[0], x1 = (coords[0] + 1) * Nx / dims[0], Nxl = x1 - x0,
+      y0 = coords[1] * Ny / dims[1], y1 = (coords[1] + 1) * Ny / dims[1], Nyl = y1 - y0;
+  int *site = new int[Nxl * Nyl];  // allocate memory to storre a sublattice
+  trng::yarn2 R;                   // random number engine
+  trng::uniform01_dist u;          // random number distribution
   // skip random numbers that are consumed by other processes
-  R.jump(Nx*y0+x0);
-  for (int i=0; i<number_of_realizations; ++i) {
+  R.jump(Nx * y0 + x0);
+  for (int i = 0; i < number_of_realizations; ++i) {
     // consume Nxl * Nyl pseudo-random numbers
-    int *s=site;
-    for (int y=y0; y<y1; ++y) {
-      for (int x=x0; x<x1; ++x) {
-	if (u(R)<P)
-	  *s=1;                          // site is occupied
-	else
-	  *s=0;                          // site is not occupied
-	++s;
-      } 
+    int *s = site;
+    for (int y = y0; y < y1; ++y) {
+      for (int x = x0; x < x1; ++x) {
+        if (u(R) < P)
+          *s = 1;  // site is occupied
+        else
+          *s = 0;  // site is not occupied
+        ++s;
+      }
       // skip random numbers that are consumed by other processes
-      R.jump(Nx-Nxl);
+      R.jump(Nx - Nxl);
     }
     // skip random numbers that are consumed by other processes
-    R.jump(Nx*(Ny-Nyl));
+    R.jump(Nx * (Ny - Nyl));
     // analyze lattice
     // ... source omitted
   }
-  MPI::Finalize();                       // quit MPI
+  MPI::Finalize();  // quit MPI
   return EXIT_SUCCESS;
 }

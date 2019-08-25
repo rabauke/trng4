@@ -35,33 +35,33 @@
 #include <trng/uniform01_dist.hpp>
 #include "mpi.h"
 
-const int number_of_realizations=1000;
-const int Nx=250, Ny=200;                  // grid size
-const int number_of_PRNs_per_sweep=Nx*Ny;  
-int site[Nx][Ny];                          // lattice
-const double P=0.46;                       // occupation probability
+const int number_of_realizations = 1000;
+const int Nx = 250, Ny = 200;  // grid size
+const int number_of_PRNs_per_sweep = Nx * Ny;
+int site[Nx][Ny];       // lattice
+const double P = 0.46;  // occupation probability
 
 int main(int argc, char *argv[]) {
-  MPI::Init(argc, argv);                   // initialize MPI environment
-  int size=MPI::COMM_WORLD.Get_size();     // get total number of processes
-  int rank=MPI::COMM_WORLD.Get_rank();     // get rank of current process
-  trng::yarn2 R;                           // random number engine
-  trng::uniform01_dist u;                  // random number distribution
+  MPI::Init(argc, argv);                  // initialize MPI environment
+  int size = MPI::COMM_WORLD.Get_size();  // get total number of processes
+  int rank = MPI::COMM_WORLD.Get_rank();  // get rank of current process
+  trng::yarn2 R;                          // random number engine
+  trng::uniform01_dist u;                 // random number distribution
   // skip random numbers that are consumed by other processes
-  R.jump(rank*number_of_PRNs_per_sweep); 
-  for (int i=rank; i<number_of_realizations; i+=size) {
+  R.jump(rank * number_of_PRNs_per_sweep);
+  for (int i = rank; i < number_of_realizations; i += size) {
     // consume Nx * Ny pseudo-random numbers
-    for (int x=0; x<Nx; ++x)
-      for (int y=0; y<Ny; ++y)
-	if (u(R)<P)
-	  site[x][y]=1;                    // site is occupied
-	else
-	  site[x][y]=0;                    // site is not occupied
+    for (int x = 0; x < Nx; ++x)
+      for (int y = 0; y < Ny; ++y)
+        if (u(R) < P)
+          site[x][y] = 1;  // site is occupied
+        else
+          site[x][y] = 0;  // site is not occupied
     // skip random numbers that are consumed by other processes
-    R.jump((size-1)*number_of_PRNs_per_sweep);
+    R.jump((size - 1) * number_of_PRNs_per_sweep);
     // analyze lattice
     // ... source omitted
   }
-  MPI::Finalize();                         // quit MPI
+  MPI::Finalize();  // quit MPI
   return EXIT_SUCCESS;
 }

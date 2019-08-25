@@ -11,7 +11,7 @@
 //   * Redistributions in binary form must reproduce the above
 //     copyright notice, this list of conditions and the following
 //     disclaimer in the documentation and/or other materials provided
-//     with the disctribution.
+//     with the distribution.
 //
 //   * Neither the name of the copyright holder nor the names of its
 //     contributors may be used to endorse or promote products derived
@@ -48,86 +48,73 @@
 namespace trng {
 
   // uniform random number generator class
-  template<typename float_t=double>
+  template<typename float_t = double>
   class twosided_exponential_dist {
   public:
     typedef float_t result_type;
     class param_type;
-    
+
     class param_type {
     private:
       result_type mu_;
+
     public:
       TRNG_CUDA_ENABLE
       result_type mu() const { return mu_; }
       TRNG_CUDA_ENABLE
-      void mu(result_type mu_new) { mu_=mu_new; }
+      void mu(result_type mu_new) { mu_ = mu_new; }
       TRNG_CUDA_ENABLE
-      param_type() : mu_(1) {
-      }
+      param_type() : mu_(1) {}
       TRNG_CUDA_ENABLE
-      explicit param_type(result_type mu) : mu_(mu) {
-      }
+      explicit param_type(result_type mu) : mu_(mu) {}
 
       friend class twosided_exponential_dist<result_type>;
 
       // Streamable concept
       template<typename char_t, typename traits_t>
-      friend std::basic_ostream<char_t, traits_t> &
-      operator<<(std::basic_ostream<char_t, traits_t> &out,
-                 const param_type &p) {
+      friend std::basic_ostream<char_t, traits_t> &operator<<(
+          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
         std::ios_base::fmtflags flags(out.flags());
-        out.flags(std::ios_base::dec | std::ios_base::fixed |
-                  std::ios_base::left);
-        out << '('
-            << std::setprecision(math::numeric_limits<float_t>::digits10+1) 
-            << p.mu() 
+        out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+        out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1) << p.mu()
             << ')';
         out.flags(flags);
         return out;
       }
 
       template<typename char_t, typename traits_t>
-      friend std::basic_istream<char_t, traits_t> &
-      operator>>(std::basic_istream<char_t, traits_t> &in,
-                 param_type &p) {
+      friend std::basic_istream<char_t, traits_t> &operator>>(
+          std::basic_istream<char_t, traits_t> &in, param_type &p) {
         float_t mu;
         std::ios_base::fmtflags flags(in.flags());
-        in.flags(std::ios_base::dec | std::ios_base::fixed |
-                 std::ios_base::left);
-        in >> utility::delim('(')
-           >> mu >> utility::delim(')');
+        in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+        in >> utility::delim('(') >> mu >> utility::delim(')');
         if (in)
-          p=param_type(mu);
+          p = param_type(mu);
         in.flags(flags);
         return in;
       }
-
     };
-    
+
   private:
     param_type p;
-    
+
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    explicit twosided_exponential_dist(result_type mu) : p(mu) {
-    }
+    explicit twosided_exponential_dist(result_type mu) : p(mu) {}
     TRNG_CUDA_ENABLE
-    explicit twosided_exponential_dist(const param_type &p) : p(p) {
-    }
+    explicit twosided_exponential_dist(const param_type &p) : p(p) {}
     // reset internal state
     TRNG_CUDA_ENABLE
-    void reset() { }
+    void reset() {}
     // random numbers
     template<typename R>
-    TRNG_CUDA_ENABLE
-    result_type operator()(R &r) {
+    TRNG_CUDA_ENABLE result_type operator()(R &r) {
       return icdf(utility::uniformoo<double>(r));
     }
     template<typename R>
-    TRNG_CUDA_ENABLE
-    result_type operator()(R &r, const param_type &p) {
+    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
       twosided_exponential_dist g(p);
       return g(r);
     }
@@ -139,35 +126,36 @@ namespace trng {
     TRNG_CUDA_ENABLE
     param_type param() const { return p; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { p=p_new; }
+    void param(const param_type &p_new) { p = p_new; }
     TRNG_CUDA_ENABLE
     result_type mu() const { return p.mu(); }
     TRNG_CUDA_ENABLE
     void mu(result_type mu_new) { p.mu(mu_new); }
-    // probability density function  
+    // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
-      return math::exp(-math::abs(x)/p.mu())/(2*p.mu());
+      return math::exp(-math::abs(x) / p.mu()) / (2 * p.mu());
     }
-    // cumulative density function 
+    // cumulative density function
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
-      return x<=0 ? math::exp(x/p.mu())/2 : 1-math::exp(-x/p.mu())/2;
+      return x <= 0 ? math::exp(x / p.mu()) / 2 : 1 - math::exp(-x / p.mu()) / 2;
     }
-    // inverse cumulative density function 
+    // inverse cumulative density function
     TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const {
-      if (x<0 or x>1) {
+      if (x < 0 or x > 1) {
 #if !(defined __CUDA_ARCH__)
-	errno=EDOM;
+        errno = EDOM;
 #endif
-	return math::numeric_limits<result_type>::quiet_NaN();
+        return math::numeric_limits<result_type>::quiet_NaN();
       }
-      if (x==1)
+      if (x == 1)
         return math::numeric_limits<result_type>::infinity();
-      if (x==0)
+      if (x == 0)
         return -math::numeric_limits<result_type>::infinity();
-      return x<math::constants<result_type>::one_half() ? p.mu()*math::ln(2*x) : -p.mu()*math::ln(2-2*x); 
+      return x < math::constants<result_type>::one_half() ? p.mu() * math::ln(2 * x)
+                                                          : -p.mu() * math::ln(2 - 2 * x);
     }
   };
 
@@ -175,65 +163,59 @@ namespace trng {
 
   // EqualityComparable concept
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator==(const typename twosided_exponential_dist<float_t>::param_type &p1, 
-			 const typename twosided_exponential_dist<float_t>::param_type &p2) {
-    return p1.mu()==p2.mu();
+  TRNG_CUDA_ENABLE inline bool operator==(
+      const typename twosided_exponential_dist<float_t>::param_type &p1,
+      const typename twosided_exponential_dist<float_t>::param_type &p2) {
+    return p1.mu() == p2.mu();
   }
 
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator!=(const typename twosided_exponential_dist<float_t>::param_type &p1, 
-			 const typename twosided_exponential_dist<float_t>::param_type &p2) {
-    return not (p1==p2);
+  TRNG_CUDA_ENABLE inline bool operator!=(
+      const typename twosided_exponential_dist<float_t>::param_type &p1,
+      const typename twosided_exponential_dist<float_t>::param_type &p2) {
+    return not(p1 == p2);
   }
-  
+
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator==(const twosided_exponential_dist<float_t> &g1, 
-			 const twosided_exponential_dist<float_t> &g2) {
-    return g1.param()==g2.param();
+  TRNG_CUDA_ENABLE inline bool operator==(const twosided_exponential_dist<float_t> &g1,
+                                          const twosided_exponential_dist<float_t> &g2) {
+    return g1.param() == g2.param();
   }
 
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator!=(const twosided_exponential_dist<float_t> &g1, 
-			 const twosided_exponential_dist<float_t> &g2) {
-    return g1.param()!=g2.param();
+  TRNG_CUDA_ENABLE inline bool operator!=(const twosided_exponential_dist<float_t> &g1,
+                                          const twosided_exponential_dist<float_t> &g2) {
+    return g1.param() != g2.param();
   }
-  
+
   // Streamable concept
   template<typename char_t, typename traits_t, typename float_t>
-  std::basic_ostream<char_t, traits_t> &
-  operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const twosided_exponential_dist<float_t> &g) {
+  std::basic_ostream<char_t, traits_t> &operator<<(
+      std::basic_ostream<char_t, traits_t> &out, const twosided_exponential_dist<float_t> &g) {
     std::ios_base::fmtflags flags(out.flags());
-    out.flags(std::ios_base::dec | std::ios_base::fixed |
-	      std::ios_base::left);
+    out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
     out << "[exponential " << g.param() << ']';
     out.flags(flags);
     return out;
   }
-  
+
   template<typename char_t, typename traits_t, typename float_t>
-  std::basic_istream<char_t, traits_t> &
-  operator>>(std::basic_istream<char_t, traits_t> &in,
-	     twosided_exponential_dist<float_t> &g) {
+  std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
+                                                   twosided_exponential_dist<float_t> &g) {
     typename twosided_exponential_dist<float_t>::param_type p;
     std::ios_base::fmtflags flags(in.flags());
-    in.flags(std::ios_base::dec | std::ios_base::fixed |
-	     std::ios_base::left);
-    in >> utility::ignore_spaces()
-       >> utility::delim("[twosided exponential ") >> p >> utility::delim(']');
+    in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+    in >> utility::ignore_spaces() >> utility::delim("[twosided exponential ") >> p >>
+        utility::delim(']');
     if (in)
       g.param(p);
     in.flags(flags);
     return in;
   }
-  
-}
+
+}  // namespace trng
 
 #endif

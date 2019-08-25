@@ -55,64 +55,92 @@
 #include <trng/mt19937.hpp>
 #include <trng/mt19937_64.hpp>
 
-struct parallel_prng { };
-struct sequential_prng { };
+struct parallel_prng {};
+struct sequential_prng {};
 
 template<typename T>
-struct rng_traits { typedef sequential_prng type; };
+struct rng_traits {
+  typedef sequential_prng type;
+};
 
 template<>
-struct rng_traits<trng::lcg64> { typedef parallel_prng type; };
+struct rng_traits<trng::lcg64> {
+  typedef parallel_prng type;
+};
 
 template<>
-struct rng_traits<trng::lcg64_shift> { typedef parallel_prng type; };
+struct rng_traits<trng::lcg64_shift> {
+  typedef parallel_prng type;
+};
 
 template<>
-struct rng_traits<trng::mrg2> { typedef parallel_prng type; };
+struct rng_traits<trng::mrg2> {
+  typedef parallel_prng type;
+};
 
 template<>
-struct rng_traits<trng::mrg3> { typedef parallel_prng type; };
+struct rng_traits<trng::mrg3> {
+  typedef parallel_prng type;
+};
 
 template<>
-struct rng_traits<trng::mrg3s> { typedef parallel_prng type; };
+struct rng_traits<trng::mrg3s> {
+  typedef parallel_prng type;
+};
 
 template<>
-struct rng_traits<trng::mrg4> { typedef parallel_prng type; };
+struct rng_traits<trng::mrg4> {
+  typedef parallel_prng type;
+};
 
 template<>
-struct rng_traits<trng::mrg5> { typedef parallel_prng type; };
+struct rng_traits<trng::mrg5> {
+  typedef parallel_prng type;
+};
 
 template<>
-struct rng_traits<trng::mrg5s> { typedef parallel_prng type; };
+struct rng_traits<trng::mrg5s> {
+  typedef parallel_prng type;
+};
 
 template<>
-struct rng_traits<trng::yarn2> { typedef parallel_prng type; };
+struct rng_traits<trng::yarn2> {
+  typedef parallel_prng type;
+};
 
 template<>
-struct rng_traits<trng::yarn3> { typedef parallel_prng type; };
+struct rng_traits<trng::yarn3> {
+  typedef parallel_prng type;
+};
 
 template<>
-struct rng_traits<trng::yarn3s> { typedef parallel_prng type; };
+struct rng_traits<trng::yarn3s> {
+  typedef parallel_prng type;
+};
 
 template<>
-struct rng_traits<trng::yarn4> { typedef parallel_prng type; };
+struct rng_traits<trng::yarn4> {
+  typedef parallel_prng type;
+};
 
 template<>
-struct rng_traits<trng::yarn5> { typedef parallel_prng type; };
+struct rng_traits<trng::yarn5> {
+  typedef parallel_prng type;
+};
 
 template<>
-struct rng_traits<trng::yarn5s> { typedef parallel_prng type; };
+struct rng_traits<trng::yarn5s> {
+  typedef parallel_prng type;
+};
 
 
 template<typename R>
 class generator_max {
 public:
   typedef typename R::result_type result_type;
-  static constexpr result_type min() {  return R::min();  }
-  static constexpr result_type max() {  return R::max();  }
-  result_type operator()() const {
-    return max();
-  }
+  static constexpr result_type min() { return R::min(); }
+  static constexpr result_type max() { return R::max(); }
+  result_type operator()() const { return max(); }
 };
 
 
@@ -120,41 +148,35 @@ template<typename R>
 class generator_min {
 public:
   typedef typename R::result_type result_type;
-  static constexpr result_type min() {  return R::min();  }
-  static constexpr result_type max() {  return R::max();  }
-  result_type operator()() const {
-    return min();
-  }
+  static constexpr result_type min() { return R::min(); }
+  static constexpr result_type max() { return R::max(); }
+  result_type operator()() const { return min(); }
 };
 
 
 template<typename R>
 bool test_savestatus_loadstatus(bool genok) {
-  // test savestatus / loadstatus 
+  // test savestatus / loadstatus
   R ra, rb;
-  for (long i=0l; i<271828l; ++i) {
+  for (long i = 0l; i < 271828l; ++i) {
     ra();
     rb();
   }
   R rc;
-  rc=ra;
-  for (long i=0l; i<314159l; ++i)
+  rc = ra;
+  for (long i = 0l; i < 314159l; ++i)
     ra();
-  ra=rc;
-  bool err=false;
-  if (ra()!=rb())
-    err=true;
-  else
-    if (ra()!=rb())
-      err=true;
-    else
-      if (ra()!=rb())
-	err=true;
+  ra = rc;
+  bool err = false;
+  if (ra() != rb())
+    err = true;
+  else if (ra() != rb())
+    err = true;
+  else if (ra() != rb())
+    err = true;
   if (err) {
-    std::cout << R::name() 
-	      << ": error in savestatus or loadstatus" 
-	      << std::endl;
-    genok=false;
+    std::cout << R::name() << ": error in savestatus or loadstatus" << std::endl;
+    genok = false;
   }
   return genok;
 }
@@ -164,7 +186,8 @@ template<typename R>
 bool test_status_io(bool genok) {
   // test status i/o
   R ra, rb;
-  rb(); rb();
+  rb();
+  rb();
   {
     std::ofstream out("rand.dat");
     out << ra << '\n';
@@ -175,19 +198,16 @@ bool test_status_io(bool genok) {
     in >> rb;
     in.close();
   }
-  bool err=false;
-  if (ra()!=rb())
-    err=true;
-  else
-    if (ra()!=rb())
-      err=true;
-    else
-      if (ra()!=rb())
-	err=true;
+  bool err = false;
+  if (ra() != rb())
+    err = true;
+  else if (ra() != rb())
+    err = true;
+  else if (ra() != rb())
+    err = true;
   if (err) {
-    std::cout << R::name()
-	      << ": error in status i/o" << std::endl; 
-    genok=false;
+    std::cout << R::name() << ": error in status i/o" << std::endl;
+    genok = false;
   }
   return genok;
 }
@@ -199,55 +219,47 @@ bool test_ranges_extremes(bool genok) {
   generator_min<R> r_min;
   generator_max<R> r_max;
 
-  x=trng::utility::u01xx_traits<FLOAT, 1, generator_min<R> >::cc(r_min);
-  if (x<0) {
-    std::cout << R::name()
-  	      << ": out of range cc(0)  x = " << x << std::endl; 
+  x = trng::utility::u01xx_traits<FLOAT, 1, generator_min<R> >::cc(r_min);
+  if (x < 0) {
+    std::cout << R::name() << ": out of range cc(0)  x = " << x << std::endl;
     return false;
   }
-  x=trng::utility::u01xx_traits<FLOAT, 1, generator_max<R> >::cc(r_max);
-  if (x>1) {
-    std::cout << R::name()
-  	      << ": out of range cc(max)  x = " << x << std::endl; 
-    return false;
-  }
-  
-  x=trng::utility::u01xx_traits<FLOAT, 1, generator_min<R> >::co(r_min);
-  if (x<0) {
-    std::cout << R::name()
-  	      << ": out of range co(0)  x = " << x << std::endl; 
-    return false;
-  }
-  x=trng::utility::u01xx_traits<FLOAT, 1, generator_max<R> >::co(r_max);
-  if (x>=1) {
-    std::cout << R::name()
-  	      << ": out of range co(max)  x = " << x << std::endl; 
+  x = trng::utility::u01xx_traits<FLOAT, 1, generator_max<R> >::cc(r_max);
+  if (x > 1) {
+    std::cout << R::name() << ": out of range cc(max)  x = " << x << std::endl;
     return false;
   }
 
-  x=trng::utility::u01xx_traits<FLOAT, 1, generator_min<R> >::oc(r_min);
-  if (x<=0) {
-    std::cout << R::name()
-  	      << ": out of range oc(0)  x = " << x << std::endl; 
+  x = trng::utility::u01xx_traits<FLOAT, 1, generator_min<R> >::co(r_min);
+  if (x < 0) {
+    std::cout << R::name() << ": out of range co(0)  x = " << x << std::endl;
     return false;
   }
-  x=trng::utility::u01xx_traits<FLOAT, 1, generator_max<R> >::oc(r_max);
-  if (x>1) {
-    std::cout << R::name()
-  	      << ": out of range oc(max)  x = " << x << std::endl; 
+  x = trng::utility::u01xx_traits<FLOAT, 1, generator_max<R> >::co(r_max);
+  if (x >= 1) {
+    std::cout << R::name() << ": out of range co(max)  x = " << x << std::endl;
     return false;
   }
 
-  x=trng::utility::u01xx_traits<FLOAT, 1, generator_min<R> >::oo(r_min);
-  if (x<=0) {
-    std::cout << R::name()
-  	      << ": out of range oo(0)  x = " << x << std::endl; 
+  x = trng::utility::u01xx_traits<FLOAT, 1, generator_min<R> >::oc(r_min);
+  if (x <= 0) {
+    std::cout << R::name() << ": out of range oc(0)  x = " << x << std::endl;
     return false;
   }
-  x=trng::utility::u01xx_traits<FLOAT, 1, generator_max<R> >::oo(r_max);
-  if (x>=1) {
-    std::cout << R::name()
-  	      << ": out of range oo(max)  x = " << x << std::endl; 
+  x = trng::utility::u01xx_traits<FLOAT, 1, generator_max<R> >::oc(r_max);
+  if (x > 1) {
+    std::cout << R::name() << ": out of range oc(max)  x = " << x << std::endl;
+    return false;
+  }
+
+  x = trng::utility::u01xx_traits<FLOAT, 1, generator_min<R> >::oo(r_min);
+  if (x <= 0) {
+    std::cout << R::name() << ": out of range oo(0)  x = " << x << std::endl;
+    return false;
+  }
+  x = trng::utility::u01xx_traits<FLOAT, 1, generator_max<R> >::oo(r_max);
+  if (x >= 1) {
+    std::cout << R::name() << ": out of range oo(max)  x = " << x << std::endl;
     return false;
   }
 
@@ -258,13 +270,13 @@ bool test_ranges_extremes(bool genok) {
 template<typename R>
 bool test_ranges(bool genok) {
   // test ranges
-  genok=test_ranges_extremes<R, float>(genok);
-  if (not genok) 
+  genok = test_ranges_extremes<R, float>(genok);
+  if (not genok)
     std::cout << R::name() << ": error for float\n";
-  genok=test_ranges_extremes<R, double>(genok);
+  genok = test_ranges_extremes<R, double>(genok);
   if (not genok)
     std::cout << R::name() << ": error for double\n";
-  genok=test_ranges_extremes<R, long double>(genok);
+  genok = test_ranges_extremes<R, long double>(genok);
   if (not genok)
     std::cout << R::name() << ": error for long double\n";
   return genok;
@@ -275,26 +287,24 @@ template<typename R>
 bool test_jump2(bool genok) {
   // test jump2
   R ra, rb;
-  long n=1l;
-  for (long i=0l; i<20l; ++i) {
+  long n = 1l;
+  for (long i = 0l; i < 20l; ++i) {
     ra.jump2(i);
-    for (long j=0l; j<n; ++j)
+    for (long j = 0l; j < n; ++j)
       rb();
-    bool err=false;
-    if (ra()!=rb())
-      err=true;
-    else
-      if (ra()!=rb())
-	err=true;
-      else
-	if (ra()!=rb())
-	  err=true;
+    bool err = false;
+    if (ra() != rb())
+      err = true;
+    else if (ra() != rb())
+      err = true;
+    else if (ra() != rb())
+      err = true;
     if (err) {
       std::cout << ra.name() << ": error in jump2" << std::endl;
-      genok=false;
+      genok = false;
       break;
-      }
-    n<<=1;
+    }
+    n <<= 1;
   }
   return genok;
 }
@@ -303,31 +313,31 @@ bool test_jump2(bool genok) {
 template<typename R>
 bool test_split(bool genok) {
   // test split
-  for (long i=2l; i<=20l; ++i) {
-    for (long j=0l; j<i; ++j) {
+  for (long i = 2l; i <= 20l; ++i) {
+    for (long j = 0l; j < i; ++j) {
       R ra, rb;
-      for (long k=0l; k<j; ++k)
-	ra();
+      for (long k = 0l; k < j; ++k)
+        ra();
       rb.split(i, j);
-      bool err=false;
-      if (ra()!=rb())
-	err=true;
+      bool err = false;
+      if (ra() != rb())
+        err = true;
       else {
-	for (long k=0l; k<i-1l; ++k)
-	  ra();
-	if (ra()!=rb())
-	  err=true;
-	else {
-	  for (long k=0l; k<i-1l; ++k)
-	    ra();
-	  if (ra()!=rb())
-	    err=true;
-	}
+        for (long k = 0l; k < i - 1l; ++k)
+          ra();
+        if (ra() != rb())
+          err = true;
+        else {
+          for (long k = 0l; k < i - 1l; ++k)
+            ra();
+          if (ra() != rb())
+            err = true;
+        }
       }
       if (err) {
-	std::cout << ra.name() << ": error in split" << std::endl;
-	genok=false;
-	break;
+        std::cout << ra.name() << ": error in split" << std::endl;
+        genok = false;
+        break;
       }
     }
   }
@@ -339,11 +349,10 @@ template<typename R>
 void plausibility_main_impl(sequential_prng) {
   bool genok(true);
   std::cout << "testing sequential PRNG " << R::name() << std::endl;
-  genok=test_savestatus_loadstatus<R>(genok);
-  genok=test_status_io<R>(genok);
-  genok=test_ranges<R>(genok);
-  std::cout << R::name() << ": test " 
-	    << (genok ? "passed" : "failed") << std::endl;
+  genok = test_savestatus_loadstatus<R>(genok);
+  genok = test_status_io<R>(genok);
+  genok = test_ranges<R>(genok);
+  std::cout << R::name() << ": test " << (genok ? "passed" : "failed") << std::endl;
 }
 
 
@@ -351,13 +360,12 @@ template<typename R>
 void plausibility_main_impl(parallel_prng) {
   bool genok(true);
   std::cout << "testing parallel PRNG " << R::name() << std::endl;
-  genok=test_savestatus_loadstatus<R>(genok);
-  genok=test_status_io<R>(genok);
-  genok=test_ranges<R>(genok);
-  genok=test_jump2<R>(genok);
-  genok=test_split<R>(genok);
-  std::cout << R::name() << ": test " 
-	    << (genok ? "passed" : "failed") << std::endl;
+  genok = test_savestatus_loadstatus<R>(genok);
+  genok = test_status_io<R>(genok);
+  genok = test_ranges<R>(genok);
+  genok = test_jump2<R>(genok);
+  genok = test_split<R>(genok);
+  std::cout << R::name() << ": test " << (genok ? "passed" : "failed") << std::endl;
 }
 
 
@@ -389,11 +397,9 @@ int main() {
     { plausibility_main<trng::lagfib4plus_521_32>(); }
     { plausibility_main<trng::mt19937>(); }
     { plausibility_main<trng::mt19937_64>(); }
-  }
-  catch (std::exception &err) {
+  } catch (std::exception &err) {
     std::cerr << err.what() << std::endl;
-  }
-  catch (...) {
+  } catch (...) {
     std::cerr << "something went wrong" << std::endl;
   }
   return EXIT_SUCCESS;

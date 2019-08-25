@@ -11,7 +11,7 @@
 //   * Redistributions in binary form must reproduce the above
 //     copyright notice, this list of conditions and the following
 //     disclaimer in the documentation and/or other materials provided
-//     with the disctribution.
+//     with the distribution.
 //
 //   * Neither the name of the copyright holder nor the names of its
 //     contributors may be used to endorse or promote products derived
@@ -39,47 +39,35 @@ namespace trng {
   // Uniform random number generator concept
 
   // Equality comparable concept
-  bool operator==(const minstd::status_type &S1, 
-		  const minstd::status_type &S2) {
-    return S1.r==S2.r;
+  bool operator==(const minstd::status_type &S1, const minstd::status_type &S2) {
+    return S1.r == S2.r;
   }
 
-  bool operator!=(const minstd::status_type &S1, 
-		  const minstd::status_type &S2) {
-    return not (S1==S2);
+  bool operator!=(const minstd::status_type &S1, const minstd::status_type &S2) {
+    return not(S1 == S2);
   }
 
   // Random number engine concept
-  minstd::minstd() : S() { }
+  minstd::minstd() : S() {}
 
-  minstd::minstd(unsigned long s) : S() { 
-    seed(s);
-  }
+  minstd::minstd(unsigned long s) : S() { seed(s); }
 
-  void minstd::seed() {
-    (*this)=minstd();
-  }
+  void minstd::seed() { (*this) = minstd(); }
 
   void minstd::seed(unsigned long s) {
-    S.r=s%2147483647;
-    if (S.r==0)
-      S.r=1;
+    S.r = s % 2147483647;
+    if (S.r == 0)
+      S.r = 1;
   }
 
   // Equality comparable concept
-  bool operator==(const minstd &R1, const minstd &R2) {
-    return R1.S==R2.S;
-  }
+  bool operator==(const minstd &R1, const minstd &R2) { return R1.S == R2.S; }
 
-  bool operator!=(const minstd &R1, const minstd &R2) {
-    return not (R1==R2);
-  }
+  bool operator!=(const minstd &R1, const minstd &R2) { return not(R1 == R2); }
 
   // Other useful methods
-  const char * const minstd::name_str="minstd";
+  const char *const minstd::name_str = "minstd";
 
-  const char * minstd::name() {
-    return name_str;
-  }
+  const char *minstd::name() { return name_str; }
 
-}
+}  // namespace trng

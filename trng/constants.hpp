@@ -11,7 +11,7 @@
 //   * Redistributions in binary form must reproduce the above
 //     copyright notice, this list of conditions and the following
 //     disclaimer in the documentation and/or other materials provided
-//     with the disctribution.
+//     with the distribution.
 //
 //   * Neither the name of the copyright holder nor the names of its
 //     contributors may be used to endorse or promote products derived
@@ -37,19 +37,18 @@
 #include <trng/cuda.hpp>
 
 #define TRNG_NEW_CONSTANT(type, value, x) \
-    TRNG_CUDA_ENABLE \
-    static type x() throw () { \
-      return value; \
-    }
+  TRNG_CUDA_ENABLE                        \
+  static type x() throw() { return value; }
 
 namespace trng {
 
-  namespace math {  
+  namespace math {
 
     template<typename T>
     class constants;
 
-    template<> class constants<float> {
+    template<>
+    class constants<float> {
     public:
       TRNG_NEW_CONSTANT(float, 0.5f, one_half);
       TRNG_NEW_CONSTANT(float, 3.14159265358979323846264f, pi);
@@ -64,8 +63,9 @@ namespace trng {
       TRNG_NEW_CONSTANT(float, .398942280401432677939946f, one_over_sqrt_2pi);
       TRNG_NEW_CONSTANT(float, .797884560802865355879892f, sqrt_2_over_pi);
     };
-  
-    template<> class constants<double> {
+
+    template<>
+    class constants<double> {
     public:
       TRNG_NEW_CONSTANT(double, 0.5, one_half);
       TRNG_NEW_CONSTANT(double, 3.14159265358979323846264, pi);
@@ -80,8 +80,9 @@ namespace trng {
       TRNG_NEW_CONSTANT(double, .398942280401432677939946, one_over_sqrt_2pi);
       TRNG_NEW_CONSTANT(double, .797884560802865355879892, sqrt_2_over_pi);
     };
-  
-    template<> class constants<long double> {
+
+    template<>
+    class constants<long double> {
     public:
       TRNG_NEW_CONSTANT(long double, 0.5l, one_half);
       TRNG_NEW_CONSTANT(long double, 3.14159265358979323846264l, pi);
@@ -96,10 +97,10 @@ namespace trng {
       TRNG_NEW_CONSTANT(long double, .398942280401432677939946l, one_over_sqrt_2pi);
       TRNG_NEW_CONSTANT(long double, .797884560802865355879892l, sqrt_2_over_pi);
     };
-    
-  }
 
-}
+  }  // namespace math
+
+}  // namespace trng
 
 #undef TRNG_NEW_CONSTANT
 

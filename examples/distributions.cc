@@ -71,102 +71,100 @@
 // integration by Simpson rule
 //
 template<typename iter>
-typename std::iterator_traits<iter>::value_type
-simpson_int(iter first, iter last) {
+typename std::iterator_traits<iter>::value_type simpson_int(iter first, iter last) {
   typedef typename std::iterator_traits<iter>::value_type value_type;
-  if (first==last)
+  if (first == last)
     return value_type(0);
   value_type sum1(0), sum2(0);
-  auto n=std::distance(first, last);
-  if (n%2==0) { // Pulcherima (3/8 rule) for even number of data points
-    sum1+=(*first)*value_type(3)/value_type(8);
+  auto n = std::distance(first, last);
+  if (n % 2 == 0) {  // Pulcherima (3/8 rule) for even number of data points
+    sum1 += (*first) * value_type(3) / value_type(8);
     ++first;
-    sum1+=(*first)*value_type(9)/value_type(8);
+    sum1 += (*first) * value_type(9) / value_type(8);
     ++first;
-    sum1+=(*first)*value_type(9)/value_type(8);
+    sum1 += (*first) * value_type(9) / value_type(8);
     ++first;
-    sum1+=(*first)*value_type(3)/value_type(8);
-    n-=3;
+    sum1 += (*first) * value_type(3) / value_type(8);
+    n -= 3;
   }
-  if (n>2) {
-    sum2+=*first;
+  if (n > 2) {
+    sum2 += *first;
     ++first;
     --n;
-    while (n>0) {
-      sum2+=value_type(4)*(*first);
+    while (n > 0) {
+      sum2 += value_type(4) * (*first);
       ++first;
       --n;
-      if (n==1) 
-	sum2+=(*first);
+      if (n == 1)
+        sum2 += (*first);
       else
-	sum2+=value_type(2)*(*first);
+        sum2 += value_type(2) * (*first);
       ++first;
       --n;
     }
-    sum2/=value_type(3);
+    sum2 /= value_type(3);
   }
-  return sum1+sum2;
+  return sum1 + sum2;
 }
 
 
 template<typename dist>
 void continous_dist_test(dist &d, const char *name) {
   typedef typename dist::result_type result_type;
-  
-  int samples=1024*1024*32+1;
-  result_type x_min=d.icdf(0.01), x_max=d.icdf(0.99), dx=(x_max-x_min)/samples;
+
+  int samples = 1024 * 1024 * 32 + 1;
+  result_type x_min = d.icdf(0.01), x_max = d.icdf(0.99), dx = (x_max - x_min) / samples;
   std::vector<result_type> y;
-  for (int i=0; i<=samples; ++i) 
-    y.push_back(d.pdf(x_min+i*dx));
-  result_type s=simpson_int(y.begin(), y.end())*dx;
-  std::cout << "\"" << name 
-	    << "\" distribution test : Int_x(0.01)^x(0.99) p(x) dx = 0.98 - "
-	    << 0.98-s << '\n';
-  result_type dp=result_type(1)/result_type(1024*1024);
+  for (int i = 0; i <= samples; ++i)
+    y.push_back(d.pdf(x_min + i * dx));
+  result_type s = simpson_int(y.begin(), y.end()) * dx;
+  std::cout << "\"" << name << "\" distribution test : Int_x(0.01)^x(0.99) p(x) dx = 0.98 - "
+            << 0.98 - s << '\n';
+  result_type dp = result_type(1) / result_type(1024 * 1024);
   bool ok(true);
-  for (result_type p=dp; p<1; p+=dp) {
-    result_type x=d.icdf(p);
-    result_type y=d.cdf(x);
-    if (trng::math::abs(y-p)>16*trng::math::numeric_limits<result_type>::epsilon()) {
-      ok=false;
-      std::cout << x << '\t' << y << '\t' << trng::math::abs(y-p) << '\n';
+  for (result_type p = dp; p < 1; p += dp) {
+    result_type x = d.icdf(p);
+    result_type y = d.cdf(x);
+    if (trng::math::abs(y - p) > 16 * trng::math::numeric_limits<result_type>::epsilon()) {
+      ok = false;
+      std::cout << x << '\t' << y << '\t' << trng::math::abs(y - p) << '\n';
       break;
     }
   }
   if (ok)
     std::cout << "\"" << name << "\" cumulative distribution test passed\n";
-  else 
-    std::cout << "\"" << name << "\" cumulative distribution test not passed\n"; 
+  else
+    std::cout << "\"" << name << "\" cumulative distribution test not passed\n";
 }
 
 
 template<typename dist>
 void chi2_test(dist &d, const char *name) {
   typedef typename dist::result_type result_type;
-  const int bins=128;
-  const result_type dp=1./bins;
-  const int N=10000;
+  const int bins = 128;
+  const result_type dp = 1. / bins;
+  const int N = 10000;
   std::vector<result_type> quantil;
   std::vector<int> count(bins, 0);
-  for (int i=1; i<bins ; ++i)
-    quantil.push_back(d.icdf(dp*i));
+  for (int i = 1; i < bins; ++i)
+    quantil.push_back(d.icdf(dp * i));
   trng::yarn2 R;
-  for (int i=0; i<N; ++i) {
-    result_type x=d(R);
-    int bin=0;
-    while (bin<bins-1 and x>quantil[bin])
+  for (int i = 0; i < N; ++i) {
+    result_type x = d(R);
+    int bin = 0;
+    while (bin < bins - 1 and x > quantil[bin])
       ++bin;
     ++count[bin];
   }
-  result_type c2=0;
-  for (int i=0; i<bins ; ++i)
-    c2+=(count[i]-N*dp)*(count[i]-N*dp)/(N*dp);
-  result_type c2_p=trng::math::GammaQ(0.5*c2, 0.5*(bins-1));
-  if (0.01<c2_p and c2_p<0.99)
+  result_type c2 = 0;
+  for (int i = 0; i < bins; ++i)
+    c2 += (count[i] - N * dp) * (count[i] - N * dp) / (N * dp);
+  result_type c2_p = trng::math::GammaQ(0.5 * c2, 0.5 * (bins - 1));
+  if (0.01 < c2_p and c2_p < 0.99)
     std::cout << "\"" << name << "\" chi-squared test passed\n";
   else {
-    std::cout << "\"" << name << "\" chi-squared test not passed\n"; 
-    for (int i=0; i<bins ; ++i)
+    std::cout << "\"" << name << "\" chi-squared test not passed\n";
+    for (int i = 0; i < bins; ++i)
       std::cout << count[i] << '\n';
   }
 }
@@ -174,20 +172,20 @@ void chi2_test(dist &d, const char *name) {
 
 template<typename dist>
 void discrete_dist_test(dist &d, const char *name) {
-  bool ok=true;
-  double p=0;
-  int i=0;
-  while (p<0.9) {
-    p+=d.pdf(i);
-    if (trng::math::abs(p-d.cdf(i))>16*trng::math::numeric_limits<double>::epsilon()) {
-      ok=false;
+  bool ok = true;
+  double p = 0;
+  int i = 0;
+  while (p < 0.9) {
+    p += d.pdf(i);
+    if (trng::math::abs(p - d.cdf(i)) > 16 * trng::math::numeric_limits<double>::epsilon()) {
+      ok = false;
       break;
     }
     ++i;
   }
   if (ok)
     std::cout << "\"" << name << "\" distribution test passed\n";
-  else 
+  else
     std::cout << "\"" << name << "\" distribution test not passed\n";
 }
 

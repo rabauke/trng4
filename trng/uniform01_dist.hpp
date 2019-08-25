@@ -11,7 +11,7 @@
 //   * Redistributions in binary form must reproduce the above
 //     copyright notice, this list of conditions and the following
 //     disclaimer in the documentation and/or other materials provided
-//     with the disctribution.
+//     with the distribution.
 //
 //   * Neither the name of the copyright holder nor the names of its
 //     contributors may be used to endorse or promote products derived
@@ -45,72 +45,60 @@
 namespace trng {
 
   // uniform random number generator class
-  template<typename float_t=double>
+  template<typename float_t = double>
   class uniform01_dist {
   public:
     typedef float_t result_type;
     class param_type;
-    
+
     class param_type {
     public:
       TRNG_CUDA_ENABLE
-      param_type() {
-      }
+      param_type() {}
 
       friend class uniform01_dist<float_t>;
 
       // Streamable concept
       template<typename char_t, typename traits_t>
-      friend std::basic_ostream<char_t, traits_t> &
-      operator<<(std::basic_ostream<char_t, traits_t> &out,
-		 const param_type &p) {
-	std::ios_base::fmtflags flags(out.flags());
-	out.flags(std::ios_base::dec | std::ios_base::fixed |
-		  std::ios_base::left);
-	out << '('
-	    << ')';
-	out.flags(flags);
-	return out;
+      friend std::basic_ostream<char_t, traits_t> &operator<<(
+          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
+        std::ios_base::fmtflags flags(out.flags());
+        out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+        out << '(' << ')';
+        out.flags(flags);
+        return out;
       }
-      
+
       template<typename char_t, typename traits_t>
-      friend std::basic_istream<char_t, traits_t> &
-      operator>>(std::basic_istream<char_t, traits_t> &in,
-		 param_type &p) {
-	std::ios_base::fmtflags flags(in.flags());
-	in.flags(std::ios_base::dec | std::ios_base::fixed |
-		 std::ios_base::left);
-	in >> utility::delim('(')
-	   >> utility::delim(')');
-	in.flags(flags);
-	return in;
+      friend std::basic_istream<char_t, traits_t> &operator>>(
+          std::basic_istream<char_t, traits_t> &in, param_type &p) {
+        std::ios_base::fmtflags flags(in.flags());
+        in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+        in >> utility::delim('(') >> utility::delim(')');
+        in.flags(flags);
+        return in;
       }
-      
     };
-    
+
   private:
     param_type p;
-    
+
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    uniform01_dist() {
-    }
+    uniform01_dist() {}
     TRNG_CUDA_ENABLE
-    explicit uniform01_dist(const param_type &p) {
-    }
+    explicit uniform01_dist(const param_type &p) {}
     // reset internal state
     TRNG_CUDA_ENABLE
-    void reset() { }
+    void reset() {}
     // random numbers
     template<typename R>
-    TRNG_CUDA_ENABLE
-    result_type operator()(R &r) {
+    TRNG_CUDA_ENABLE result_type operator()(R &r) {
       return utility::uniformco<result_type>(r);
     }
     template<typename R>
-    TRNG_CUDA_ENABLE
-    result_type operator()(R &r, const param_type &p) {
+    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
       return utility::uniformco<result_type>(r);
     }
     // property methods
@@ -122,100 +110,92 @@ namespace trng {
     TRNG_CUDA_ENABLE
     param_type param() const { return p; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { }
-    // probability density function  
+    void param(const param_type &p_new) {}
+    // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
-      if (x<0 or x>=1)
-	return 0;
+      if (x < 0 or x >= 1)
+        return 0;
       return 1;
     }
-    // cumulative density function 
+    // cumulative density function
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
-      if (x<0)
-	return 0;
-      if (x>=1)
-	return 1;
+      if (x < 0)
+        return 0;
+      if (x >= 1)
+        return 1;
       return x;
     }
-    // inverse cumulative density function 
+    // inverse cumulative density function
     TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const {
-      if (x<0 or x>1) {
+      if (x < 0 or x > 1) {
 #if !(defined __CUDA_ARCH__)
-	errno=EDOM;
+        errno = EDOM;
 #endif
-	return math::numeric_limits<result_type>::quiet_NaN();
+        return math::numeric_limits<result_type>::quiet_NaN();
       }
-      return x; 
+      return x;
     }
-    
   };
-  
+
   // -------------------------------------------------------------------
 
   // Equality comparable concept
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator==(const typename uniform01_dist<float_t>::param_type &, 
-			 const typename uniform01_dist<float_t>::param_type &) {
+  TRNG_CUDA_ENABLE inline bool operator==(
+      const typename uniform01_dist<float_t>::param_type &,
+      const typename uniform01_dist<float_t>::param_type &) {
     return true;
   }
 
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator!=(const typename uniform01_dist<float_t>::param_type &, 
-			 const typename uniform01_dist<float_t>::param_type &) {
+  TRNG_CUDA_ENABLE inline bool operator!=(
+      const typename uniform01_dist<float_t>::param_type &,
+      const typename uniform01_dist<float_t>::param_type &) {
     return false;
   }
-   
+
   // -------------------------------------------------------------------
-  
+
   // Equality comparable concept
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator==(const uniform01_dist<float_t> &g1, 
-			 const uniform01_dist<float_t> &g2) {
-    return g1.param()==g2.param();
+  TRNG_CUDA_ENABLE inline bool operator==(const uniform01_dist<float_t> &g1,
+                                          const uniform01_dist<float_t> &g2) {
+    return g1.param() == g2.param();
   }
 
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator!=(const uniform01_dist<float_t> &g1, 
-			 const uniform01_dist<float_t> &g2) {
-    return g1.param()!=g2.param();
+  TRNG_CUDA_ENABLE inline bool operator!=(const uniform01_dist<float_t> &g1,
+                                          const uniform01_dist<float_t> &g2) {
+    return g1.param() != g2.param();
   }
-  
+
   // Streamable concept
   template<typename char_t, typename traits_t, typename float_t>
-  std::basic_ostream<char_t, traits_t> &
-  operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const uniform01_dist<float_t> &g) {
+  std::basic_ostream<char_t, traits_t> &operator<<(std::basic_ostream<char_t, traits_t> &out,
+                                                   const uniform01_dist<float_t> &g) {
     std::ios_base::fmtflags flags(out.flags());
-    out.flags(std::ios_base::dec | std::ios_base::fixed |
-	      std::ios_base::left);
+    out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
     out << "[uniform01 " << g.param() << ']';
     out.flags(flags);
     return out;
   }
-  
+
   template<typename char_t, typename traits_t, typename float_t>
-  std::basic_istream<char_t, traits_t> &
-  operator>>(std::basic_istream<char_t, traits_t> &in,
-	     uniform01_dist<float_t> &g) {
+  std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
+                                                   uniform01_dist<float_t> &g) {
     typename uniform01_dist<float_t>::param_type p;
     std::ios_base::fmtflags flags(in.flags());
-    in.flags(std::ios_base::dec | std::ios_base::fixed |
-	     std::ios_base::left);
-    in >> utility::ignore_spaces()
-       >> utility::delim("[uniform01 ") >> p >> utility::delim(']');
+    in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+    in >> utility::ignore_spaces() >> utility::delim("[uniform01 ") >> p >> utility::delim(']');
     if (in)
       g.param(p);
     in.flags(flags);
     return in;
   }
-  
-}
+
+}  // namespace trng
 
 #endif

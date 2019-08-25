@@ -12,7 +12,7 @@ int main() {
   trng::lcg64 R_trng;
   std::normal_distribution<> N_cpp11;
   trng::normal_dist<> N_trng(0, 1);
-  for (int i=0; i<10000; ++i) {
+  for (int i = 0; i < 10000; ++i) {
     std::cout << N_cpp11(R_cpp11) << '\t';
     std::cout << N_cpp11(R_trng) << '\t';
     std::cout << N_trng(R_cpp11) << '\t';

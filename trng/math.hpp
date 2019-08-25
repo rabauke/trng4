@@ -11,7 +11,7 @@
 //   * Redistributions in binary form must reproduce the above
 //     copyright notice, this list of conditions and the following
 //     disclaimer in the documentation and/or other materials provided
-//     with the disctribution.
+//     with the distribution.
 //
 //   * Neither the name of the copyright holder nor the names of its
 //     contributors may be used to endorse or promote products derived
@@ -35,63 +35,41 @@
 #define TRNG_MATH_HPP
 
 #if !(defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL))
-#  include <cmath>
+#include <cmath>
 #else
-#  include <mathimf.h>
-#  include <cmath>
+#include <mathimf.h>
+#include <cmath>
 #endif
 
 #include <trng/cuda.hpp>
 #include <ciso646>
 
 namespace trng {
-  
+
   namespace math {
-  
+
     // --- trigonometric functions ---------------------------------------
 
     using ::std::sin;
     using ::std::cos;
     using ::std::tan;
 
-    inline float sec(float x) {
-      return 1.0f/cos(x);
-    }
-    inline double sec(double x) {
-      return 1.0/cos(x);
-    }
-    inline long double sec(long double x) {
-      return 1.0l/cos(x);
-    }
+    inline float sec(float x) { return 1.0f / cos(x); }
+    inline double sec(double x) { return 1.0 / cos(x); }
+    inline long double sec(long double x) { return 1.0l / cos(x); }
 
-    inline float csc(float x) {
-      return 1.0f/sin(x);
-    }
-    inline double csc(double x) {
-      return 1.0/sin(x);
-    }
-    inline long double csc(long double x) {
-      return 1.0l/sin(x);
-    }
+    inline float csc(float x) { return 1.0f / sin(x); }
+    inline double csc(double x) { return 1.0 / sin(x); }
+    inline long double csc(long double x) { return 1.0l / sin(x); }
 
 #if defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL)
-    inline float cot(float x) {
-      return ::cotf(x);
-    }
+    inline float cot(float x) { return ::cotf(x); }
     using ::cot;
-    inline long double cot(long double x) {
-      return ::cotl(x);
-    }
+    inline long double cot(long double x) { return ::cotl(x); }
 #else
-    inline float cot(float x) {
-      return cos(x)/sin(x);
-    }
-    inline double cot(double x) {
-      return cos(x)/sin(x);
-    }
-    inline long double cot(long double x) {
-      return cos(x)/sin(x);
-    }
+    inline float cot(float x) { return cos(x) / sin(x); }
+    inline double cot(double x) { return cos(x) / sin(x); }
+    inline long double cot(long double x) { return cos(x) / sin(x); }
 #endif
 
     using ::std::asin;
@@ -99,15 +77,9 @@ namespace trng {
     using ::std::atan;
     using ::std::atan2;
 
-    inline float atan(float y, float x) {
-      return atan2(y, x);
-    }
-    inline double atan(double y, double x) {
-      return atan2(y, x);
-    }
-    inline long double atan(long double y, long double x) {
-      return atan2(y, x);
-    }
+    inline float atan(float y, float x) { return atan2(y, x); }
+    inline double atan(double y, double x) { return atan2(y, x); }
+    inline long double atan(long double y, long double x) { return atan2(y, x); }
 
     // --- hyperbolic functions ------------------------------------------
 
@@ -115,71 +87,45 @@ namespace trng {
     using ::std::cosh;
     using ::std::tanh;
 
-    inline float sech(float x) {
-      return 1.0f/cosh(x);
-    }
-    inline double sech(double x) {
-      return 1.0/cosh(x);
-    }
-    inline long double sech(long double x) {
-      return 1.0l/cosh(x);
-    }
+    inline float sech(float x) { return 1.0f / cosh(x); }
+    inline double sech(double x) { return 1.0 / cosh(x); }
+    inline long double sech(long double x) { return 1.0l / cosh(x); }
 
-    inline float csch(float x) {
-      return 1.0f/sinh(x);
-    }
-    inline double csch(double x) {
-      return 1.0/sinh(x);
-    }
-    inline long double csch(long double x) {
-      return 1.0l/sinh(x);
-    }
+    inline float csch(float x) { return 1.0f / sinh(x); }
+    inline double csch(double x) { return 1.0 / sinh(x); }
+    inline long double csch(long double x) { return 1.0l / sinh(x); }
 
-    inline float coth(float x) {
-      return cosh(x)/sinh(x);
-    }
-    inline double coth(double x) {
-      return cosh(x)/sinh(x);
-    }
-    inline long double coth(long double x) {
-      return cosh(x)/sinh(x);
-    }
+    inline float coth(float x) { return cosh(x) / sinh(x); }
+    inline double coth(double x) { return cosh(x) / sinh(x); }
+    inline long double coth(long double x) { return cosh(x) / sinh(x); }
 
     using ::std::asinh;
     using ::std::acosh;
     using ::std::atanh;
 
-    inline float asech(float x) {
-      return ::std::log((1.0f+::std::sqrt(1.0f-x*x))/x);
-    }
-    inline double asech(double x) {
-      return ::std::log((1.0+::std::sqrt(1.0-x*x))/x);
-    }
+    inline float asech(float x) { return ::std::log((1.0f + ::std::sqrt(1.0f - x * x)) / x); }
+    inline double asech(double x) { return ::std::log((1.0 + ::std::sqrt(1.0 - x * x)) / x); }
     inline long double asech(long double x) {
-      return ::std::log((1.0l+::std::sqrt(1.0l-x*x))/x);
-    }
-  
-    inline float acsch(float x) {
-      const float t=1.0f/x;
-      return ::std::log(t+::std::sqrt(1.0f+t*t));
-    }
-    inline double acsch(double x) {
-      const double t=1.0/x;
-      return ::std::log(t+::std::sqrt(1.0+t*t));
-    }
-    inline long double acsch(long double x) {
-      const long double t=1.0l/x;
-      return ::std::log(t+::std::sqrt(1.0l+t*t));
+      return ::std::log((1.0l + ::std::sqrt(1.0l - x * x)) / x);
     }
 
-    inline float acoth(float x) {
-      return 0.5f*::std::log((x+1.0f)/(x-1.0f));
+    inline float acsch(float x) {
+      const float t = 1.0f / x;
+      return ::std::log(t + ::std::sqrt(1.0f + t * t));
     }
-    inline double acoth(double x) {
-      return 0.5*::std::log((x+1.0)/(x-1.0));
+    inline double acsch(double x) {
+      const double t = 1.0 / x;
+      return ::std::log(t + ::std::sqrt(1.0 + t * t));
     }
+    inline long double acsch(long double x) {
+      const long double t = 1.0l / x;
+      return ::std::log(t + ::std::sqrt(1.0l + t * t));
+    }
+
+    inline float acoth(float x) { return 0.5f * ::std::log((x + 1.0f) / (x - 1.0f)); }
+    inline double acoth(double x) { return 0.5 * ::std::log((x + 1.0) / (x - 1.0)); }
     inline long double acoth(long double x) {
-      return 0.5l*::std::log((x+1.0l)/(x-1.0l));
+      return 0.5l * ::std::log((x + 1.0l) / (x - 1.0l));
     }
 
     // --- exponential functions -----------------------------------------
@@ -187,23 +133,13 @@ namespace trng {
     using ::std::exp;
 
 #if defined(__ICC) || defined(__ICL) || defined(__ECC) || defined(__ECL)
-    inline float exp10(float x) {
-      return ::exp10f(x);
-    }
+    inline float exp10(float x) { return ::exp10f(x); }
     using ::exp10;
-    inline long double exp10(long double x) {
-      return ::exp10l(x);
-    }
+    inline long double exp10(long double x) { return ::exp10l(x); }
 #else
-    inline float exp10(float x) {
-      return ::std::pow(10.0f, x);
-    }
-    inline double exp10(double x) {
-      return ::std::pow(10.0, x);
-    }
-    inline long double exp10(long double x) {
-      return ::std::pow(10.0l, x);
-    }
+    inline float exp10(float x) { return ::std::pow(10.0f, x); }
+    inline double exp10(double x) { return ::std::pow(10.0, x); }
+    inline long double exp10(long double x) { return ::std::pow(10.0l, x); }
 #endif
 
     using ::std::exp2;
@@ -215,66 +151,48 @@ namespace trng {
     template<typename T>
     inline T log2_floor(T x) {
       T y(0);
-      while (x>0) {
-	x>>=1;
-	++y;
+      while (x > 0) {
+        x >>= 1;
+        ++y;
       };
       --y;
       return y;
     }
-    
+
     template<typename T>
     inline T log2_ceil(T x) {
       T y(log2_floor(x));
-      if ((T(1)<<y)<x)
+      if ((T(1) << y) < x)
         ++y;
       return y;
     }
-    
+
     template<typename T>
     inline T pow2(T x) {
       return T(1) << x;
     }
-    
-    TRNG_CUDA_ENABLE
-    inline float ln(float x) {
-      return log(x);
-    }
 
     TRNG_CUDA_ENABLE
-    inline double ln(double x) {
-      return log(x);
-    }
+    inline float ln(float x) { return log(x); }
 
-    inline long double ln(long double x) {
-      return log(x);
-    }
+    TRNG_CUDA_ENABLE
+    inline double ln(double x) { return log(x); }
 
-    inline float log(float b, float x) {
-      return log(x)*log(b);
-    }
-    inline double log(double b, double x) {
-      return log(x)*log(b);
-    }
-    inline long double log(long double b, long double x) {
-      return log(x)*log(b);
-    }
+    inline long double ln(long double x) { return log(x); }
+
+    inline float log(float b, float x) { return log(x) * log(b); }
+    inline double log(double b, double x) { return log(x) * log(b); }
+    inline long double log(long double b, long double x) { return log(x) * log(b); }
 
     using ::std::log10;
     using ::std::log2;
 
     using ::std::pow;
     using ::std::sqrt;
-    inline float sqrt(float r, float x) {
-      return ::std::pow(x, 1.0f/r);
-    }
-    inline double sqrt(double r, double x) {
-      return ::std::pow(x, 1.0/r);
-    }
-    inline long double sqrt(long double r, long double x) {
-      return ::std::pow(x, 1.0l/r);
-    }
-  
+    inline float sqrt(float r, float x) { return ::std::pow(x, 1.0f / r); }
+    inline double sqrt(double r, double x) { return ::std::pow(x, 1.0 / r); }
+    inline long double sqrt(long double r, long double x) { return ::std::pow(x, 1.0l / r); }
+
     // --- nearest integer functions -------------------------------------
 
     using ::std::ceil;
@@ -301,8 +219,8 @@ namespace trng {
       return ::std::modf(x, &dummy);
     }
 
-  }
+  }  // namespace math
 
-}
+}  // namespace trng
 
 #endif

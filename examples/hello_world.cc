@@ -42,7 +42,7 @@ int main() {
   // normal distribution with mean 6 and standard deviation 2
   trng::normal_dist<> normal(6.0, 2.0);
   // generate 1000 normal distributed random numbers
-  for (int i=0; i<100000; ++i)
+  for (int i = 0; i < 100000; ++i)
     std::cout << normal(R) << '\n';
   return EXIT_SUCCESS;
 }

@@ -37,24 +37,24 @@
 #include <trng/uniform01_dist.hpp>
 
 int main() {
-  const long samples=1000000l;          // total number of points in square
-  long in=0l;                           // number of points in circle
-  // distribute workload over all processes and make a global reduction 
-#pragma omp parallel reduction(+:in)
+  const long samples = 1000000l;  // total number of points in square
+  long in = 0l;                   // number of points in circle
+  // distribute workload over all processes and make a global reduction
+#pragma omp parallel reduction(+ : in)
   {
-    trng::yarn2 r;                      // random number engine
-    int size=omp_get_num_threads();     // get total number of processes 
-    int rank=omp_get_thread_num();      // get rank of current process
-    trng::uniform01_dist<> u;           // random number distribution
-    r.jump(2*(rank*samples/size));      // jump ahead
-    // throw random points into square 
-    for (long i=rank*samples/size; i<(rank+1)*samples/size; ++i) {
-      double x=u(r), y=u(r);            // choose random x- and y-coordinates
-      if (x*x+y*y<=1.0)                 // is point in circle?
-	++in;                           // increase thread-local counter
+    trng::yarn2 r;                        // random number engine
+    int size = omp_get_num_threads();     // get total number of processes
+    int rank = omp_get_thread_num();      // get rank of current process
+    trng::uniform01_dist<> u;             // random number distribution
+    r.jump(2 * (rank * samples / size));  // jump ahead
+    // throw random points into square
+    for (long i = rank * samples / size; i < (rank + 1) * samples / size; ++i) {
+      double x = u(r), y = u(r);  // choose random x- and y-coordinates
+      if (x * x + y * y <= 1.0)   // is point in circle?
+        ++in;                     // increase thread-local counter
     }
   }
   // print result
-  std::cout << "pi = " << 4.0*in/samples << std::endl;
+  std::cout << "pi = " << 4.0 * in / samples << std::endl;
   return EXIT_SUCCESS;
 }

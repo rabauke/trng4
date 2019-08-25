@@ -57,10 +57,10 @@
 
 template<typename R>
 void sample_output(R &r, std::string name) {
-  while (name.length()<32)
-    name+=' ';
+  while (name.length() < 32)
+    name += ' ';
   std::cout << name;
-  for (int i=0; i<15; ++i)
+  for (int i = 0; i < 15; ++i)
     std::cout << r() << '\t';
   std::cout << r() << '\n';
 }
@@ -68,31 +68,83 @@ void sample_output(R &r, std::string name) {
 
 int main() {
   try {
-    { trng::lcg64       r;  sample_output(r, "trng::lcg64"); }
-    { trng::lcg64_shift r;  sample_output(r, "trng::lcg64_shift"); }
-    { trng::mrg2        r;  sample_output(r, "trng::mrg2"); }
-    { trng::mrg3        r;  sample_output(r, "trng::mrg3"); }
-    { trng::mrg3s       r;  sample_output(r, "trng::mrg3s"); }
-    { trng::mrg4        r;  sample_output(r, "trng::mrg4"); }
-    { trng::mrg5        r;  sample_output(r, "trng::mrg5"); }
-    { trng::mrg5s       r;  sample_output(r, "trng::mrg5s"); }
-    { trng::yarn2       r;  sample_output(r, "trng::yarn2"); }
-    { trng::yarn3       r;  sample_output(r, "trng::yarn3"); }
-    { trng::yarn3s      r;  sample_output(r, "trng::yarn3s"); }
-    { trng::yarn4       r;  sample_output(r, "trng::yarn4"); }
-    { trng::yarn5       r;  sample_output(r, "trng::yarn5"); }
-    { trng::yarn5s      r;  sample_output(r, "trng::yarn5s"); }
+    {
+      trng::lcg64 r;
+      sample_output(r, "trng::lcg64");
+    }
+    {
+      trng::lcg64_shift r;
+      sample_output(r, "trng::lcg64_shift");
+    }
+    {
+      trng::mrg2 r;
+      sample_output(r, "trng::mrg2");
+    }
+    {
+      trng::mrg3 r;
+      sample_output(r, "trng::mrg3");
+    }
+    {
+      trng::mrg3s r;
+      sample_output(r, "trng::mrg3s");
+    }
+    {
+      trng::mrg4 r;
+      sample_output(r, "trng::mrg4");
+    }
+    {
+      trng::mrg5 r;
+      sample_output(r, "trng::mrg5");
+    }
+    {
+      trng::mrg5s r;
+      sample_output(r, "trng::mrg5s");
+    }
+    {
+      trng::yarn2 r;
+      sample_output(r, "trng::yarn2");
+    }
+    {
+      trng::yarn3 r;
+      sample_output(r, "trng::yarn3");
+    }
+    {
+      trng::yarn3s r;
+      sample_output(r, "trng::yarn3s");
+    }
+    {
+      trng::yarn4 r;
+      sample_output(r, "trng::yarn4");
+    }
+    {
+      trng::yarn5 r;
+      sample_output(r, "trng::yarn5");
+    }
+    {
+      trng::yarn5s r;
+      sample_output(r, "trng::yarn5s");
+    }
     // { trng::mt19937     r;  sample_output(r, "trng::mt19937"); }
     // { trng::mt19937_64  r;  sample_output(r, "trng::mt19937_64"); }
-    { trng::lagfib2xor_19937_64  r;  sample_output(r, "trng::lagfib2xor_19937_64"); }
-    { trng::lagfib4xor_19937_64  r;  sample_output(r, "trng::lagfib4xor_19937_64"); }
-    { trng::lagfib4plus_19937_64 r;  sample_output(r, "trng::lagfib2plus_19937_64"); }
-    { trng::lagfib2plus_19937_64 r;  sample_output(r, "trng::lagfib4plus_19937_64"); }
-  } 
-  catch (std::exception &err) {
+    {
+      trng::lagfib2xor_19937_64 r;
+      sample_output(r, "trng::lagfib2xor_19937_64");
+    }
+    {
+      trng::lagfib4xor_19937_64 r;
+      sample_output(r, "trng::lagfib4xor_19937_64");
+    }
+    {
+      trng::lagfib4plus_19937_64 r;
+      sample_output(r, "trng::lagfib2plus_19937_64");
+    }
+    {
+      trng::lagfib2plus_19937_64 r;
+      sample_output(r, "trng::lagfib4plus_19937_64");
+    }
+  } catch (std::exception &err) {
     std::cerr << err.what() << std::endl;
-  }
-  catch (...) {
+  } catch (...) {
     std::cerr << "something went wrong" << std::endl;
   }
   return EXIT_SUCCESS;

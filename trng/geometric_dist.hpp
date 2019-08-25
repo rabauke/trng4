@@ -11,7 +11,7 @@
 //   * Redistributions in binary form must reproduce the above
 //     copyright notice, this list of conditions and the following
 //     disclaimer in the documentation and/or other materials provided
-//     with the disctribution.
+//     with the distribution.
 //
 //   * Neither the name of the copyright holder nor the names of its
 //     contributors may be used to endorse or promote products derived
@@ -51,54 +51,50 @@ namespace trng {
   public:
     typedef int result_type;
     class param_type;
-    
+
     class param_type {
     private:
       double p_, q_, one_over_ln_q_;
 
       TRNG_CUDA_ENABLE
-      double q() const {  return q_;  }
+      double q() const { return q_; }
       TRNG_CUDA_ENABLE
-      double one_over_ln_q() const {  return one_over_ln_q_;  }
+      double one_over_ln_q() const { return one_over_ln_q_; }
 
     public:
       TRNG_CUDA_ENABLE
       double p() const { return p_; }
       TRNG_CUDA_ENABLE
-      void p(double p_new) { 
-	p_=p_new;  q_=1.0-p_;  one_over_ln_q_=1.0/math::ln(q_);
+      void p(double p_new) {
+        p_ = p_new;
+        q_ = 1.0 - p_;
+        one_over_ln_q_ = 1.0 / math::ln(q_);
       }
       TRNG_CUDA_ENABLE
-      explicit param_type(double p=0.5) :
-	p_(p), q_(1.0-p_), one_over_ln_q_(1.0/math::ln(q_)) {
-      }
+      explicit param_type(double p = 0.5)
+          : p_(p), q_(1.0 - p_), one_over_ln_q_(1.0 / math::ln(q_)) {}
       friend class geometric_dist;
     };
-    
+
   private:
     param_type P;
-    
+
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    explicit geometric_dist(double p) : P(p) {
-    }
+    explicit geometric_dist(double p) : P(p) {}
     TRNG_CUDA_ENABLE
-    explicit geometric_dist(const param_type &P) : P(P) {
-    }
+    explicit geometric_dist(const param_type &P) : P(P) {}
     // reset internal state
     TRNG_CUDA_ENABLE
-    void reset() { }
+    void reset() {}
     // random numbers
     template<typename R>
-    TRNG_CUDA_ENABLE
-    int operator()(R &r) {
-      return static_cast<int>(math::ln(utility::uniformoo<double>(r))*
-			      P.one_over_ln_q());
+    TRNG_CUDA_ENABLE int operator()(R &r) {
+      return static_cast<int>(math::ln(utility::uniformoo<double>(r)) * P.one_over_ln_q());
     }
     template<typename R>
-    TRNG_CUDA_ENABLE
-    int operator()(R &r, const param_type &p) {
+    TRNG_CUDA_ENABLE int operator()(R &r, const param_type &p) {
       geometric_dist g(p);
       return g(r);
     }
@@ -110,20 +106,20 @@ namespace trng {
     TRNG_CUDA_ENABLE
     param_type param() const { return P; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &P_new) { P=P_new; }
+    void param(const param_type &P_new) { P = P_new; }
     TRNG_CUDA_ENABLE
     double p() const { return P.p(); }
     TRNG_CUDA_ENABLE
     void p(double p_new) { P.p(p_new); }
-    // probability density function  
+    // probability density function
     TRNG_CUDA_ENABLE
     double pdf(int x) const {
-      return x<0 ? 0.0 : P.p()*math::pow(P.q(), static_cast<double>(x));
+      return x < 0 ? 0.0 : P.p() * math::pow(P.q(), static_cast<double>(x));
     }
-    // cumulative density function 
+    // cumulative density function
     TRNG_CUDA_ENABLE
     double cdf(int x) const {
-      return x<0 ? 0.0 : 1.0-math::pow(P.q(), static_cast<double>(x+1));
+      return x < 0 ? 0.0 : 1.0 - math::pow(P.q(), static_cast<double>(x + 1));
     }
   };
 
@@ -131,93 +127,78 @@ namespace trng {
 
   // EqualityComparable concept
   TRNG_CUDA_ENABLE
-  inline bool operator==(const geometric_dist::param_type &p1, 
-			 const geometric_dist::param_type &p2) {
-    return p1.p()==p2.p();
+  inline bool operator==(const geometric_dist::param_type &p1,
+                         const geometric_dist::param_type &p2) {
+    return p1.p() == p2.p();
   }
 
   TRNG_CUDA_ENABLE
-  inline bool operator!=(const geometric_dist::param_type &p1, 
-			 const geometric_dist::param_type &p2) {
-    return !(p1==p2);
+  inline bool operator!=(const geometric_dist::param_type &p1,
+                         const geometric_dist::param_type &p2) {
+    return !(p1 == p2);
   }
-  
+
   // Streamable concept
   template<typename char_t, typename traits_t>
-  std::basic_ostream<char_t, traits_t> &
-  operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const geometric_dist::param_type &P) {
+  std::basic_ostream<char_t, traits_t> &operator<<(std::basic_ostream<char_t, traits_t> &out,
+                                                   const geometric_dist::param_type &P) {
     std::ios_base::fmtflags flags(out.flags());
-    out.flags(std::ios_base::dec | std::ios_base::fixed |
-	      std::ios_base::left);
-    out << '('
-	<< std::setprecision(17) << P.p()
-	<< ')';
+    out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+    out << '(' << std::setprecision(17) << P.p() << ')';
     out.flags(flags);
     return out;
   }
-  
+
   template<typename char_t, typename traits_t>
-  std::basic_istream<char_t, traits_t> &
-  operator>>(std::basic_istream<char_t, traits_t> &in,
-	     geometric_dist::param_type &P) {
+  std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
+                                                   geometric_dist::param_type &P) {
     double p;
     std::ios_base::fmtflags flags(in.flags());
-    in.flags(std::ios_base::dec | std::ios_base::fixed |
-	     std::ios_base::left);
-    in >> utility::delim('(')
-       >> p >> utility::delim(')');
+    in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+    in >> utility::delim('(') >> p >> utility::delim(')');
     if (in)
-      P=geometric_dist::param_type(p);
+      P = geometric_dist::param_type(p);
     in.flags(flags);
     return in;
   }
-  
+
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
   TRNG_CUDA_ENABLE
-  inline bool operator==(const geometric_dist &g1, 
-			 const geometric_dist &g2) {
-    return g1.param()==g2.param();
+  inline bool operator==(const geometric_dist &g1, const geometric_dist &g2) {
+    return g1.param() == g2.param();
   }
 
   TRNG_CUDA_ENABLE
-  inline bool operator!=(const geometric_dist &g1, 
-			 const geometric_dist &g2) {
-    return g1.param()!=g2.param();
+  inline bool operator!=(const geometric_dist &g1, const geometric_dist &g2) {
+    return g1.param() != g2.param();
   }
-  
+
   // Streamable concept
   template<typename char_t, typename traits_t>
-  std::basic_ostream<char_t, traits_t> &
-  operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const geometric_dist &g) {
+  std::basic_ostream<char_t, traits_t> &operator<<(std::basic_ostream<char_t, traits_t> &out,
+                                                   const geometric_dist &g) {
     std::ios_base::fmtflags flags(out.flags());
-    out.flags(std::ios_base::dec | std::ios_base::fixed |
-	      std::ios_base::left);
+    out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
     out << "[geometric " << g.param() << ']';
     out.flags(flags);
     return out;
   }
-  
+
   template<typename char_t, typename traits_t>
-  std::basic_istream<char_t, traits_t> &
-  operator>>(std::basic_istream<char_t, traits_t> &in,
-	     geometric_dist &g) {
+  std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
+                                                   geometric_dist &g) {
     geometric_dist::param_type p;
     std::ios_base::fmtflags flags(in.flags());
-    in.flags(std::ios_base::dec | std::ios_base::fixed |
-	     std::ios_base::left);
-    in >> utility::ignore_spaces()
-       >> utility::delim("[geometric ") >> p >> utility::delim(']');
+    in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+    in >> utility::ignore_spaces() >> utility::delim("[geometric ") >> p >> utility::delim(']');
     if (in)
       g.param(p);
     in.flags(flags);
     return in;
   }
-  
-}
+
+}  // namespace trng
 
 #endif
-

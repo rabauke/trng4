@@ -37,28 +37,26 @@
 #include <trng/lcg64.hpp>
 #include <trng/bernoulli_dist.hpp>
 
-typedef enum { head=0, tail=1 } coin;
+typedef enum { head = 0, tail = 1 } coin;
 
 int main() {
   // discrete distribution object
   trng::bernoulli_dist<coin> biased_coin(0.51, head, tail);
   // random number generator
   trng::lcg64 r;
-  // draw some random numbers 
+  // draw some random numbers
   std::vector<int> count(2, 0);
-  const int samples=100000;
-  for (int i=0; i<samples; ++i) {
-    int x=biased_coin(r);  // draw a random number
-    ++count[x];            // count
+  const int samples = 100000;
+  for (int i = 0; i < samples; ++i) {
+    int x = biased_coin(r);  // draw a random number
+    ++count[x];              // count
   }
   // print results
   std::cout << "value\t\tprobability\tcount\t\tempirical probability\n"
-   	    << "=====\t\t===========\t=====\t\t=====================\n";
-  for (std::vector<int>::size_type i=0; i<count.size(); ++i)
-    std::cout << std::setprecision(3) 
-	      << i << "\t\t"
-	      << biased_coin.pdf(static_cast<coin>(i)) << "\t\t"
- 	      << count[i] << "\t\t"
- 	      << static_cast<double>(count[i])/samples << '\n';
+            << "=====\t\t===========\t=====\t\t=====================\n";
+  for (std::vector<int>::size_type i = 0; i < count.size(); ++i)
+    std::cout << std::setprecision(3) << i << "\t\t" << biased_coin.pdf(static_cast<coin>(i))
+              << "\t\t" << count[i] << "\t\t" << static_cast<double>(count[i]) / samples
+              << '\n';
   return EXIT_SUCCESS;
 }

@@ -11,7 +11,7 @@
 //   * Redistributions in binary form must reproduce the above
 //     copyright notice, this list of conditions and the following
 //     disclaimer in the documentation and/or other materials provided
-//     with the disctribution.
+//     with the distribution.
 //
 //   * Neither the name of the copyright holder nor the names of its
 //     contributors may be used to endorse or promote products derived
@@ -47,86 +47,73 @@
 namespace trng {
 
   // uniform random number generator class
-  template<typename float_t=double>
+  template<typename float_t = double>
   class rayleigh_dist {
   public:
     typedef double result_type;
     class param_type;
-    
+
     class param_type {
     private:
       result_type nu_;
+
     public:
       TRNG_CUDA_ENABLE
       result_type nu() const { return nu_; }
       TRNG_CUDA_ENABLE
-      void nu(result_type nu_new) { nu_=nu_new; }
+      void nu(result_type nu_new) { nu_ = nu_new; }
       TRNG_CUDA_ENABLE
-      param_type() : nu_(1) {
-      }
+      param_type() : nu_(1) {}
       TRNG_CUDA_ENABLE
-      explicit param_type(result_type nu) : nu_(nu) {
-      }
+      explicit param_type(result_type nu) : nu_(nu) {}
 
       friend class rayleigh_dist;
 
       // Streamable concept
       template<typename char_t, typename traits_t>
-      friend std::basic_ostream<char_t, traits_t> &
-      operator<<(std::basic_ostream<char_t, traits_t> &out,
-		 const param_type &p) {
-	std::ios_base::fmtflags flags(out.flags());
-	out.flags(std::ios_base::dec | std::ios_base::fixed |
-		  std::ios_base::left);
-	out << '('
-	    << std::setprecision(math::numeric_limits<float_t>::digits10+1) 
-	    << p.nu()
-	    << ')';
-	out.flags(flags);
-	return out;
-      }
-      
-      template<typename char_t, typename traits_t>
-      friend std::basic_istream<char_t, traits_t> &
-      operator>>(std::basic_istream<char_t, traits_t> &in,
-		 param_type &p) {
-	float_t nu;
-	std::ios_base::fmtflags flags(in.flags());
-	in.flags(std::ios_base::dec | std::ios_base::fixed |
-		 std::ios_base::left);
-	in >> utility::delim('(')
-	   >> nu >> utility::delim(')');
-	if (in)
-	  p=rayleigh_dist::param_type(nu);
-	in.flags(flags);
-	return in;
+      friend std::basic_ostream<char_t, traits_t> &operator<<(
+          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
+        std::ios_base::fmtflags flags(out.flags());
+        out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+        out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1) << p.nu()
+            << ')';
+        out.flags(flags);
+        return out;
       }
 
+      template<typename char_t, typename traits_t>
+      friend std::basic_istream<char_t, traits_t> &operator>>(
+          std::basic_istream<char_t, traits_t> &in, param_type &p) {
+        float_t nu;
+        std::ios_base::fmtflags flags(in.flags());
+        in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+        in >> utility::delim('(') >> nu >> utility::delim(')');
+        if (in)
+          p = rayleigh_dist::param_type(nu);
+        in.flags(flags);
+        return in;
+      }
     };
-    
+
   private:
     param_type p;
-   
+
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    explicit rayleigh_dist(result_type nu) : p(nu) {
-    }
+    explicit rayleigh_dist(result_type nu) : p(nu) {}
     TRNG_CUDA_ENABLE
-    explicit rayleigh_dist(const param_type &p) : p(p) {
-    }
+    explicit rayleigh_dist(const param_type &p) : p(p) {}
     // reset internal state
     TRNG_CUDA_ENABLE
-    void reset() { }
+    void reset() {}
     // random numbers
     template<typename R>
-    TRNG_CUDA_ENABLE
-    result_type operator()(R &r) {
+    TRNG_CUDA_ENABLE result_type operator()(R &r) {
       return icdf(utility::uniformoo<result_type>(r));
     }
     template<typename R>
-    TRNG_CUDA_ENABLE
-    result_type operator()(R &r, const param_type &p) {
+    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
       rayleigh_dist g(p);
       return g(r);
     }
@@ -138,102 +125,95 @@ namespace trng {
     TRNG_CUDA_ENABLE
     param_type param() const { return p; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { p=p_new; }
+    void param(const param_type &p_new) { p = p_new; }
     TRNG_CUDA_ENABLE
     result_type nu() const { return p.nu(); }
     TRNG_CUDA_ENABLE
     void nu(result_type nu_new) { p.nu(nu_new); }
-    // probability density function  
+    // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
-      if (x<=0)
-	return 0;
-      result_type t=x/(p.nu()*p.nu());
-      return t*math::exp(-t*x/2);
+      if (x <= 0)
+        return 0;
+      result_type t = x / (p.nu() * p.nu());
+      return t * math::exp(-t * x / 2);
     }
-    // cumulative density function 
+    // cumulative density function
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
-      if (x<=0)
-	return 0;
-      return 1-math::exp(-x*x/(2*p.nu()*p.nu()));
+      if (x <= 0)
+        return 0;
+      return 1 - math::exp(-x * x / (2 * p.nu() * p.nu()));
     }
-    // inverse cumulative density function 
+    // inverse cumulative density function
     TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const {
-      if (x<0 or x>1) {
+      if (x < 0 or x > 1) {
 #if !(defined __CUDA_ARCH__)
-	errno=EDOM;
+        errno = EDOM;
 #endif
-	return math::numeric_limits<result_type>::quiet_NaN();
+        return math::numeric_limits<result_type>::quiet_NaN();
       }
-      return p.nu()*math::sqrt(-2*math::ln(1-x));
+      return p.nu() * math::sqrt(-2 * math::ln(1 - x));
     }
   };
-    
+
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator==(const typename rayleigh_dist<float_t>::param_type &p1, 
-			 const typename rayleigh_dist<float_t>::param_type &p2) {
-    return p1.nu()==p2.nu();
+  TRNG_CUDA_ENABLE inline bool operator==(
+      const typename rayleigh_dist<float_t>::param_type &p1,
+      const typename rayleigh_dist<float_t>::param_type &p2) {
+    return p1.nu() == p2.nu();
   }
 
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator!=(const typename rayleigh_dist<float_t>::param_type &p1, 
-			 const typename rayleigh_dist<float_t>::param_type &p2) {
-    return not (p1==p2);
+  TRNG_CUDA_ENABLE inline bool operator!=(
+      const typename rayleigh_dist<float_t>::param_type &p1,
+      const typename rayleigh_dist<float_t>::param_type &p2) {
+    return not(p1 == p2);
   }
-    
+
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator==(const rayleigh_dist<float_t> &g1, 
-			 const rayleigh_dist<float_t> &g2) {
-    return g1.param()==g2.param();
+  TRNG_CUDA_ENABLE inline bool operator==(const rayleigh_dist<float_t> &g1,
+                                          const rayleigh_dist<float_t> &g2) {
+    return g1.param() == g2.param();
   }
 
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator!=(const rayleigh_dist<float_t> &g1, 
-			 const rayleigh_dist<float_t> &g2) {
-    return g1.param()!=g2.param();
+  TRNG_CUDA_ENABLE inline bool operator!=(const rayleigh_dist<float_t> &g1,
+                                          const rayleigh_dist<float_t> &g2) {
+    return g1.param() != g2.param();
   }
-  
+
   // Streamable concept
   template<typename char_t, typename traits_t, typename float_t>
-  std::basic_ostream<char_t, traits_t> &
-  operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const rayleigh_dist<float_t> &g) {
+  std::basic_ostream<char_t, traits_t> &operator<<(std::basic_ostream<char_t, traits_t> &out,
+                                                   const rayleigh_dist<float_t> &g) {
     std::ios_base::fmtflags flags(out.flags());
-    out.flags(std::ios_base::dec | std::ios_base::fixed |
-	      std::ios_base::left);
+    out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
     out << "[rayleigh " << g.param() << ']';
     out.flags(flags);
     return out;
   }
-  
+
   template<typename char_t, typename traits_t, typename float_t>
-  std::basic_istream<char_t, traits_t> &
-  operator>>(std::basic_istream<char_t, traits_t> &in,
-	     rayleigh_dist<float_t> &g) {
+  std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
+                                                   rayleigh_dist<float_t> &g) {
     typename rayleigh_dist<float_t>::param_type p;
     std::ios_base::fmtflags flags(in.flags());
-    in.flags(std::ios_base::dec | std::ios_base::fixed |
-	     std::ios_base::left);
-    in >> utility::ignore_spaces()
-       >> utility::delim("[rayleigh ") >> p >> utility::delim(']');
+    in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+    in >> utility::ignore_spaces() >> utility::delim("[rayleigh ") >> p >> utility::delim(']');
     if (in)
       g.param(p);
     in.flags(flags);
     return in;
   }
-  
-}
+
+}  // namespace trng
 
 #endif

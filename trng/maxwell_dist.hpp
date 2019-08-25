@@ -11,7 +11,7 @@
 //   * Redistributions in binary form must reproduce the above
 //     copyright notice, this list of conditions and the following
 //     disclaimer in the documentation and/or other materials provided
-//     with the disctribution.
+//     with the distribution.
 //
 //   * Neither the name of the copyright holder nor the names of its
 //     contributors may be used to endorse or promote products derived
@@ -48,87 +48,72 @@
 namespace trng {
 
   // uniform random number generator class
-  template<typename float_t=double>
+  template<typename float_t = double>
   class maxwell_dist {
   public:
     typedef float_t result_type;
     class param_type;
-    
+
     class param_type {
     private:
       result_type theta_;
+
     public:
       TRNG_CUDA_ENABLE
       result_type theta() const { return theta_; }
       TRNG_CUDA_ENABLE
-      void theta(result_type theta_new) { theta_=theta_new; }
-      param_type() : 
-	theta_(1) {
-      }
+      void theta(result_type theta_new) { theta_ = theta_new; }
+      param_type() : theta_(1) {}
       TRNG_CUDA_ENABLE
-      param_type(result_type theta) : 
-	theta_(theta) {
-      }
-      
+      param_type(result_type theta) : theta_(theta) {}
+
       friend class maxwell_dist;
-      
+
       // Streamable concept
       template<typename char_t, typename traits_t>
-      friend std::basic_ostream<char_t, traits_t> &
-      operator<<(std::basic_ostream<char_t, traits_t> &out,
-		 const param_type &p) {
-	std::ios_base::fmtflags flags(out.flags());
-	out.flags(std::ios_base::dec | std::ios_base::fixed |
-		  std::ios_base::left);
-	out << '('
-            << std::setprecision(math::numeric_limits<float_t>::digits10+1) 
-	    << p.theta()
-	    << ')';
-	out.flags(flags);
-	return out;
-      }
-  
-      template<typename char_t, typename traits_t>
-      friend std::basic_istream<char_t, traits_t> &
-      operator>>(std::basic_istream<char_t, traits_t> &in,
-		 param_type &p) {
-	float_t theta;
-	std::ios_base::fmtflags flags(in.flags());
-	in.flags(std::ios_base::dec | std::ios_base::fixed |
-		 std::ios_base::left);
-	in >> utility::delim('(')
-	   >> theta >> utility::delim(')');
-	if (in)
-	  p=param_type(theta);
-	in.flags(flags);
-	return in;
+      friend std::basic_ostream<char_t, traits_t> &operator<<(
+          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
+        std::ios_base::fmtflags flags(out.flags());
+        out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+        out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1)
+            << p.theta() << ')';
+        out.flags(flags);
+        return out;
       }
 
+      template<typename char_t, typename traits_t>
+      friend std::basic_istream<char_t, traits_t> &operator>>(
+          std::basic_istream<char_t, traits_t> &in, param_type &p) {
+        float_t theta;
+        std::ios_base::fmtflags flags(in.flags());
+        in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+        in >> utility::delim('(') >> theta >> utility::delim(')');
+        if (in)
+          p = param_type(theta);
+        in.flags(flags);
+        return in;
+      }
     };
-    
+
   private:
     param_type p;
-   
+
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    maxwell_dist(result_type theta) : p(theta) {
-    }
+    maxwell_dist(result_type theta) : p(theta) {}
     TRNG_CUDA_ENABLE
-    explicit maxwell_dist(const param_type &p) : p(p) {
-    }
+    explicit maxwell_dist(const param_type &p) : p(p) {}
     // reset internal state
     TRNG_CUDA_ENABLE
-    void reset() { }
+    void reset() {}
     // random numbers
     template<typename R>
-    TRNG_CUDA_ENABLE
-    result_type operator()(R &r) {
+    TRNG_CUDA_ENABLE result_type operator()(R &r) {
       return icdf(utility::uniformoo<result_type>(r));
     }
     template<typename R>
-    TRNG_CUDA_ENABLE
-    result_type operator()(R &r, const param_type &p) {
+    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
       maxwell_dist g(p);
       return g(r);
     }
@@ -140,111 +125,104 @@ namespace trng {
     TRNG_CUDA_ENABLE
     param_type param() const { return p; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { p=p_new; }
+    void param(const param_type &p_new) { p = p_new; }
     TRNG_CUDA_ENABLE
     result_type theta() const { return p.theta(); }
-    // probability density function  
+    // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
-      result_type x2(x*x);
-      result_type t2(p.theta()*p.theta());
-      return math::constants<result_type>::sqrt_2_over_pi()*
-	x2*math::exp(-x2/(2*t2))/(t2*p.theta());
+      result_type x2(x * x);
+      result_type t2(p.theta() * p.theta());
+      return math::constants<result_type>::sqrt_2_over_pi() * x2 * math::exp(-x2 / (2 * t2)) /
+             (t2 * p.theta());
     }
-    // cumulative density function 
+    // cumulative density function
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
-      return math::erf(x*math::constants<result_type>::one_over_sqrt_2()/p.theta())- 
-	math::constants<result_type>::sqrt_2_over_pi()*
-	x*math::exp(-x*x/(2*p.theta()*p.theta()))/(p.theta());
+      return math::erf(x * math::constants<result_type>::one_over_sqrt_2() / p.theta()) -
+             math::constants<result_type>::sqrt_2_over_pi() * x *
+                 math::exp(-x * x / (2 * p.theta() * p.theta())) / (p.theta());
     }
-    // inverse cumulative density function 
+    // inverse cumulative density function
     TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const {
-      if (x<0 or x>1) {
+      if (x < 0 or x > 1) {
 #if !(defined __CUDA_ARCH__)
-	errno=EDOM;
+        errno = EDOM;
 #endif
-	return math::numeric_limits<result_type>::quiet_NaN();
+        return math::numeric_limits<result_type>::quiet_NaN();
       }
-      if (x==1)
+      if (x == 1)
         return math::numeric_limits<result_type>::infinity();
-      if (x==0)
+      if (x == 0)
         return 0;
-      result_type y(2*p.theta()*math::constants<result_type>::sqrt_2_over_pi()), y_old;
-      for (int i=0; i<math::numeric_limits<result_type>::digits+2; ++i) {
-	y_old=y;
-	y-=(cdf(y)-x)/pdf(y);
-	if (math::abs(y/y_old-1)<4*math::numeric_limits<result_type>::epsilon())
-	  break;
+      result_type y(2 * p.theta() * math::constants<result_type>::sqrt_2_over_pi()), y_old;
+      for (int i = 0; i < math::numeric_limits<result_type>::digits + 2; ++i) {
+        y_old = y;
+        y -= (cdf(y) - x) / pdf(y);
+        if (math::abs(y / y_old - 1) < 4 * math::numeric_limits<result_type>::epsilon())
+          break;
       }
       return y;
     }
   };
-    
+
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator==(const typename maxwell_dist<float_t>::param_type &p1, 
-			 const typename maxwell_dist<float_t>::param_type &p2) {
-    return p1.theta()==p2.theta();
+  TRNG_CUDA_ENABLE inline bool operator==(
+      const typename maxwell_dist<float_t>::param_type &p1,
+      const typename maxwell_dist<float_t>::param_type &p2) {
+    return p1.theta() == p2.theta();
   }
 
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator!=(const typename maxwell_dist<float_t>::param_type &p1, 
-			 const typename maxwell_dist<float_t>::param_type &p2) {
-    return not (p1==p2);
-  }  
-  
+  TRNG_CUDA_ENABLE inline bool operator!=(
+      const typename maxwell_dist<float_t>::param_type &p1,
+      const typename maxwell_dist<float_t>::param_type &p2) {
+    return not(p1 == p2);
+  }
+
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator==(const maxwell_dist<float_t> &g1, 
-			 const maxwell_dist<float_t> &g2) {
-    return g1.param()==g2.param();
+  TRNG_CUDA_ENABLE inline bool operator==(const maxwell_dist<float_t> &g1,
+                                          const maxwell_dist<float_t> &g2) {
+    return g1.param() == g2.param();
   }
 
   template<typename float_t>
-  TRNG_CUDA_ENABLE
-  inline bool operator!=(const maxwell_dist<float_t> &g1, 
-			 const maxwell_dist<float_t> &g2) {
-    return g1.param()!=g2.param();
+  TRNG_CUDA_ENABLE inline bool operator!=(const maxwell_dist<float_t> &g1,
+                                          const maxwell_dist<float_t> &g2) {
+    return g1.param() != g2.param();
   }
-  
+
   // Streamable concept
   template<typename char_t, typename traits_t, typename float_t>
-  std::basic_ostream<char_t, traits_t> &
-  operator<<(std::basic_ostream<char_t, traits_t> &out,
-	     const maxwell_dist<float_t> &g) {
+  std::basic_ostream<char_t, traits_t> &operator<<(std::basic_ostream<char_t, traits_t> &out,
+                                                   const maxwell_dist<float_t> &g) {
     std::ios_base::fmtflags flags(out.flags());
-    out.flags(std::ios_base::dec | std::ios_base::fixed |
-	      std::ios_base::left);
+    out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
     out << "[maxwell " << g.param() << ']';
     out.flags(flags);
     return out;
   }
-  
+
   template<typename char_t, typename traits_t, typename float_t>
-  std::basic_istream<char_t, traits_t> &
-  operator>>(std::basic_istream<char_t, traits_t> &in,
-	     maxwell_dist<float_t> &g) {
+  std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
+                                                   maxwell_dist<float_t> &g) {
     typename maxwell_dist<float_t>::param_type p;
     std::ios_base::fmtflags flags(in.flags());
-    in.flags(std::ios_base::dec | std::ios_base::fixed |
-	     std::ios_base::left);
-    in >> utility::ignore_spaces()
-       >> utility::delim("[maxwell ") >> p >> utility::delim(']');
+    in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
+    in >> utility::ignore_spaces() >> utility::delim("[maxwell ") >> p >> utility::delim(']');
     if (in)
       g.param(p);
     in.flags(flags);
     return in;
   }
-  
-}
+
+}  // namespace trng
 
 #endif
