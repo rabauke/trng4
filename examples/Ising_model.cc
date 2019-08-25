@@ -37,7 +37,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <string>
-#include <ctime>
+#include <chrono>
 #include <trng/lcg64.hpp>
 #include <trng/mrg2.hpp>
 #include <trng/mrg3.hpp>
@@ -56,43 +56,20 @@
 #include <trng/uniform_int_dist.hpp>
 #include <trng/bernoulli_dist.hpp>
 
-#if defined __unix__
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/times.h>
-#else
-#include <ctime>
-#endif
-
 class timer {
 private:
   const double _resolution;
-  double _t;
-  double get_time() {
-#if defined __unix__
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return static_cast<double>(tv.tv_sec) + static_cast<double>(tv.tv_usec) * 1e-6;
-#else
-    return static_cast<double>(std::clock()) * _resolution;
-#endif
-  }
+  std::chrono::time_point<std::chrono::system_clock> _t;
 
 public:
-  void reset() { _t = get_time(); }
-  double time() { return get_time() - _t; }
-  double resolution() const { return _resolution; }
-  timer()
-      :
-#if defined __unix__
-        _resolution(1e-6),
-#else
-        _resolution(1.0 / CLOCKS_PER_SEC),
-#endif
-        _t(get_time()) {
+  void reset() { _t = std::chrono::system_clock::now(); }
+  double time() const {
+    auto now = std::chrono::system_clock::now();
+    return std::chrono::duration_cast<std::chrono::microseconds>(now - _t).count() * 1e-6;
   }
+  double resolution() const { return _resolution; }
+  timer() : _resolution([]() { return 1e-6; }()), _t(std::chrono::system_clock::now()) {}
 };
-
 
 typedef struct {
   int x;
@@ -102,24 +79,24 @@ typedef struct {
 class lattice {
 private:
   std::vector<int> s;
-  int L, L2;
-  int pos(int);
+  int L{0}, L2{0};
+  int pos(int) const;
 
 public:
-  int size(void);
+  int size() const;
   void resize(int);
   void fill(int);
   void flipp(koord);
   int get(koord);
   void set(koord, int);
-  double energy(void);
-  double magnet(void);
-  void print(void);
-  lattice(int);
-  lattice();
+  double energy() const;
+  double magnet() const;
+  void print() const;
+  explicit lattice(int);
+  lattice() = default;
 };
 
-inline int lattice::pos(int x) {
+inline int lattice::pos(int x) const {
   while (x < 0)
     x += L;
   while (x >= L)
@@ -127,7 +104,7 @@ inline int lattice::pos(int x) {
   return x;
 }
 
-int lattice::size(void) {
+int lattice::size() const {
   return L;
 }
 
@@ -160,7 +137,7 @@ void lattice::set(koord r, int w) {
   s[pos(r.x) + pos(r.y) * L] = w;
 }
 
-double lattice::energy(void) {
+double lattice::energy() const {
   double e = 0.0;
   for (int i = 0; i < L; ++i)
     for (int j = 0; j < L; ++j)
@@ -168,7 +145,7 @@ double lattice::energy(void) {
   return e / L2;
 }
 
-double lattice::magnet(void) {
+double lattice::magnet() const {
   double m = 0.0;
   for (int i = 0; i < L; ++i)
     for (int j = 0; j < L; ++j)
@@ -179,7 +156,7 @@ double lattice::magnet(void) {
   return std::abs(m) / L2;
 }
 
-void lattice::print(void) {
+void lattice::print() const {
   for (int i = 0; i < L; ++i) {
     for (int j = 0; j < L; ++j)
       if (s[i + j * L] < 0)
@@ -195,17 +172,11 @@ lattice::lattice(int newL) {
   lattice::resize(newL);
 }
 
-lattice::lattice() {
-  L = 0;
-  L2 = 0;
-}
-
-
 template<class RNG_type>
 void wolffstep(RNG_type &R, lattice &s, double T) {
   std::queue<koord> buffer;
   const double padd = 1.0 - std::exp(-2.0 / T);
-  ;
+
   int oldspin;
   trng::uniform_int_dist U(0, s.size());
   trng::bernoulli_dist<bool> B(padd, true, false);
@@ -252,16 +223,15 @@ void wolffstep(RNG_type &R, lattice &s, double T) {
 
 void output(std::vector<double> &Ea, std::vector<double> &ca, int simulations, double E_exact,
             double c_exact) {
-  int j;
   Ea[simulations] = 0.0;
   ca[simulations] = 0.0;
   Ea[simulations + 1] = 0.0;
   ca[simulations + 1] = 0.0;
-  for (j = 0; j < simulations; ++j) {
+  for (int j = 0; j < simulations; ++j) {
     Ea[simulations] += Ea[j] / simulations;
     ca[simulations] += ca[j] / simulations;
   }
-  for (j = 0; j < simulations; ++j) {
+  for (int j = 0; j < simulations; ++j) {
     Ea[simulations + 1] += (Ea[j] - Ea[simulations]) * (Ea[j] - Ea[simulations]);
     ca[simulations + 1] += (ca[j] - ca[simulations]) * (ca[j] - ca[simulations]);
   }
@@ -272,7 +242,7 @@ void output(std::vector<double> &Ea, std::vector<double> &ca, int simulations, d
   ca[simulations + 1] = std::sqrt(ca[simulations + 1]);
   // Student_t(0.99, simulations-1l);
   std::cout << "\n\t E\t\t c\n";
-  for (j = 0; j < simulations; ++j)
+  for (int j = 0; j < simulations; ++j)
     std::cout << '\t' << std::setprecision(8) << Ea[j] << '\t' << std::setprecision(8) << ca[j]
               << '\n';
   std::cout << "\t--------------\t--------------" << '\n'
@@ -360,7 +330,6 @@ void wolff_main(RNG_type &R, long runs, long split, long L) {
 
   // const double
   const int simulations = 10;
-  int i, j;
   double T, E, E2, q, c;
   std::vector<double> Ea(simulations + 2);
   std::vector<double> ca(simulations + 2);
@@ -377,13 +346,13 @@ void wolff_main(RNG_type &R, long runs, long split, long L) {
             << "Lattice = " << L << "x" << L << '\n'
             << "Samples = " << runs << '\n';
 
-  for (i = 0; i < 2 * runs; ++i)
+  for (int i = 0; i < 2 * runs; ++i)
     wolffstep(R, s, T);
   timer t;
-  for (j = 0; j < simulations; ++j) {
+  for (int j = 0; j < simulations; ++j) {
     E = 0.0;
     E2 = 0.0;
-    for (i = 0; i < runs; ++i) {
+    for (int i = 0; i < runs; ++i) {
       wolffstep(R, s, T);
       q = s.energy();
       E += q;
@@ -428,7 +397,7 @@ int main(int argc, char *argv[]) {
     } else if (arg == "--runs") {
       ++argi;
       if (argi < argc) {
-        runs = atoi(argv[argi]);
+        runs = std::atoi(argv[argi]);
         ++argi;
       } else {
         std::cerr << "missung argument for parameter " << arg << '\n';
@@ -437,7 +406,7 @@ int main(int argc, char *argv[]) {
     } else if (arg == "--split") {
       ++argi;
       if (argi < argc) {
-        split = atoi(argv[argi]);
+        split = std::atoi(argv[argi]);
         ++argi;
       } else {
         std::cerr << "missung argument for parameter " << arg << '\n';
@@ -446,7 +415,7 @@ int main(int argc, char *argv[]) {
     } else if (arg == "--size") {
       ++argi;
       if (argi < argc) {
-        L = atoi(argv[argi]);
+        L = std::atoi(argv[argi]);
         ++argi;
       } else {
         std::cerr << "missung argument for parameter " << arg << '\n';
