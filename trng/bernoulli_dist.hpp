@@ -52,8 +52,8 @@ namespace trng {
 
     class param_type {
     private:
-      double p_;
-      T head_, tail_;
+      double p_{0.5};
+      T head_{}, tail_{};
 
     public:
       TRNG_CUDA_ENABLE
@@ -68,6 +68,7 @@ namespace trng {
       T tail() const { return tail_; }
       TRNG_CUDA_ENABLE
       void tail(const T &tail_new) { tail_ = tail_new; }
+      param_type() = default;
       TRNG_CUDA_ENABLE
       param_type(double p, const T &head, const T &tail) : p_(p), head_(head), tail_(tail) {}
       friend class bernoulli_dist;

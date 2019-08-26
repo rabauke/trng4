@@ -61,9 +61,9 @@ namespace trng {
   const mrg5::parameter_type mrg5::LEcuyer1 = parameter_type(107374182l, 0, 0, 0, 104480);
 
   // Random number engine concept
-  mrg5::mrg5(mrg5::parameter_type P) : P(P), S() {}
+  mrg5::mrg5(const mrg5::parameter_type &P) : P(P), S() {}
 
-  mrg5::mrg5(unsigned long s, mrg5::parameter_type P) : P(P), S() { seed(s); }
+  mrg5::mrg5(unsigned long s, const mrg5::parameter_type &P) : P(P), S() { seed(s); }
 
   void mrg5::seed() { (*this) = mrg5(); }
 

@@ -60,10 +60,8 @@ namespace trng {
       void calc_probabilities() {
         P_ = std::vector<double>();
         int x = 0;
-        double p = 0.0;
         while (x < 7 or x < 2 * mu_) {
-          p = math::GammaQ(x + 1.0, mu_);
-          P_.push_back(p);
+          P_.push_back(math::GammaQ(x + 1.0, mu_));
           ++x;
         }
         P_.push_back(1);

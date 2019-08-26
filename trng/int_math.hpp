@@ -53,10 +53,10 @@ namespace trng {
         utility::throw_this(
             std::invalid_argument("invalid argument in trng::int_math::modulo_invers"));
 #endif
-      int32_t q, flast(0), f(1), m1(m);
+      int32_t flast(0), f(1), m1(m);
       while (a > 1) {
         int32_t temp = m1 % a;
-        q = m1 / a;
+        int32_t q = m1 / a;
         m1 = a;
         a = temp;
         temp = f;
@@ -318,11 +318,12 @@ namespace trng {
         }
         return static_cast<int32_t>(p);
       }
-      // make it non-copyable
-      power &operator=(const power &);
-      power(const power &);
 
     public:
+      // make it non-copyable
+      power &operator=(const power &) = delete;
+      power(const power &) = delete;
+
       power() {
         for (int32_t i(0); i < 0x10000; ++i)
           b_power0[i] = pow(i);

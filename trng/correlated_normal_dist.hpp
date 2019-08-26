@@ -59,7 +59,7 @@ namespace trng {
     class param_type {
       typedef typename std::vector<result_type>::size_type size_type;
       std::vector<result_type> H_;
-      size_type d_;
+      size_type d_{0};
 
       void Cholesky_factorization() {
         for (size_type i = 0; i < d_; ++i) {
@@ -90,8 +90,9 @@ namespace trng {
       size_type d() const { return d_; }
 
     public:
+      param_type() = default;
       template<typename iter>
-      param_type(iter first, iter last) {
+      explicit param_type(iter first, iter last) {
         d_ = static_cast<size_type>(
             trng::math::sqrt(static_cast<result_type>(std::distance(first, last))));
         H_.reserve(d_ * d_);

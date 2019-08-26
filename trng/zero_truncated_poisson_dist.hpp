@@ -63,7 +63,7 @@ namespace trng {
         double p = 0;
         P_.push_back(p);
         while (x < 7 or x < 2 * mu_) {
-          p = (math::exp(mu_) * math::GammaQ(x + 1.0, mu_) - 1) / (math::exp(mu_) - 1);
+          p = (math::exp(mu_) * math::GammaQ(x + 1.0, mu_) - 1) / math::expm1(mu_);
           P_.push_back(p);
           ++x;
         }
@@ -120,13 +120,13 @@ namespace trng {
     double pdf(int x) const {
       return x <= 0 ? 0.0
                     : math::exp(-math::ln_Gamma(x + 1.0) + x * math::ln(P.mu())) /
-                          (math::exp(P.mu()) - 1);
+                          math::expm1(P.mu());
     }
     // cumulative density function
     double cdf(int x) const {
       return x <= 0 ? 0.0
                     : (math::exp(P.mu()) * math::GammaQ(x + 1.0, P.mu()) - 1) /
-                          (math::exp(P.mu()) - 1);
+                          math::expm1(P.mu());
     }
   };
 

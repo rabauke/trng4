@@ -62,8 +62,8 @@ namespace trng {
         int x = 0;
         double p = 0.0;
         while (p < 1.0 - 1.0 / 4096.0) {
-          p += math::exp(math::ln_Gamma(static_cast<double>(r_ + x)) -
-                         math::ln_Gamma(static_cast<double>(x + 1)) - math::ln_Gamma(r_)) *
+          p += math::exp(math::ln_Gamma(r_ + x) - math::ln_Gamma(static_cast<double>(x + 1)) -
+                         math::ln_Gamma(r_)) *
                math::pow(p_, r_) * math::pow(1 - p_, x);
           P_.push_back(p);
           std::cerr << x << '\t' << p << '\n';
@@ -128,9 +128,9 @@ namespace trng {
     // probability density function
     double pdf(int x) const {
       return x < 0 ? 0.0
-                   : math::exp(math::ln_Gamma(static_cast<double>(P.r() + x)) -
+                   : math::exp(math::ln_Gamma(P.r() + x) -
                                math::ln_Gamma(static_cast<double>(x + 1)) -
-                               math::ln_Gamma(static_cast<double>(P.r()))) *
+                               math::ln_Gamma(P.r())) *
                          math::pow(P.p(), P.r()) * math::pow(1 - P.p(), x);
     }
     // cumulative density function

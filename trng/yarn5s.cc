@@ -64,9 +64,9 @@ namespace trng {
       parameter_type(2068619238, 2138332912, 671754166, 1442240992, 1526958817);
 
   // Random number engine concept
-  yarn5s::yarn5s(yarn5s::parameter_type P) : P(P), S() {}
+  yarn5s::yarn5s(const parameter_type &P) : P(P), S() {}
 
-  yarn5s::yarn5s(unsigned long s, yarn5s::parameter_type P) : P(P), S() { seed(s); }
+  yarn5s::yarn5s(unsigned long s, const parameter_type &P) : P(P), S() { seed(s); }
 
   void yarn5s::seed() { (*this) = yarn5s(); }
 

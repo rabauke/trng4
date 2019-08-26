@@ -162,10 +162,10 @@ namespace trng {
         const T eps = T(4) * numeric_limits<T>::epsilon();
         const T min = T(4) * numeric_limits<T>::min();
         // set up for evaluating continued fraction by modied Lentz's method
-        T del, ai, bi(x + T(1) - a), ci(T(1) / min), di(T(1) / bi), h(di), i(T(0));
+        T del, bi(x + T(1) - a), ci(T(1) / min), di(T(1) / bi), h(di), i(T(0));
         do {  // iterate
           ++i;
-          ai = -i * (i - a);
+          T ai = -i * (i - a);
           bi += T(2);
           di = ai * di + bi;
           if (abs(di) < min)

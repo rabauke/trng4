@@ -56,16 +56,16 @@ namespace trng {
 
     class param_type {
     private:
-      result_type theta_;
+      result_type theta_{1};
 
     public:
       TRNG_CUDA_ENABLE
       result_type theta() const { return theta_; }
       TRNG_CUDA_ENABLE
       void theta(result_type theta_new) { theta_ = theta_new; }
-      param_type() : theta_(1) {}
+      param_type() = default;
       TRNG_CUDA_ENABLE
-      param_type(result_type theta) : theta_(theta) {}
+      explicit param_type(result_type theta) : theta_(theta) {}
 
       friend class maxwell_dist;
 
@@ -101,7 +101,7 @@ namespace trng {
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    maxwell_dist(result_type theta) : p(theta) {}
+    explicit maxwell_dist(result_type theta) : p(theta) {}
     TRNG_CUDA_ENABLE
     explicit maxwell_dist(const param_type &p) : p(p) {}
     // reset internal state
@@ -156,9 +156,9 @@ namespace trng {
         return math::numeric_limits<result_type>::infinity();
       if (x == 0)
         return 0;
-      result_type y(2 * p.theta() * math::constants<result_type>::sqrt_2_over_pi()), y_old;
+      result_type y(2 * p.theta() * math::constants<result_type>::sqrt_2_over_pi());
       for (int i = 0; i < math::numeric_limits<result_type>::digits + 2; ++i) {
-        y_old = y;
+        result_type y_old = y;
         y -= (cdf(y) - x) / pdf(y);
         if (math::abs(y / y_old - 1) < 4 * math::numeric_limits<result_type>::epsilon())
           break;

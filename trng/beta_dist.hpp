@@ -147,7 +147,9 @@ namespace trng {
     TRNG_CUDA_ENABLE
     void param(const param_type &p_new) { p = p_new; }
     TRNG_CUDA_ENABLE
-    result_type alpha() const { return p.thata(); }
+    result_type alpha() const { return p.alpha(); }
+    TRNG_CUDA_ENABLE
+    result_type beta() const { return p.beta(); }
     // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {

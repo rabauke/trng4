@@ -154,10 +154,10 @@ namespace trng {
     static const parameter_type LEcuyer1;
 
     // Random number engine concept
-    explicit mrg5(parameter_type = LEcuyer1);
-    explicit mrg5(unsigned long, parameter_type = LEcuyer1);
+    explicit mrg5(const parameter_type &P = LEcuyer1);
+    explicit mrg5(unsigned long, const parameter_type &P = LEcuyer1);
     template<typename gen>
-    explicit mrg5(gen &g, parameter_type P = LEcuyer1) : P(P), S() {
+    explicit mrg5(gen &g, const parameter_type &P = LEcuyer1) : P(P), S() {
       seed(g);
     }
 

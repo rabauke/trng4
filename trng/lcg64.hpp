@@ -270,7 +270,7 @@ namespace trng {
     while (x > 0) {
       x >>= 1;
       ++y;
-    };
+    }
     --y;
     return y;
   }

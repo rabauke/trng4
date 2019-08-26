@@ -61,9 +61,9 @@ namespace trng {
   const yarn5::parameter_type yarn5::LEcuyer1 = parameter_type(107374182, 0, 0, 0, 104480);
 
   // Random number engine concept
-  yarn5::yarn5(yarn5::parameter_type P) : P(P), S() {}
+  yarn5::yarn5(const parameter_type &P) : P(P), S() {}
 
-  yarn5::yarn5(unsigned long s, yarn5::parameter_type P) : P(P), S() { seed(s); }
+  yarn5::yarn5(unsigned long s, const parameter_type &P) : P(P), S() { seed(s); }
 
   void yarn5::seed() { (*this) = yarn5(); }
 

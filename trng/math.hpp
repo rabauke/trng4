@@ -143,6 +143,7 @@ namespace trng {
 #endif
 
     using ::std::exp2;
+    using ::std::expm1;
 
     using ::std::frexp;
     using ::std::ldexp;
@@ -154,7 +155,7 @@ namespace trng {
       while (x > 0) {
         x >>= 1;
         ++y;
-      };
+      }
       --y;
       return y;
     }

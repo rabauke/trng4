@@ -73,7 +73,7 @@ namespace trng {
       static T infinity() noexcept { return ::std::numeric_limits<T>::infinity(); }
       static T quiet_NaN() noexcept { return ::std::numeric_limits<T>::quiet_NaN(); }
       static T signaling_NaN() noexcept { return ::std::numeric_limits<T>::signaling_NaN(); }
-      static T denorm_min() noexcept { return ::std::numeric_limits<T>::nenom_min(); }
+      static T denorm_min() noexcept { return ::std::numeric_limits<T>::denorm_min(); }
       static const bool is_iec559 = ::std::numeric_limits<T>::is_iec559;
       static const bool is_bounded = ::std::numeric_limits<T>::is_bounded;
       static const bool is_modulo = ::std::numeric_limits<T>::is_modulo;

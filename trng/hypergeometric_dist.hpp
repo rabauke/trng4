@@ -55,10 +55,10 @@ namespace trng {
 
     class param_type {
     private:
-      int n_,            // total number of balls in urn
-          m_,            // number of "white" balls in urn
-          d_,            // number of selected balls
-          x_min, x_max;  // minimum and maximum values of random raviable
+      int n_{0},               // total number of balls in urn
+          m_{0},               // number of "white" balls in urn
+          d_{0},               // number of selected balls
+          x_min{0}, x_max{0};  // minimum and maximum values of random variable
       std::vector<double> P_;
 
       void calc_probabilities() {
@@ -92,8 +92,8 @@ namespace trng {
         d_ = d_new;
         calc_probabilities();
       }
-      param_type() : n_(0), m_(0), d_(0) {}
-      param_type(int n, int m, int d) : n_(n), m_(m), d_(d) { calc_probabilities(); }
+      param_type() = default;
+      explicit param_type(int n, int m, int d) : n_(n), m_(m), d_(d) { calc_probabilities(); }
       friend class hypergeometric_dist;
     };
 

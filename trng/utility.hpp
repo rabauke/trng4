@@ -84,7 +84,7 @@ namespace trng {
       const char *str;
 
     public:
-      delim_str(const char *str_) : str(str_) {}
+      explicit delim_str(const char *str_) : str(str_) {}
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &operator>>(
           std::basic_istream<char_t, traits_t> &in, const delim_str &d) {
@@ -103,7 +103,7 @@ namespace trng {
       const char c;
 
     public:
-      delim_c(char c_) : c(c_) {}
+      explicit delim_c(char c_) : c(c_) {}
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &operator>>(
           std::basic_istream<char_t, traits_t> &in, const delim_c &d) {
