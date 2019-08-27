@@ -40,7 +40,7 @@ int main() {
   const long samples = 1000000l;  // total number of points in square
   long in = 0l;                   // number of points in circle
   // distribute workload over all processes and make a global reduction
-#pragma omp parallel reduction(+ : in)
+#pragma omp parallel reduction(+ : in) default(none)
   {
     trng::yarn2 r;                        // random number engine
     int size = omp_get_num_threads();     // get total number of processes

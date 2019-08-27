@@ -85,7 +85,7 @@ namespace trng {
 
     class parameter_type {
     public:
-      parameter_type(){};
+      parameter_type() = default;
 
       friend class mt19937;
 
@@ -119,16 +119,12 @@ namespace trng {
     };
 
     class status_type {
-      static const int N = 624;
-      int mti;
-      result_type mt[N];
+      static const int N{624};
+      int mti{0};
+      result_type mt[N]{};
 
     public:
-      status_type() : mti(0) {
-        for (int i = 0; i < N; ++i)
-          mt[i] = 0;
-      }
-
+      status_type() = default;
       friend class mt19937;
 
       // Equality comparable concept

@@ -52,8 +52,8 @@ int main() {
   std::vector<long> v(10);
 
   std::cout << "random number generation by call operator\n";
-  for (std::vector<long>::size_type i = 0; i < v.size(); ++i)
-    v[i] = U(R);
+  for (auto &val : v)
+    val = U(R);
   print_range(v.begin(), v.end());
   std::vector<long> w(12);
   std::cout << "random number generation by std::generate\n";

@@ -150,7 +150,7 @@ namespace trng {
       const char *delim_str;
 
     public:
-      io_range(const T first, const T last, const char *delim_str = 0)
+      io_range(const T first, const T last, const char *delim_str = nullptr)
           : first(first), last(last), delim_str(delim_str) {}
 
       template<typename S, typename char_t, typename traits_t>
@@ -189,7 +189,7 @@ namespace trng {
     }
 
     template<typename T>
-    inline io_range<T> make_io_range(T first, T last, const char *delim_str = 0) {
+    inline io_range<T> make_io_range(T first, T last, const char *delim_str = nullptr) {
       return io_range<T>(first, last, delim_str);
     }
 

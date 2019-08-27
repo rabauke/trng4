@@ -188,6 +188,14 @@ namespace trng {
     using ::std::log10;
     using ::std::log2;
 
+    TRNG_CUDA_ENABLE
+    inline float ln1p(float x) { return ::std::log1p(x); }
+
+    TRNG_CUDA_ENABLE
+    inline double ln1p(double x) { return ::std::log1p(x); }
+
+    inline long double ln1p(long double x) { return ::std::log1p(x); }
+
     using ::std::pow;
     using ::std::sqrt;
     inline float sqrt(float r, float x) { return ::std::pow(x, 1.0f / r); }

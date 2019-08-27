@@ -56,8 +56,8 @@ public:
   // join threds and counters
   void join(const parallel_pi &other) { in += other.in; }
   long in_circle() const { return in; }
-  parallel_pi(const trng::yarn2 &r) : r(r), in(0) {}
-  parallel_pi(const parallel_pi &other, tbb::split) : r(other.r), in(0) {}
+  explicit parallel_pi(const trng::yarn2 &r) : r(r), in(0) {}
+  explicit parallel_pi(const parallel_pi &other, tbb::split) : r(other.r), in(0) {}
 };
 
 int main() {

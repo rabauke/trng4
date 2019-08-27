@@ -65,10 +65,10 @@ namespace trng {
       typedef std::vector<double>::size_type size_type;
       std::vector<double> P, F;
       std::vector<int> L;
-      size_type N;
+      size_type N{0};
 
     public:
-      param_type() : P(), F(), L(), N(0) {}
+      param_type() = default;
       template<typename iter>
       param_type(iter first, iter last)
           : P(first, last), F(P.size()), L(P.size()), N(P.size()) {
@@ -147,12 +147,12 @@ namespace trng {
     param_type param() const { return P; }
     void param(const param_type &P_new) { P = P_new; }
     // probability density function
-    double pdf(int x) const { return (x < 0 or x >= static_cast<int>(P.N)) ? 0.0 : P.P[x]; }
+    double pdf(int x) const { return (x < 0 or x >= P.N) ? 0.0 : P.P[x]; }
     // cumulative density function
     double cdf(int x) const {
       if (x < 0)
         return 0.0;
-      if (x < static_cast<int>(P.N))
+      if (x < P.N)
         return std::accumulate(P.P.begin(), P.P.begin() + x + 1, 0.0);
       return 1.0;
     }

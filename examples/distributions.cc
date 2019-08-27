@@ -257,6 +257,10 @@ int main() {
     continous_test(d, "tent distribution");
   }
   {
+    trng::weibull_dist<> d(3.0, 2.0);
+    continous_test(d, "Weibull distribution");
+  }
+  {
     trng::extreme_value_dist<> d(5.0, 2.0);
     continous_test(d, "extreme-value distribution");
   }

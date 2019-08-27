@@ -170,7 +170,7 @@ namespace trng {
     t = (t & 0x7fffffffu) + (t >> 31);
     if (t >= 2147483647u)
       t -= 2147483647u;
-    S.r = static_cast<long>(t);
+    S.r = static_cast<result_type>(t);
   }
 
   inline minstd::result_type minstd::operator()() {

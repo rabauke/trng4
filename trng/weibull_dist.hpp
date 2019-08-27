@@ -146,8 +146,9 @@ namespace trng {
         return 0;
       x /= p.theta();
       if (x > 0) {
-        result_type t(math::pow(x, p.beta()));
-        return p.beta() * t / x * math::exp(-t);
+        const result_type t1(math::pow(x, p.beta()));
+        const result_type t2(t1 / x);
+        return p.beta() / p.theta() * t2 * math::exp(-t1);
       }
       // x==0
       if (p.beta() == 1)
@@ -162,7 +163,7 @@ namespace trng {
       x /= p.theta();
       if (x <= 0)
         return 0;
-      return 1 - math::exp(-math::pow(x, p.beta()));
+      return -math::expm1(-math::pow(x, p.beta()));
     }
     // inverse cumulative density function
     TRNG_CUDA_ENABLE
@@ -173,7 +174,7 @@ namespace trng {
 #endif
         return math::numeric_limits<result_type>::quiet_NaN();
       }
-      return p.theta() * math::pow(-math::ln(1 - x), 1 / p.beta());
+      return p.theta() * math::pow(-math::ln1p(-x), 1 / p.beta());
     }
   };
 

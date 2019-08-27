@@ -330,13 +330,12 @@ void wolff_main(RNG_type &R, long runs, long split, long L) {
 
   // const double
   const int simulations = 10;
-  double T, E, E2, q, c;
   std::vector<double> Ea(simulations + 2);
   std::vector<double> ca(simulations + 2);
 
   std::cout.setf(std::ios::fixed);
   std::cout.setf(std::ios::showpoint);
-  T = 2.0 / std::log(1.0 + std::sqrt(2.0));
+  double T = 2.0 / std::log1p(std::sqrt(2.0));
   lattice s(L);
   s.fill(-1);
   std::cout << "Generator : " << R.name() << '\n'
@@ -350,17 +349,17 @@ void wolff_main(RNG_type &R, long runs, long split, long L) {
     wolffstep(R, s, T);
   timer t;
   for (int j = 0; j < simulations; ++j) {
-    E = 0.0;
-    E2 = 0.0;
+    double E = 0.0;
+    double E2 = 0.0;
     for (int i = 0; i < runs; ++i) {
       wolffstep(R, s, T);
-      q = s.energy();
+      double q = s.energy();
       E += q;
       E2 += q * q;
     }
     E /= runs;
     E2 /= runs;
-    c = (L * L) / (T * T) * (E2 - E * E);
+    double c = (L * L) / (T * T) * (E2 - E * E);
     Ea[j] = E;
     ca[j] = c;
   }
@@ -374,7 +373,7 @@ int main(int argc, char *argv[]) {
   int argi = 1;
   if (argc == 1) {
     std::cerr << "Tina's Random Number Generator Library\n\n"
-              << "(P) & (C) by Heiko Bauke, Magdeburg 2001-2006\n\n"
+              << "(P) & (C) by Heiko Bauke, Magdeburg 2001-2019\n\n"
               << "two-domensional Ising model (Wolff algorithm)\n"
               << "---------------------------------------------\n\n"
               << "synopsis:\n"

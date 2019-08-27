@@ -66,7 +66,6 @@ namespace trng {
                          math::ln_Gamma(r_)) *
                math::pow(p_, r_) * math::pow(1 - p_, x);
           P_.push_back(p);
-          std::cerr << x << '\t' << p << '\n';
           ++x;
         }
         P_.push_back(1);

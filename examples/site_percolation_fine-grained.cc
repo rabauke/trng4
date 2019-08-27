@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
   int coords[2];                     // coordinates of current process within the grid
   bool periods[2] = {false, false};  // no periodic boundary conditions
   // calculate a balanced grid partitioning such that  size = dims[0]*dims[1]
-  MPI::Compute_dims(MPI::COMM_WORLD.Get_size(), 2, dims);
+  MPI::Compute_dims(size, 2, dims);
   MPI::Cartcomm Comm = MPI::COMM_WORLD.Create_cart(2, dims, periods, true);
   int rank = Comm.Get_rank();        // get rank of current process
   Comm.Get_coords(rank, 2, coords);  // get coordinates of current process
