@@ -13,3 +13,8 @@ ENDIF ()
 
 add_subdirectory(trng)
 add_subdirectory(examples)
+
+
+SET(CPACK_GENERATOR "DEB")
+SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Heiko Bauke")
+INCLUDE(CPack)
