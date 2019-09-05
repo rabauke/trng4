@@ -73,24 +73,24 @@ BOOST_AUTO_TEST_SUITE(test_suite_engines)
 
 BOOST_AUTO_TEST_SUITE(test_suite_advance)
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_advance, R, engines) {
-  // two generators with equal state
+  // two engines with equal state
   R r1, r2;
-  advance_engine(r1, 271828l);  // advance generator ra
+  advance_engine(r1, 271828l);  // advance engine r1
   BOOST_TEST(r1 != r2, "engines have different state");
 }
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(test_suite_restore)
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_restore, R, engines) {
-  // three generators with equal state
+  // three engines with equal state
   R r1, r2, r3;
-  advance_engine(r1, r2, 271828l);  // advance generators ra and rb
-  r3 = r1;                          // backup ra in rc
+  advance_engine(r1, r2, 271828l);  // advance engines ra and rb
+  r3 = r1;                          // backup r1 in r3
   // advance ra such that ra and rb have different states
   advance_engine(r1, 314159l);
   r1 = r3;  // restore ra
   BOOST_TEST(r1 == r2, "engine state restored successfully");
-  // when state has been restored correctly, ra and rb must yield the same values
+  // when state has been restored correctly, r1 and r2 must yield the same values
   auto v = generate_list(r1, r2, 32);
   BOOST_TEST(std::get<0>(v) == std::get<1>(v), "engines yield same values after restore");
 }
@@ -98,14 +98,14 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(test_suite_status_io)
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_status_io, R, engines) {
-  // two generators with equal state
+  // two engines with equal state
   R r1, r2;
-  advance_engine(r1, 271828l);  // advance generator ra
+  advance_engine(r1, 271828l);  // advance engine r1
   std::stringstream str;
   str << r1 << '\n';
   str >> r2;
   BOOST_TEST(r1 == r2, "engine state restored from stream successfully");
-  // when state has been restored correctly, ra and rb must yield the same values
+  // when state has been restored correctly, r1 and r2 must yield the same values
   auto v = generate_list(r1, r2, 32);
   BOOST_TEST(std::get<0>(v) == std::get<1>(v),
              "engines yield same values after restore from stream");
