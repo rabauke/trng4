@@ -10,14 +10,12 @@ link_libraries(trng4)
 link_directories(${PROJECT_BINARY_DIR}/trng)
 
 add_executable(hello_world hello_world.cc)
-
 add_executable(sample_output sample_output.cc)
 add_executable(time time.cc)
 if (Boost_FOUND)
     target_compile_definitions(time PUBLIC TRNG_HAVE_BOOST)
 endif ()
 add_executable(pi pi.cc)
-
 if (MPI_FOUND)
     add_executable(pi_block_mpi pi_block_mpi.cc)
     target_link_libraries(pi_block_mpi PUBLIC MPI::MPI_CXX)
