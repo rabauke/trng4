@@ -131,7 +131,7 @@ namespace trng {
         return 0;
       if (x >= p.b())
         return 1.0;
-      return (x - p.a() + 1) / p.d();
+      return static_cast<double>(x - p.a() + 1) / static_cast<double>(p.d());
     }
   };
 
