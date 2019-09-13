@@ -165,7 +165,7 @@ namespace trng {
     void seed();
     template<typename gen>
     void seed(gen &g) {
-      result_type r = g();
+      const unsigned long r{g()};
       seed(r);
     }
     void seed(unsigned long);

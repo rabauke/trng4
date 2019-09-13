@@ -288,7 +288,7 @@ namespace trng {
     b[23] = 1;
     b[24] = 0;
     for (unsigned int i(0); i < s; ++i)
-      if ((i & 1) == 0)
+      if ((i & 1u) == 0)
         int_math::matrix_mult<5>(b, b, c, modulus);
       else
         int_math::matrix_mult<5>(c, c, b, modulus);
@@ -297,7 +297,7 @@ namespace trng {
     r[2] = S.r[2];
     r[3] = S.r[3];
     r[4] = S.r[4];
-    if ((s & 1) == 0)
+    if ((s & 1u) == 0)
       int_math::matrix_vec_mult<5>(b, r, d, modulus);
     else
       int_math::matrix_vec_mult<5>(c, r, d, modulus);
