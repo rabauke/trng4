@@ -50,12 +50,11 @@ namespace trng {
   template<typename float_t = double>
   class exponential_dist {
   public:
-    typedef float_t result_type;
-    class param_type;
+    using result_type = float_t;
 
     class param_type {
     private:
-      result_type mu_;
+      result_type mu_{1};
 
     public:
       TRNG_CUDA_ENABLE
@@ -63,7 +62,7 @@ namespace trng {
       TRNG_CUDA_ENABLE
       void mu(result_type mu_new) { mu_ = mu_new; }
       TRNG_CUDA_ENABLE
-      param_type() : mu_(1) {}
+      param_type() = default;
       TRNG_CUDA_ENABLE
       explicit param_type(result_type mu) : mu_(mu) {}
 
@@ -72,10 +71,10 @@ namespace trng {
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
-          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
+          std::basic_ostream<char_t, traits_t> &out, const param_type &P) {
         std::ios_base::fmtflags flags(out.flags());
         out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-        out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1) << p.mu()
+        out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1) << P.mu()
             << ')';
         out.flags(flags);
         return out;
@@ -83,38 +82,38 @@ namespace trng {
 
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &operator>>(
-          std::basic_istream<char_t, traits_t> &in, param_type &p) {
+          std::basic_istream<char_t, traits_t> &in, param_type &P) {
         float_t mu;
         std::ios_base::fmtflags flags(in.flags());
         in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         in >> utility::delim('(') >> mu >> utility::delim(')');
         if (in)
-          p = param_type(mu);
+          P = param_type(mu);
         in.flags(flags);
         return in;
       }
     };
 
   private:
-    param_type p;
+    param_type P;
 
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    explicit exponential_dist(result_type mu) : p(mu) {}
+    explicit exponential_dist(result_type mu) : P{mu} {}
     TRNG_CUDA_ENABLE
-    explicit exponential_dist(const param_type &p) : p(p) {}
+    explicit exponential_dist(const param_type &P) : P{P} {}
     // reset internal state
     TRNG_CUDA_ENABLE
     void reset() {}
     // random numbers
     template<typename R>
     TRNG_CUDA_ENABLE result_type operator()(R &r) {
-      return -p.mu() * math::ln(utility::uniformoc<result_type>(r));
+      return -P.mu() * math::ln(utility::uniformoc<result_type>(r));
     }
     template<typename R>
-    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
-      exponential_dist g(p);
+    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &P) {
+      exponential_dist g(P);
       return g(r);
     }
     // property methods
@@ -123,19 +122,19 @@ namespace trng {
     TRNG_CUDA_ENABLE
     result_type max() const { return math::numeric_limits<result_type>::infinity(); }
     TRNG_CUDA_ENABLE
-    param_type param() const { return p; }
+    param_type param() const { return P; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { p = p_new; }
+    void param(const param_type &P_new) { P = P_new; }
     TRNG_CUDA_ENABLE
-    result_type mu() const { return p.mu(); }
+    result_type mu() const { return P.mu(); }
     TRNG_CUDA_ENABLE
-    void mu(result_type mu_new) { p.mu(mu_new); }
+    void mu(result_type mu_new) { P.mu(mu_new); }
     // probability density function
     TRNG_CUDA_ENABLE
-    result_type pdf(result_type x) const { return x < 0 ? 0 : math::exp(-x / p.mu()) / p.mu(); }
+    result_type pdf(result_type x) const { return x < 0 ? 0 : math::exp(-x / P.mu()) / P.mu(); }
     // cumulative density function
     TRNG_CUDA_ENABLE
-    result_type cdf(result_type x) const { return x <= 0 ? 0 : 1 - math::exp(-x / p.mu()); }
+    result_type cdf(result_type x) const { return x <= 0 ? 0 : 1 - math::exp(-x / P.mu()); }
     // inverse cumulative density function
     TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const {
@@ -147,7 +146,7 @@ namespace trng {
       }
       if (x == 1)
         return math::numeric_limits<result_type>::infinity();
-      return -p.mu() * math::ln(1 - x);
+      return -P.mu() * math::ln(1 - x);
     }
   };
 
@@ -156,16 +155,16 @@ namespace trng {
   // EqualityComparable concept
   template<typename float_t>
   TRNG_CUDA_ENABLE inline bool operator==(
-      const typename exponential_dist<float_t>::param_type &p1,
-      const typename exponential_dist<float_t>::param_type &p2) {
-    return p1.mu() == p2.mu();
+      const typename exponential_dist<float_t>::param_type &P1,
+      const typename exponential_dist<float_t>::param_type &P2) {
+    return P1.mu() == P2.mu();
   }
 
   template<typename float_t>
   TRNG_CUDA_ENABLE inline bool operator!=(
-      const typename exponential_dist<float_t>::param_type &p1,
-      const typename exponential_dist<float_t>::param_type &p2) {
-    return not(p1 == p2);
+      const typename exponential_dist<float_t>::param_type &P1,
+      const typename exponential_dist<float_t>::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // -------------------------------------------------------------------
@@ -197,13 +196,13 @@ namespace trng {
   template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    exponential_dist<float_t> &g) {
-    typename exponential_dist<float_t>::param_type p;
+    typename exponential_dist<float_t>::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[exponential ") >> p >>
+    in >> utility::ignore_spaces() >> utility::delim("[exponential ") >> P >>
         utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

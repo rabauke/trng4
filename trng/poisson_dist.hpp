@@ -49,12 +49,11 @@ namespace trng {
   // non-uniform random number generator class
   class poisson_dist {
   public:
-    typedef int result_type;
-    class param_type;
+    using result_type = int;
 
     class param_type {
     private:
-      double mu_;
+      double mu_{0};
       std::vector<double> P_;
 
       void calc_probabilities() {
@@ -73,8 +72,8 @@ namespace trng {
         mu_ = mu_new;
         calc_probabilities();
       }
-      param_type() : mu_(0) {}
-      explicit param_type(double mu) : mu_(mu) { calc_probabilities(); }
+      param_type() = default;
+      explicit param_type(double mu) : mu_{mu} { calc_probabilities(); }
       friend class poisson_dist;
     };
 
@@ -83,8 +82,8 @@ namespace trng {
 
   public:
     // constructor
-    explicit poisson_dist(double mu) : P(mu) {}
-    explicit poisson_dist(const param_type &P) : P(P) {}
+    explicit poisson_dist(double mu) : P{mu} {}
+    explicit poisson_dist(const param_type &P) : P{P} {}
     // reset internal state
     void reset() {}
     // random numbers
@@ -124,13 +123,11 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const poisson_dist::param_type &p1,
-                         const poisson_dist::param_type &p2) {
-    return p1.mu() == p2.mu();
+  bool operator==(const poisson_dist::param_type &P1, const poisson_dist::param_type &P2) {
+    return P1.mu() == P2.mu();
   }
-  inline bool operator!=(const poisson_dist::param_type &p1,
-                         const poisson_dist::param_type &p2) {
-    return !(p1 == p2);
+  bool operator!=(const poisson_dist::param_type &P1, const poisson_dist::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // Streamable concept
@@ -160,10 +157,10 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const poisson_dist &g1, const poisson_dist &g2) {
+  bool operator==(const poisson_dist &g1, const poisson_dist &g2) {
     return g1.param() == g2.param();
   }
-  inline bool operator!=(const poisson_dist &g1, const poisson_dist &g2) {
+  bool operator!=(const poisson_dist &g1, const poisson_dist &g2) {
     return g1.param() != g2.param();
   }
 
@@ -181,12 +178,12 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    poisson_dist &g) {
-    poisson_dist::param_type p;
+    poisson_dist::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[poisson ") >> p >> utility::delim(']');
+    in >> utility::ignore_spaces() >> utility::delim("[poisson ") >> P >> utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

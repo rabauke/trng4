@@ -35,6 +35,8 @@ set(HEADER_FILES
         mrg4.hpp
         mrg5.hpp
         mrg5s.hpp
+        mrg_parameter.hpp
+        mrg_status.hpp
         mt19937_64.hpp
         mt19937.hpp
         negative_binomial_dist.hpp

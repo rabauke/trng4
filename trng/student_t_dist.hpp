@@ -51,12 +51,11 @@ namespace trng {
   template<typename float_t = double>
   class student_t_dist {
   public:
-    typedef float_t result_type;
-    class param_type;
+    using result_type = float_t;
 
     class param_type {
     private:
-      int nu_;
+      int nu_{1};
 
     public:
       TRNG_CUDA_ENABLE
@@ -64,7 +63,7 @@ namespace trng {
       TRNG_CUDA_ENABLE
       void nu(int nu_new) { nu_ = nu_new; }
       TRNG_CUDA_ENABLE
-      param_type() : nu_(1) {}
+      param_type() = default;
       TRNG_CUDA_ENABLE
       explicit param_type(int nu) : nu_(nu) {}
 
@@ -73,44 +72,45 @@ namespace trng {
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
-          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
+          std::basic_ostream<char_t, traits_t> &out, const param_type &P) {
         std::ios_base::fmtflags flags(out.flags());
         out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-        out << '(' << p.nu() << ')';
+        out << '(' << P.nu() << ')';
         out.flags(flags);
         return out;
       }
 
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &operator>>(
-          std::basic_istream<char_t, traits_t> &in, param_type &p) {
+          std::basic_istream<char_t, traits_t> &in, param_type &P) {
         int nu;
         std::ios_base::fmtflags flags(in.flags());
         in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         in >> utility::delim('(') >> nu >> utility::delim(')');
         if (in)
-          p = param_type(nu);
+          P = param_type(nu);
         in.flags(flags);
         return in;
       }
     };
 
   private:
-    param_type p;
+    param_type P;
 
     // inverse cumulative density function
     TRNG_CUDA_ENABLE
     result_type icdf_(result_type x) const {
-      result_type t = math::inv_Beta_I(x, p.nu() / result_type(2), p.nu() / result_type(2));
-      return math::sqrt(p.nu() / (t * (1 - t))) * (t - result_type(1) / result_type(2));
+      const result_type t{
+          math::inv_Beta_I(x, P.nu() / result_type(2), P.nu() / result_type(2))};
+      return math::sqrt(P.nu() / (t * (1 - t))) * (t - result_type(1) / result_type(2));
     }
 
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    explicit student_t_dist(int nu) : p(nu) {}
+    explicit student_t_dist(int nu) : P{nu} {}
     TRNG_CUDA_ENABLE
-    explicit student_t_dist(const param_type &p) : p(p) {}
+    explicit student_t_dist(const param_type &P) : P{P} {}
     // reset internal state
     TRNG_CUDA_ENABLE
     void reset() {}
@@ -120,8 +120,8 @@ namespace trng {
       return icdf_(utility::uniformoo<result_type>(r));
     }
     template<typename R>
-    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
-      student_t_dist g(p);
+    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &P) {
+      student_t_dist g(P);
       return g(r);
     }
     // property methods
@@ -130,27 +130,27 @@ namespace trng {
     TRNG_CUDA_ENABLE
     result_type max() const { return math::numeric_limits<result_type>::infinity(); }
     TRNG_CUDA_ENABLE
-    param_type param() const { return p; }
+    param_type param() const { return P; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { p = p_new; }
+    void param(const param_type &p_new) { P = p_new; }
     TRNG_CUDA_ENABLE
-    int nu() const { return p.nu(); }
+    int nu() const { return P.nu(); }
     TRNG_CUDA_ENABLE
-    void nu(int nu_new) { p.nu(nu_new); }
+    void nu(int nu_new) { P.nu(nu_new); }
     // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
-      result_type norm = math::exp(math::ln_Gamma((p.nu() + 1) / result_type(2)) -
-                                   math::ln_Gamma(p.nu() / result_type(2))) /
-                         math::sqrt(math::constants<result_type>::pi() * p.nu());
-      return norm * math::pow(1 + x * x / p.nu(), (p.nu() + 1) / result_type(-2));
+      const result_type norm{math::exp(math::ln_Gamma((P.nu() + 1) / result_type(2)) -
+                                       math::ln_Gamma(P.nu() / result_type(2))) /
+                             math::sqrt(math::constants<result_type>::pi() * P.nu())};
+      return norm * math::pow(1 + x * x / P.nu(), (P.nu() + 1) / result_type(-2));
     }
     // cumulative density function
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
-      result_type t1 = +math::sqrt(x * x + p.nu());
-      result_type t2 = (x + t1) / (2 * t1);
-      return math::Beta_I(t2, p.nu() / result_type(2), p.nu() / result_type(2));
+      const result_type t1{+math::sqrt(x * x + P.nu())};
+      const result_type t2{(x + t1) / (2 * t1)};
+      return math::Beta_I(t2, P.nu() / result_type(2), P.nu() / result_type(2));
     }
     // inverse cumulative density function
     TRNG_CUDA_ENABLE
@@ -174,16 +174,16 @@ namespace trng {
   // EqualityComparable concept
   template<typename float_t>
   TRNG_CUDA_ENABLE inline bool operator==(
-      const typename student_t_dist<float_t>::param_type &p1,
-      const typename student_t_dist<float_t>::param_type &p2) {
-    return p1.nu() == p2.nu();
+      const typename student_t_dist<float_t>::param_type &P1,
+      const typename student_t_dist<float_t>::param_type &P2) {
+    return P1.nu() == P2.nu();
   }
 
   template<typename float_t>
   TRNG_CUDA_ENABLE inline bool operator!=(
-      const typename student_t_dist<float_t>::param_type &p1,
-      const typename student_t_dist<float_t>::param_type &p2) {
-    return not(p1 == p2);
+      const typename student_t_dist<float_t>::param_type &P1,
+      const typename student_t_dist<float_t>::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // -------------------------------------------------------------------
@@ -215,12 +215,12 @@ namespace trng {
   template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    student_t_dist<float_t> &g) {
-    typename student_t_dist<float_t>::param_type p;
+    typename student_t_dist<float_t>::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[student_t ") >> p >> utility::delim(']');
+    in >> utility::ignore_spaces() >> utility::delim("[student_t ") >> P >> utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

@@ -51,12 +51,12 @@ namespace trng {
   template<typename float_t = double>
   class truncated_normal_dist {
   public:
-    typedef float_t result_type;
-    class param_type;
+    using result_type = float_t;
 
     class param_type {
     private:
-      result_type mu_, sigma_, a_, b_, Phi_a, Phi_b;
+      result_type mu_{0}, sigma_{1}, a_{-math::numeric_limits<result_type>::infinity()},
+          b_{math::numeric_limits<result_type>::infinity()}, Phi_a{0}, Phi_b{1};
 
       TRNG_CUDA_ENABLE
       void update_Phi() {
@@ -100,16 +100,10 @@ namespace trng {
         update_Phi();
       }
       TRNG_CUDA_ENABLE
-      param_type()
-          : mu_(0),
-            sigma_(1),
-            a_(-math::numeric_limits<result_type>::infinity()),
-            b_(math::numeric_limits<result_type>::infinity()) {
-        update_Phi();
-      }
+      param_type() { update_Phi(); }
       TRNG_CUDA_ENABLE
-      param_type(result_type mu, result_type sigma, result_type a, result_type b)
-          : mu_(mu), sigma_(sigma), a_(a), b_(b) {
+      explicit param_type(result_type mu, result_type sigma, result_type a, result_type b)
+          : mu_{mu}, sigma_{sigma}, a_{a}, b_{b} {
         update_Phi();
       }
 
@@ -118,40 +112,41 @@ namespace trng {
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
-          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
+          std::basic_ostream<char_t, traits_t> &out, const param_type &P) {
         std::ios_base::fmtflags flags(out.flags());
         out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-        out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1) << p.mu()
-            << ' ' << p.sigma() << ' ' << p.a() << ' ' << p.b() << ')';
+        out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1) << P.mu()
+            << ' ' << P.sigma() << ' ' << P.a() << ' ' << P.b() << ')';
         out.flags(flags);
         return out;
       }
 
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &operator>>(
-          std::basic_istream<char_t, traits_t> &in, param_type &p) {
+          std::basic_istream<char_t, traits_t> &in, param_type &P) {
         float_t mu, sigma, a, b;
         std::ios_base::fmtflags flags(in.flags());
         in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         in >> utility::delim('(') >> mu >> utility::delim(' ') >> sigma >>
             utility::delim(' ') >> a >> utility::delim(' ') >> b >> utility::delim(')');
         if (in)
-          p = param_type(mu, sigma, a, b);
+          P = param_type(mu, sigma, a, b);
         in.flags(flags);
         return in;
       }
     };
 
   private:
-    param_type p;
+    param_type P;
 
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    truncated_normal_dist(result_type mu, result_type sigma, result_type a, result_type b)
-        : p(mu, sigma, a, b) {}
+    explicit truncated_normal_dist(result_type mu, result_type sigma, result_type a,
+                                   result_type b)
+        : P{mu, sigma, a, b} {}
     TRNG_CUDA_ENABLE
-    explicit truncated_normal_dist(const param_type &p) : p(p) {}
+    explicit truncated_normal_dist(const param_type &P) : P{P} {}
     // reset internal state
     TRNG_CUDA_ENABLE
     void reset() {}
@@ -161,56 +156,56 @@ namespace trng {
       return icdf(utility::uniformoo<result_type>(r));
     }
     template<typename R>
-    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
-      truncated_normal_dist g(p);
+    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &P) {
+      truncated_normal_dist g(P);
       return g(r);
     }
     // property methods
     TRNG_CUDA_ENABLE
-    result_type min() const { return p.a(); }
+    result_type min() const { return P.a(); }
     TRNG_CUDA_ENABLE
-    result_type max() const { return p.b(); }
+    result_type max() const { return P.b(); }
     TRNG_CUDA_ENABLE
-    param_type param() const { return p; }
+    param_type param() const { return P; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { p = p_new; }
+    void param(const param_type &p_new) { P = p_new; }
     TRNG_CUDA_ENABLE
-    result_type mu() const { return p.mu(); }
+    result_type mu() const { return P.mu(); }
     TRNG_CUDA_ENABLE
-    void mu(result_type mu_new) { p.mu(mu_new); }
+    void mu(result_type mu_new) { P.mu(mu_new); }
     TRNG_CUDA_ENABLE
-    result_type sigma() const { return p.sigma(); }
+    result_type sigma() const { return P.sigma(); }
     TRNG_CUDA_ENABLE
-    void sigma(result_type sigma_new) { p.sigma(sigma_new); }
+    void sigma(result_type sigma_new) { P.sigma(sigma_new); }
     TRNG_CUDA_ENABLE
-    result_type a() const { return p.a(); }
+    result_type a() const { return P.a(); }
     TRNG_CUDA_ENABLE
-    void a(result_type a_new) { p.a(a_new); }
+    void a(result_type a_new) { P.a(a_new); }
     TRNG_CUDA_ENABLE
-    result_type b() const { return p.b(); }
+    result_type b() const { return P.b(); }
     TRNG_CUDA_ENABLE
-    void b(result_type b_new) { p.b(b_new); }
+    void b(result_type b_new) { P.b(b_new); }
     // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
-      x -= p.mu();
-      x /= p.sigma();
-      return math::constants<result_type>::one_over_sqrt_2pi() / p.sigma() *
-             math::exp(-0.5 * x * x) / (p.Phi_b - p.Phi_a);
+      x -= P.mu();
+      x /= P.sigma();
+      return math::constants<result_type>::one_over_sqrt_2pi() / P.sigma() *
+             math::exp(-0.5 * x * x) / (P.Phi_b - P.Phi_a);
     }
     // cumulative density function
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
-      x -= p.mu();
-      x /= p.sigma();
-      return (math::Phi(x) - p.Phi_a) / (p.Phi_b - p.Phi_a);
+      x -= P.mu();
+      x /= P.sigma();
+      return (math::Phi(x) - P.Phi_a) / (P.Phi_b - P.Phi_a);
     }
     // inverse cumulative density function
     TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const {
-      x *= p.Phi_b - p.Phi_a;
-      x += p.Phi_a;
-      return math::inv_Phi(x) * p.sigma() + p.mu();
+      x *= P.Phi_b - P.Phi_a;
+      x += P.Phi_a;
+      return math::inv_Phi(x) * P.sigma() + P.mu();
     }
   };
 
@@ -219,16 +214,17 @@ namespace trng {
   // EqualityComparable concept
   template<typename float_t>
   TRNG_CUDA_ENABLE inline bool operator==(
-      const typename truncated_normal_dist<float_t>::param_type &p1,
-      const typename truncated_normal_dist<float_t>::param_type &p2) {
-    return p1.mu() == p2.mu() and p1.sigma() == p2.sigma();
+      const typename truncated_normal_dist<float_t>::param_type &P1,
+      const typename truncated_normal_dist<float_t>::param_type &P2) {
+    return P1.mu() == P2.mu() and P1.sigma() == P2.sigma() and P1.a() == P2.a() and
+           P1.b() == P2.b();
   }
 
   template<typename float_t>
   TRNG_CUDA_ENABLE inline bool operator!=(
-      const typename truncated_normal_dist<float_t>::param_type &p1,
-      const typename truncated_normal_dist<float_t>::param_type &p2) {
-    return not(p1 == p2);
+      const typename truncated_normal_dist<float_t>::param_type &P1,
+      const typename truncated_normal_dist<float_t>::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // -------------------------------------------------------------------
@@ -260,13 +256,13 @@ namespace trng {
   template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    truncated_normal_dist<float_t> &g) {
-    typename truncated_normal_dist<float_t>::param_type p;
+    typename truncated_normal_dist<float_t>::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[truncated_normal ") >> p >>
+    in >> utility::ignore_spaces() >> utility::delim("[truncated_normal ") >> P >>
         utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

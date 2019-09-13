@@ -47,8 +47,7 @@ namespace trng {
   template<typename T>
   class bernoulli_dist {
   public:
-    typedef T result_type;
-    class param_type;
+    using result_type = T;
 
     class param_type {
     private:
@@ -70,7 +69,8 @@ namespace trng {
       void tail(const T &tail_new) { tail_ = tail_new; }
       param_type() = default;
       TRNG_CUDA_ENABLE
-      param_type(double p, const T &head, const T &tail) : p_(p), head_(head), tail_(tail) {}
+      explicit param_type(double p, const T &head, const T &tail)
+          : p_{p}, head_{head}, tail_{tail} {}
       friend class bernoulli_dist;
     };
 
@@ -80,9 +80,9 @@ namespace trng {
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    bernoulli_dist(double p, const T &head, const T &tail) : P(p, head, tail) {}
+    explicit bernoulli_dist(double p, const T &head, const T &tail) : P{p, head, tail} {}
     TRNG_CUDA_ENABLE
-    explicit bernoulli_dist(const param_type &P) : P(P) {}
+    explicit bernoulli_dist(const param_type &P) : P{P} {}
     // reset internal state
     TRNG_CUDA_ENABLE
     void reset() {}
@@ -108,7 +108,7 @@ namespace trng {
     TRNG_CUDA_ENABLE
     double p() const { return P.p(); }
     TRNG_CUDA_ENABLE
-    void p(double p_new) { P.p(p_new); }
+    void p(double P_new) { P.p(P_new); }
     TRNG_CUDA_ENABLE
     T head() const { return P.head(); }
     TRNG_CUDA_ENABLE
@@ -122,7 +122,7 @@ namespace trng {
     double pdf(const T &x) const {
       if (x == P.head())
         return P.p();
-      else if (x == P.tail())
+      if (x == P.tail())
         return 1.0 - P.p();
       return 0.0;
     }
@@ -131,7 +131,7 @@ namespace trng {
     double cdf(const T &x) const {
       if (x == P.head())
         return P.p();
-      else if (x == P.tail())
+      if (x == P.tail())
         return 1.0;
       return 0.0;
     }
@@ -141,14 +141,14 @@ namespace trng {
 
   // EqualityComparable concept
   template<typename T>
-  TRNG_CUDA_ENABLE inline bool operator==(const typename bernoulli_dist<T>::param_type &p1,
-                                          const typename bernoulli_dist<T>::param_type &p2) {
-    return p1.p() == p2.p() and p1.head() == p2.head() and p1.tail() == p2.tail();
+  TRNG_CUDA_ENABLE inline bool operator==(const typename bernoulli_dist<T>::param_type &P1,
+                                          const typename bernoulli_dist<T>::param_type &P2) {
+    return P1.p() == P2.p() and P1.head() == P2.head() and P1.tail() == P2.tail();
   }
   template<typename T>
-  TRNG_CUDA_ENABLE inline bool operator!=(const typename bernoulli_dist<T>::param_type &p1,
-                                          const typename bernoulli_dist<T>::param_type &p2) {
-    return !(p1 == p2);
+  TRNG_CUDA_ENABLE inline bool operator!=(const typename bernoulli_dist<T>::param_type &P1,
+                                          const typename bernoulli_dist<T>::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // Streamable concept
@@ -206,12 +206,12 @@ namespace trng {
   template<typename char_t, typename traits_t, typename T>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    bernoulli_dist<T> &g) {
-    typename bernoulli_dist<T>::param_type p;
+    typename bernoulli_dist<T>::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[bernoulli ") >> p >> utility::delim(']');
+    in >> utility::ignore_spaces() >> utility::delim("[bernoulli ") >> P >> utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

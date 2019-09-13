@@ -50,8 +50,7 @@ namespace trng {
   // non-uniform random number generator class
   class hypergeometric_dist {
   public:
-    typedef int result_type;
-    class param_type;
+    using result_type = int;
 
     class param_type {
     private:
@@ -65,14 +64,14 @@ namespace trng {
         x_min = std::max(0, d_ - n_ + m_);
         x_max = std::min(d_, m_);
         P_ = std::vector<double>();
-        for (int x = x_min; x <= x_max; ++x)
+        for (int x{x_min}; x <= x_max; ++x)
           P_.push_back(math::exp(
               math::ln_binomial(static_cast<double>(m_), static_cast<double>(x)) +
               math::ln_binomial(static_cast<double>(n_ - m_), static_cast<double>(m_ - x))));
         // build list with cumulative density function
-        for (std::vector<double>::size_type i(1); i < P_.size(); ++i)
+        for (std::vector<double>::size_type i{1}; i < P_.size(); ++i)
           P_[i] += P_[i - 1];
-        for (std::vector<double>::size_type i(0); i < P_.size(); ++i)
+        for (std::vector<double>::size_type i{0}; i < P_.size(); ++i)
           P_[i] /= P_.back();
       }
 
@@ -93,7 +92,7 @@ namespace trng {
         calc_probabilities();
       }
       param_type() = default;
-      explicit param_type(int n, int m, int d) : n_(n), m_(m), d_(d) { calc_probabilities(); }
+      explicit param_type(int n, int m, int d) : n_{n}, m_{m}, d_{d} { calc_probabilities(); }
       friend class hypergeometric_dist;
     };
 
@@ -102,8 +101,8 @@ namespace trng {
 
   public:
     // constructor
-    hypergeometric_dist(int n, int m, int d) : P(n, m, d) {}
-    explicit hypergeometric_dist(const param_type &P) : P(P) {}
+    explicit hypergeometric_dist(int n, int m, int d) : P{n, m, d} {}
+    explicit hypergeometric_dist(const param_type &P) : P{P} {}
     // reset internal state
     void reset() {}
     // random numbers
@@ -113,8 +112,8 @@ namespace trng {
              utility::discrete(utility::uniformoo<double>(r), P.P_.begin(), P.P_.end());
     }
     template<typename R>
-    int operator()(R &r, const param_type &p) {
-      hypergeometric_dist g(p);
+    int operator()(R &r, const param_type &P) {
+      hypergeometric_dist g(P);
       return g(r);
     }
     // property methods
@@ -150,13 +149,13 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const hypergeometric_dist::param_type &p1,
-                         const hypergeometric_dist::param_type &p2) {
-    return p1.n() == p2.n() and p1.m() == p2.m() and p1.d() == p2.d();
+  inline bool operator==(const hypergeometric_dist::param_type &P1,
+                         const hypergeometric_dist::param_type &P2) {
+    return P1.n() == P2.n() and P1.m() == P2.m() and P1.d() == P2.d();
   }
-  inline bool operator!=(const hypergeometric_dist::param_type &p1,
-                         const hypergeometric_dist::param_type &p2) {
-    return not(p1 == p2);
+  inline bool operator!=(const hypergeometric_dist::param_type &P1,
+                         const hypergeometric_dist::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // Streamable concept
@@ -208,13 +207,13 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    hypergeometric_dist &g) {
-    hypergeometric_dist::param_type p;
+    hypergeometric_dist::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[hypergeometric ") >> p >>
+    in >> utility::ignore_spaces() >> utility::delim("[hypergeometric ") >> P >>
         utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

@@ -37,65 +37,44 @@ namespace trng {
   // Uniform random number generator concept
 
   // Parameter and status classes
-
-  // EqualityComparable concept
-  bool operator==(const mrg5::parameter_type &P1, const mrg5::parameter_type &P2) {
-    return P1.a1 == P2.a1 and P1.a2 == P2.a2 and P1.a3 == P2.a3 and P1.a4 == P2.a4 and
-           P1.a5 == P2.a5;
-  }
-
-  bool operator!=(const mrg5::parameter_type &P1, const mrg5::parameter_type &P2) {
-    return not(P1 == P2);
-  }
-
-  // Equality comparable concept
-  bool operator==(const mrg5::status_type &S1, const mrg5::status_type &S2) {
-    return S1.r1 == S2.r1 and S1.r2 == S2.r2 and S1.r3 == S2.r3 and S1.r4 == S2.r4 and
-           S1.r5 == S2.r5;
-  }
-
-  bool operator!=(const mrg5::status_type &S1, const mrg5::status_type &S2) {
-    return not(S1 == S2);
-  }
-
   const mrg5::parameter_type mrg5::LEcuyer1 = parameter_type(107374182l, 0, 0, 0, 104480);
 
   // Random number engine concept
-  mrg5::mrg5(const mrg5::parameter_type &P) : P(P), S() {}
+  mrg5::mrg5(const mrg5::parameter_type &P) : P{P} {}
 
-  mrg5::mrg5(unsigned long s, const mrg5::parameter_type &P) : P(P), S() { seed(s); }
+  mrg5::mrg5(unsigned long s, const mrg5::parameter_type &P) : P{P} { seed(s); }
 
   void mrg5::seed() { (*this) = mrg5(); }
 
   void mrg5::seed(unsigned long s) {
-    int64_t t = s;
+    int64_t t(s);
     t %= modulus;
     if (t < 0)
       t += modulus;
-    S.r1 = static_cast<result_type>(t);
-    S.r2 = 1;
-    S.r3 = 1;
-    S.r4 = 1;
-    S.r5 = 1;
+    S.r[0] = static_cast<result_type>(t);
+    S.r[1] = 1;
+    S.r[2] = 1;
+    S.r[3] = 1;
+    S.r[4] = 1;
   }
 
   void mrg5::seed(mrg5::result_type s1, mrg5::result_type s2, mrg5::result_type s3,
                   mrg5::result_type s4, mrg5::result_type s5) {
-    S.r1 = s1 % modulus;
-    if (S.r1 < 0)
-      S.r1 += modulus;
-    S.r2 = s2 % modulus;
-    if (S.r2 < 0)
-      S.r2 += modulus;
-    S.r3 = s3 % modulus;
-    if (S.r3 < 0)
-      S.r3 += modulus;
-    S.r4 = s4 % modulus;
-    if (S.r4 < 0)
-      S.r4 += modulus;
-    S.r5 = s5 % modulus;
-    if (S.r5 < 0)
-      S.r5 += modulus;
+    S.r[0] = s1 % modulus;
+    if (S.r[0] < 0)
+      S.r[0] += modulus;
+    S.r[1] = s2 % modulus;
+    if (S.r[1] < 0)
+      S.r[1] += modulus;
+    S.r[2] = s3 % modulus;
+    if (S.r[2] < 0)
+      S.r[2] += modulus;
+    S.r[3] = s4 % modulus;
+    if (S.r[3] < 0)
+      S.r[3] += modulus;
+    S.r[4] = s5 % modulus;
+    if (S.r[4] < 0)
+      S.r[4] += modulus;
   }
 
   // Equality comparable concept

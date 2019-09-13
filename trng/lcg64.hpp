@@ -36,29 +36,27 @@
 
 #include <trng/cuda.hpp>
 #include <trng/limits.hpp>
+#include <trng/utility.hpp>
+#include <trng/int_types.hpp>
+#include <trng/generate_canonical.hpp>
 #include <climits>
 #include <stdexcept>
 #include <ostream>
 #include <istream>
-#include <trng/utility.hpp>
-#include <trng/int_types.hpp>
-#include <trng/generate_canonical.hpp>
 #include <ciso646>
 
 namespace trng {
 
-  class lcg64;
-
   class lcg64 {
   public:
     // Uniform random number generator concept
-    typedef uint64_t result_type;
+    using result_type = uint64_t;
     TRNG_CUDA_ENABLE
     result_type operator()();
 
   private:
-    static const result_type min_ = 0;
-    static const result_type max_ = 18446744073709551615u;
+    static constexpr result_type min_ = 0;
+    static constexpr result_type max_ = ~result_type(0);
 
   public:
     static constexpr result_type min() { return min_; }
@@ -80,15 +78,12 @@ namespace trng {
 
   public:
     // Parameter and status classes
-    class parameter_type;
-    class status_type;
-
     class parameter_type {
-      result_type a, b;
+      result_type a{0}, b{0};
 
     public:
-      parameter_type() : a(0), b(0){};
-      parameter_type(result_type a, result_type b) : a(a), b(b){};
+      parameter_type() = default;
+      explicit parameter_type(result_type a, result_type b) : a{a}, b{b} {};
 
       friend class lcg64;
 
@@ -123,11 +118,11 @@ namespace trng {
     };
 
     class status_type {
-      result_type r;
+      result_type r{0};
 
     public:
-      status_type() : r(0){};
-      explicit status_type(result_type r) : r(r){};
+      status_type() = default;
+      explicit status_type(result_type r) : r{r} {};
 
       friend class lcg64;
 
@@ -171,7 +166,7 @@ namespace trng {
     explicit lcg64(unsigned long long, parameter_type = Default);
 
     template<typename gen>
-    explicit lcg64(gen &g, parameter_type P = Default) : P(P), S() {
+    explicit lcg64(gen &g, parameter_type P = Default) : P{P} {
       seed(g);
     }
 
@@ -179,9 +174,9 @@ namespace trng {
     void seed(unsigned long);
     template<typename gen>
     void seed(gen &g) {
-      result_type r = 0;
-      for (int i = 0; i < 2; ++i) {
-        r <<= 32;
+      result_type r{0};
+      for (int i{0}; i < 2; ++i) {
+        r <<= 32u;
         r += g();
       }
       S.r = r;
@@ -266,9 +261,9 @@ namespace trng {
   // compute floor(log_2(x))
   TRNG_CUDA_ENABLE
   inline unsigned int lcg64::log2_floor(lcg64::result_type x) {
-    unsigned int y(0);
+    unsigned int y{0};
     while (x > 0) {
-      x >>= 1;
+      x >>= 1u;
       ++y;
     }
     --y;
@@ -278,12 +273,12 @@ namespace trng {
   // compute pow(x, n)
   TRNG_CUDA_ENABLE
   inline lcg64::result_type lcg64::pow(lcg64::result_type x, lcg64::result_type n) {
-    lcg64::result_type result = 1;
+    lcg64::result_type result{1};
     while (n > 0) {
-      if ((n & 1) > 0)
-        result = result * x;
-      x = x * x;
-      n >>= 1;
+      if ((n & 1u) > 0)
+        result *= x;
+      x *= x;
+      n >>= 1u;
     }
     return result;
   }
@@ -291,8 +286,8 @@ namespace trng {
   // compute prod(1+a^(2^i), i=0..l-1)
   TRNG_CUDA_ENABLE
   inline lcg64::result_type lcg64::g(unsigned int l, lcg64::result_type a) {
-    lcg64::result_type p = a, res = 1;
-    for (unsigned i = 0; i < l; ++i) {
+    lcg64::result_type p{a}, res{1};
+    for (unsigned i{0}; i < l; ++i) {
       res *= 1 + p;
       p *= p;
     }
@@ -304,9 +299,9 @@ namespace trng {
   inline lcg64::result_type lcg64::f(lcg64::result_type s, lcg64::result_type a) {
     if (s == 0)
       return 0;
-    unsigned int e = log2_floor(s);
-    lcg64::result_type y = 0, p = a;
-    for (unsigned int l = 0; l <= e; ++l) {
+    const unsigned int e{log2_floor(s)};
+    lcg64::result_type y{0}, p{a};
+    for (unsigned int l{0}; l <= e; ++l) {
       if (((1ull << l) & s) > 0) {
         y = g(l, a) + p * y;
       }
@@ -339,15 +334,15 @@ namespace trng {
   TRNG_CUDA_ENABLE
   inline void lcg64::jump(unsigned long long s) {
     if (s < 16) {
-      for (unsigned int i(0); i < s; ++i)
+      for (unsigned int i{0}; i < s; ++i)
         step();
     } else {
-      unsigned int i(0);
+      unsigned int i{0};
       while (s > 0) {
         if (s % 2 == 1)
           jump2(i);
         ++i;
-        s >>= 1;
+        s >>= 1u;
       }
     }
   }
@@ -357,7 +352,7 @@ namespace trng {
 
   TRNG_CUDA_ENABLE
   inline void lcg64::backward() {
-    for (unsigned int i(0); i < 64; ++i)
+    for (unsigned int i{0}; i < 64; ++i)
       jump2(i);
   }
 

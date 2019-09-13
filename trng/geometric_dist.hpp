@@ -49,8 +49,7 @@ namespace trng {
   // non-uniform random number generator class
   class geometric_dist {
   public:
-    typedef int result_type;
-    class param_type;
+    using result_type = int;
 
     class param_type {
     private:
@@ -72,7 +71,7 @@ namespace trng {
       }
       TRNG_CUDA_ENABLE
       explicit param_type(double p = 0.5)
-          : p_(p), q_(1.0 - p_), one_over_ln_q_(1.0 / math::ln(q_)) {}
+          : p_{p}, q_{1.0 - p_}, one_over_ln_q_{(1.0 / math::ln(q_))} {}
       friend class geometric_dist;
     };
 
@@ -82,9 +81,9 @@ namespace trng {
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    explicit geometric_dist(double p) : P(p) {}
+    explicit geometric_dist(double p) : P{p} {}
     TRNG_CUDA_ENABLE
-    explicit geometric_dist(const param_type &P) : P(P) {}
+    explicit geometric_dist(const param_type &P) : P{P} {}
     // reset internal state
     TRNG_CUDA_ENABLE
     void reset() {}
@@ -127,15 +126,15 @@ namespace trng {
 
   // EqualityComparable concept
   TRNG_CUDA_ENABLE
-  inline bool operator==(const geometric_dist::param_type &p1,
-                         const geometric_dist::param_type &p2) {
-    return p1.p() == p2.p();
+  inline bool operator==(const geometric_dist::param_type &P1,
+                         const geometric_dist::param_type &P2) {
+    return P1.p() == P2.p();
   }
 
   TRNG_CUDA_ENABLE
-  inline bool operator!=(const geometric_dist::param_type &p1,
-                         const geometric_dist::param_type &p2) {
-    return !(p1 == p2);
+  inline bool operator!=(const geometric_dist::param_type &P1,
+                         const geometric_dist::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // Streamable concept
@@ -189,12 +188,12 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    geometric_dist &g) {
-    geometric_dist::param_type p;
+    geometric_dist::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[geometric ") >> p >> utility::delim(']');
+    in >> utility::ignore_spaces() >> utility::delim("[geometric ") >> P >> utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

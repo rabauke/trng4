@@ -37,51 +37,32 @@ namespace trng {
   // Uniform random number generator concept
 
   // Parameter and status classes
-
-  // EqualityComparable concept
-  bool operator==(const yarn2::parameter_type &P1, const yarn2::parameter_type &P2) {
-    return P1.a1 == P2.a1 and P1.a2 == P2.a2;
-  }
-
-  bool operator!=(const yarn2::parameter_type &P1, const yarn2::parameter_type &P2) {
-    return not(P1 == P2);
-  }
-
-  // Equality comparable concept
-  bool operator==(const yarn2::status_type &S1, const yarn2::status_type &S2) {
-    return S1.r1 == S2.r1 and S1.r2 == S2.r2;
-  }
-
-  bool operator!=(const yarn2::status_type &S1, const yarn2::status_type &S2) {
-    return not(S1 == S2);
-  }
-
   const yarn2::parameter_type yarn2::LEcuyer1 = parameter_type(1498809829, 1160990996);
   const yarn2::parameter_type yarn2::LEcuyer2 = parameter_type(46325, 1084587);
 
   // Random number engine concept
-  yarn2::yarn2(yarn2::parameter_type P) : P(P), S() {}
+  yarn2::yarn2(yarn2::parameter_type P) : P{P} {}
 
-  yarn2::yarn2(unsigned long s, yarn2::parameter_type P) : P(P), S() { seed(s); }
+  yarn2::yarn2(unsigned long s, yarn2::parameter_type P) : P{P} { seed(s); }
 
   void yarn2::seed() { (*this) = yarn2(); }
 
   void yarn2::seed(unsigned long s) {
-    int64_t t = s;
+    int64_t t(s);
     t %= modulus;
     if (t < 0)
       t += modulus;
-    S.r1 = static_cast<result_type>(t);
-    S.r2 = 1;
+    S.r[0] = static_cast<result_type>(t);
+    S.r[1] = 1;
   }
 
   void yarn2::seed(yarn2::result_type s1, yarn2::result_type s2) {
-    S.r1 = s1 % modulus;
-    if (S.r1 < 0)
-      S.r1 += modulus;
-    S.r2 = s2 % modulus;
-    if (S.r2 < 0)
-      S.r2 += modulus;
+    S.r[0] = s1 % modulus;
+    if (S.r[0] < 0)
+      S.r[0] += modulus;
+    S.r[1] = s2 % modulus;
+    if (S.r[1] < 0)
+      S.r[1] += modulus;
   }
 
   // Equality comparable concept
@@ -94,6 +75,6 @@ namespace trng {
 
   const char *yarn2::name() { return name_str; }
 
-  int_math::power<yarn2::modulus, yarn2::gen> yarn2::parameter_type::g;
+  const int_math::power<yarn2::modulus, yarn2::gen> yarn2::g;
 
 }  // namespace trng

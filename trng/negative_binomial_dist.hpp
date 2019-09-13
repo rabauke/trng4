@@ -48,19 +48,18 @@ namespace trng {
   // non-uniform random number generator class
   class negative_binomial_dist {
   public:
-    typedef int result_type;
-    class param_type;
+    using result_type = int;
 
     class param_type {
     private:
-      double p_;
-      double r_;
+      double p_{0};
+      double r_{0};
       std::vector<double> P_;
 
       void calc_probabilities() {
         P_ = std::vector<double>();
-        int x = 0;
-        double p = 0.0;
+        int x{0};
+        double p{0.0};
         while (p < 1.0 - 1.0 / 4096.0) {
           p += math::exp(math::ln_Gamma(r_ + x) - math::ln_Gamma(static_cast<double>(x + 1)) -
                          math::ln_Gamma(r_)) *
@@ -82,8 +81,8 @@ namespace trng {
         r_ = r_new;
         calc_probabilities();
       }
-      param_type() : p_(0), r_(0) {}
-      param_type(double p, double r) : p_(p), r_(r) { calc_probabilities(); }
+      param_type() = default;
+      explicit param_type(double p, double r) : p_{p}, r_{r} { calc_probabilities(); }
       friend class negative_binomial_dist;
     };
 
@@ -92,15 +91,15 @@ namespace trng {
 
   public:
     // constructor
-    explicit negative_binomial_dist(double p, double r) : P(p, r) {}
-    explicit negative_binomial_dist(const param_type &P) : P(P) {}
+    explicit negative_binomial_dist(double p, double r) : P{p, r} {}
+    explicit negative_binomial_dist(const param_type &P) : P{P} {}
     // reset internal state
     void reset() {}
     // random numbers
     template<typename R>
     int operator()(R &r) {
-      double p(utility::uniformco<double>(r));
-      int x(utility::discrete(p, P.P_.begin(), P.P_.end()));
+      double p{utility::uniformco<double>(r)};
+      int x{utility::discrete(p, P.P_.begin(), P.P_.end())};
       if (x + 1 == P.P_.size()) {
         p -= cdf(x);
         while (p > 0) {
@@ -134,7 +133,7 @@ namespace trng {
     }
     // cumulative density function
     double cdf(int x) const {
-      double res = 0;
+      double res{0};
       while (x >= 0) {
         res += pdf(x);
         --x;
@@ -146,13 +145,13 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const negative_binomial_dist::param_type &p1,
-                         const negative_binomial_dist::param_type &p2) {
-    return p1.p() == p2.p() and p1.r() == p2.r();
+  bool operator==(const negative_binomial_dist::param_type &P1,
+                  const negative_binomial_dist::param_type &P2) {
+    return P1.p() == P2.p() and P1.r() == P2.r();
   }
-  inline bool operator!=(const negative_binomial_dist::param_type &p1,
-                         const negative_binomial_dist::param_type &p2) {
-    return !(p1 == p2);
+  bool operator!=(const negative_binomial_dist::param_type &P1,
+                  const negative_binomial_dist::param_type &P2) {
+    return !(P1 == P2);
   }
 
   // Streamable concept
@@ -183,10 +182,10 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const negative_binomial_dist &g1, const negative_binomial_dist &g2) {
+  bool operator==(const negative_binomial_dist &g1, const negative_binomial_dist &g2) {
     return g1.param() == g2.param();
   }
-  inline bool operator!=(const negative_binomial_dist &g1, const negative_binomial_dist &g2) {
+  bool operator!=(const negative_binomial_dist &g1, const negative_binomial_dist &g2) {
     return g1.param() != g2.param();
   }
 
@@ -204,13 +203,13 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    negative_binomial_dist &g) {
-    negative_binomial_dist::param_type p;
+    negative_binomial_dist::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[negative_binomial ") >> p >>
+    in >> utility::ignore_spaces() >> utility::delim("[negative_binomial ") >> P >>
         utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

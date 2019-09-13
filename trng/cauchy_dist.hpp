@@ -51,12 +51,11 @@ namespace trng {
   template<typename float_t = double>
   class cauchy_dist {
   public:
-    typedef float_t result_type;
-    class param_type;
+    using result_type = float_t;
 
     class param_type {
     private:
-      result_type theta_, eta_;
+      result_type theta_{1}, eta_{0};
 
     public:
       TRNG_CUDA_ENABLE
@@ -68,54 +67,54 @@ namespace trng {
       TRNG_CUDA_ENABLE
       void eta(result_type eta_new) { eta_ = eta_new; }
       TRNG_CUDA_ENABLE
-      param_type() : theta_(1), eta_(0) {}
+      param_type() = default;
       TRNG_CUDA_ENABLE
-      param_type(result_type theta, result_type eta) : theta_(theta), eta_(eta) {}
+      explicit param_type(result_type theta, result_type eta) : theta_(theta), eta_(eta) {}
 
       friend class cauchy_dist;
 
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
-          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
+          std::basic_ostream<char_t, traits_t> &out, const param_type &P) {
         std::ios_base::fmtflags flags(out.flags());
         out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1)
-            << p.theta() << ' ' << p.eta() << ')';
+            << P.theta() << ' ' << P.eta() << ')';
         out.flags(flags);
         return out;
       }
 
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &operator>>(
-          std::basic_istream<char_t, traits_t> &in, param_type &p) {
+          std::basic_istream<char_t, traits_t> &in, param_type &P) {
         float_t theta, eta;
         std::ios_base::fmtflags flags(in.flags());
         in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         in >> utility::delim('(') >> theta >> utility::delim(' ') >> eta >> utility::delim(')');
         if (in)
-          p = param_type(theta, eta);
+          P = param_type(theta, eta);
         in.flags(flags);
         return in;
       }
     };
 
   private:
-    param_type p;
+    param_type P;
 
     // inverse cumulative density function
     TRNG_CUDA_ENABLE
     result_type icdf_(result_type x) const {
-      result_type t = x * math::constants<result_type>::pi();
-      return p.eta() - p.theta() * math::cos(t) / math::sin(t);
+      const result_type t{x * math::constants<result_type>::pi()};
+      return P.eta() - P.theta() * math::cos(t) / math::sin(t);
     }
 
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    cauchy_dist(result_type theta, result_type eta) : p(theta, eta) {}
+    explicit cauchy_dist(result_type theta, result_type eta) : P{theta, eta} {}
     TRNG_CUDA_ENABLE
-    explicit cauchy_dist(const param_type &p) : p(p) {}
+    explicit cauchy_dist(const param_type &P) : P{P} {}
     // reset internal state
     TRNG_CUDA_ENABLE
     void reset() {}
@@ -125,8 +124,8 @@ namespace trng {
       return icdf_(utility::uniformoo<result_type>(r));
     }
     template<typename R>
-    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
-      cauchy_dist g(p);
+    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &P) {
+      cauchy_dist g(P);
       return g(r);
     }
     // property methods
@@ -135,29 +134,29 @@ namespace trng {
     TRNG_CUDA_ENABLE
     result_type max() const { return math::numeric_limits<result_type>::infinity(); }
     TRNG_CUDA_ENABLE
-    param_type param() const { return p; }
+    param_type param() const { return P; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { p = p_new; }
+    void param(const param_type &p_new) { P = p_new; }
     TRNG_CUDA_ENABLE
-    result_type theta() const { return p.theta(); }
+    result_type theta() const { return P.theta(); }
     TRNG_CUDA_ENABLE
-    void theta(result_type theta_new) { p.theta(theta_new); }
+    void theta(result_type theta_new) { P.theta(theta_new); }
     TRNG_CUDA_ENABLE
-    result_type eta() const { return p.eta(); }
+    result_type eta() const { return P.eta(); }
     TRNG_CUDA_ENABLE
-    void eta(result_type eta_new) { p.eta(eta_new); }
+    void eta(result_type eta_new) { P.eta(eta_new); }
     // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
-      x -= p.eta();
-      x /= p.theta();
-      return math::constants<result_type>::one_over_pi() / (1.0 + x * x) / p.theta();
+      x -= P.eta();
+      x /= P.theta();
+      return math::constants<result_type>::one_over_pi() / (1 + x * x) / P.theta();
     }
     // cumulative density function
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
-      x -= p.eta();
-      x /= p.theta();
+      x -= P.eta();
+      x /= P.theta();
       return math::constants<result_type>::one_over_pi() * math::atan(x) +
              result_type(1) / result_type(2);
     }
@@ -182,15 +181,15 @@ namespace trng {
 
   // EqualityComparable concept
   template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator==(const typename cauchy_dist<float_t>::param_type &p1,
-                                          const typename cauchy_dist<float_t>::param_type &p2) {
-    return p1.theta() == p2.theta() and p1.eta() == p2.eta();
+  TRNG_CUDA_ENABLE inline bool operator==(const typename cauchy_dist<float_t>::param_type &P1,
+                                          const typename cauchy_dist<float_t>::param_type &P2) {
+    return P1.theta() == P2.theta() and P1.eta() == P2.eta();
   }
 
   template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator!=(const typename cauchy_dist<float_t>::param_type &p1,
-                                          const typename cauchy_dist<float_t>::param_type &p2) {
-    return not(p1 == p2);
+  TRNG_CUDA_ENABLE inline bool operator!=(const typename cauchy_dist<float_t>::param_type &P1,
+                                          const typename cauchy_dist<float_t>::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // -------------------------------------------------------------------
@@ -222,12 +221,12 @@ namespace trng {
   template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    cauchy_dist<float_t> &g) {
-    typename cauchy_dist<float_t>::param_type p;
+    typename cauchy_dist<float_t>::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[cauchy ") >> p >> utility::delim(']');
+    in >> utility::ignore_spaces() >> utility::delim("[cauchy ") >> P >> utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

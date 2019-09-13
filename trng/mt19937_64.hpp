@@ -49,13 +49,13 @@
 #define TRNG_MT19937_64_HPP
 
 #include <trng/limits.hpp>
+#include <trng/int_types.hpp>
+#include <trng/utility.hpp>
+#include <trng/generate_canonical.hpp>
 #include <climits>
 #include <stdexcept>
 #include <ostream>
 #include <istream>
-#include <trng/int_types.hpp>
-#include <trng/utility.hpp>
-#include <trng/generate_canonical.hpp>
 #include <ciso646>
 
 namespace trng {
@@ -65,30 +65,28 @@ namespace trng {
   class mt19937_64 {
   public:
     // Uniform random number generator concept
-    typedef uint64_t result_type;
+    using result_type = uint64_t;
     result_type operator()();
 
   private:
-    static const result_type min_ = 0;
-    static const result_type max_ = 18446744073709551615u;
+    static constexpr result_type min_ = 0;
+    static constexpr result_type max_ = 18446744073709551615u;
 
   public:
     static constexpr result_type min() { return min_; }
     static constexpr result_type max() { return max_; }
 
   private:
-    static const int N = 312;
-    static const int M = 156;
-    static const result_type UM = 0xFFFFFFFF80000000u;  // most significant 33 bits
-    static const result_type LM = 0x7FFFFFFFu;          // least significant 31 bits
+    static constexpr int N = 312;
+    static constexpr int M = 156;
+    static constexpr result_type UM = 0xFFFFFFFF80000000u;  // most significant 33 bits
+    static constexpr result_type LM = 0x7FFFFFFFu;          // least significant 31 bits
+
   public:
     // Parameter and status classes
-    class parameter_type;
-    class status_type;
-
     class parameter_type {
     public:
-      parameter_type(){};
+      parameter_type() = default;
 
       friend class mt19937_64;
 
@@ -122,15 +120,12 @@ namespace trng {
     };
 
     class status_type {
-      static const int N = 312;
-      int mti;
-      result_type mt[N];
+      static constexpr int N = 312;
+      int mti{0};
+      result_type mt[N]{};
 
     public:
-      status_type() : mti(0) {
-        for (int i = 0; i < N; ++i)
-          mt[i] = 0;
-      }
+      status_type() = default;
 
       friend class mt19937_64;
 
@@ -169,7 +164,7 @@ namespace trng {
     explicit mt19937_64(unsigned long);
 
     template<typename gen>
-    explicit mt19937_64(gen &g) : P(), S() {
+    explicit mt19937_64(gen &g) {
       seed(g);
     }
 
@@ -177,9 +172,9 @@ namespace trng {
     void seed(unsigned long);
     template<typename gen>
     void seed(gen &g) {
-      result_type r = 0;
-      for (int i = 0; i < 2; ++i) {
-        r <<= 32;
+      result_type r{0};
+      for (int i{0}; i < 2; ++i) {
+        r <<= 32u;
         r += g();
       }
       seed(r);
@@ -234,32 +229,32 @@ namespace trng {
 
   inline mt19937_64::result_type mt19937_64::operator()() {
     result_type x;
-    const result_type mag01[2] = {0u, 0xB5026F5AA96619E9u};
+    const result_type mag01[2]{0u, 0xB5026F5AA96619E9u};
 
     if (S.mti >= mt19937_64::N) {  // generate N words at one time
-      int i;
-      for (i = 0; i < mt19937_64::N - mt19937_64::M; ++i) {
+      int i{0};
+      for (; i < mt19937_64::N - mt19937_64::M; ++i) {
         x = (S.mt[i] & mt19937_64::UM) | (S.mt[i + 1] & mt19937_64::LM);
-        S.mt[i] = S.mt[i + mt19937_64::M] ^ (x >> 1) ^ mag01[(int)(x & 1u)];
+        S.mt[i] = S.mt[i + mt19937_64::M] ^ (x >> 1u) ^ mag01[(int)(x & 1u)];
       }
       for (; i < mt19937_64::N - 1; ++i) {
         x = (S.mt[i] & mt19937_64::UM) | (S.mt[i + 1] & mt19937_64::LM);
-        S.mt[i] = S.mt[i + (mt19937_64::M - mt19937_64::N)] ^ (x >> 1) ^ mag01[(int)(x & 1u)];
+        S.mt[i] = S.mt[i + (mt19937_64::M - mt19937_64::N)] ^ (x >> 1u) ^ mag01[(int)(x & 1u)];
       }
       x = (S.mt[mt19937_64::N - 1] & UM) | (S.mt[0] & LM);
-      S.mt[N - 1] = S.mt[mt19937_64::M - 1] ^ (x >> 1) ^ mag01[(int)(x & 1u)];
+      S.mt[N - 1] = S.mt[mt19937_64::M - 1] ^ (x >> 1u) ^ mag01[(int)(x & 1u)];
       S.mti = 0;
     }
     x = S.mt[S.mti++];
-    x ^= (x >> 29) & 0x5555555555555555u;
-    x ^= (x << 17) & 0x71D67FFFEDA60000u;
-    x ^= (x << 37) & 0xFFF7EEE000000000u;
-    x ^= (x >> 43);
+    x ^= (x >> 29u) & 0x5555555555555555u;
+    x ^= (x << 17u) & 0x71D67FFFEDA60000u;
+    x ^= (x << 37u) & 0xFFF7EEE000000000u;
+    x ^= (x >> 43u);
     return x;
   }
 
   inline void mt19937_64::discard(unsigned long long n) {
-    for (unsigned long long i(0); i < n; ++i)
+    for (unsigned long long i{0}; i < n; ++i)
       this->operator()();
   }
 

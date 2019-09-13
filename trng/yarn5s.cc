@@ -37,36 +37,15 @@ namespace trng {
   // Uniform random number generator concept
 
   // Parameter and status classes
-
-  // EqualityComparable concept
-  bool operator==(const yarn5s::parameter_type &P1, const yarn5s::parameter_type &P2) {
-    return P1.a1 == P2.a1 and P1.a2 == P2.a2 and P1.a3 == P2.a3 and P1.a4 == P2.a4 and
-           P1.a5 == P2.a5;
-  }
-
-  bool operator!=(const yarn5s::parameter_type &P1, const yarn5s::parameter_type &P2) {
-    return not(P1 == P2);
-  }
-
-  // Equality comparable concept
-  bool operator==(const yarn5s::status_type &S1, const yarn5s::status_type &S2) {
-    return S1.r1 == S2.r1 and S1.r2 == S2.r2 and S1.r3 == S2.r3 and S1.r4 == S2.r4 and
-           S1.r5 == S2.r5;
-  }
-
-  bool operator!=(const yarn5s::status_type &S1, const yarn5s::status_type &S2) {
-    return not(S1 == S2);
-  }
-
   const yarn5s::parameter_type yarn5s::trng0 =
       parameter_type(1053223373, 1530818118, 1612122482, 133497989, 573245311);
   const yarn5s::parameter_type yarn5s::trng1 =
       parameter_type(2068619238, 2138332912, 671754166, 1442240992, 1526958817);
 
   // Random number engine concept
-  yarn5s::yarn5s(const parameter_type &P) : P(P), S() {}
+  yarn5s::yarn5s(const parameter_type &P) : P{P} {}
 
-  yarn5s::yarn5s(unsigned long s, const parameter_type &P) : P(P), S() { seed(s); }
+  yarn5s::yarn5s(unsigned long s, const parameter_type &P) : P{P} { seed(s); }
 
   void yarn5s::seed() { (*this) = yarn5s(); }
 
@@ -75,30 +54,30 @@ namespace trng {
     t %= modulus;
     if (t < 0)
       t += modulus;
-    S.r1 = static_cast<result_type>(t);
-    S.r2 = 1;
-    S.r3 = 1;
-    S.r4 = 1;
-    S.r5 = 1;
+    S.r[0] = static_cast<result_type>(t);
+    S.r[1] = 1;
+    S.r[2] = 1;
+    S.r[3] = 1;
+    S.r[4] = 1;
   }
 
   void yarn5s::seed(yarn5s::result_type s1, yarn5s::result_type s2, yarn5s::result_type s3,
                     yarn5s::result_type s4, yarn5s::result_type s5) {
-    S.r1 = s1 % modulus;
-    if (S.r1 < 0)
-      S.r1 += modulus;
-    S.r2 = s2 % modulus;
-    if (S.r2 < 0)
-      S.r2 += modulus;
-    S.r3 = s3 % modulus;
-    if (S.r3 < 0)
-      S.r3 += modulus;
-    S.r4 = s4 % modulus;
-    if (S.r4 < 0)
-      S.r4 += modulus;
-    S.r5 = s5 % modulus;
-    if (S.r5 < 0)
-      S.r5 += modulus;
+    S.r[0] = s1 % modulus;
+    if (S.r[0] < 0)
+      S.r[0] += modulus;
+    S.r[1] = s2 % modulus;
+    if (S.r[1] < 0)
+      S.r[1] += modulus;
+    S.r[2] = s3 % modulus;
+    if (S.r[2] < 0)
+      S.r[2] += modulus;
+    S.r[3] = s4 % modulus;
+    if (S.r[3] < 0)
+      S.r[3] += modulus;
+    S.r[4] = s5 % modulus;
+    if (S.r[4] < 0)
+      S.r[4] += modulus;
   }
 
   // Equality comparable concept
@@ -111,6 +90,6 @@ namespace trng {
 
   const char *yarn5s::name() { return name_str; }
 
-  int_math::power<yarn5s::modulus, yarn5s::gen> yarn5s::parameter_type::g;
+  const int_math::power<yarn5s::modulus, yarn5s::gen> yarn5s::g;
 
 }  // namespace trng

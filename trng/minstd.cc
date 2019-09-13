@@ -50,7 +50,7 @@ namespace trng {
   // Random number engine concept
   minstd::minstd() : S() {}
 
-  minstd::minstd(unsigned long s) : S() { seed(s); }
+  minstd::minstd(unsigned long s) { seed(s); }
 
   void minstd::seed() { (*this) = minstd(); }
 

@@ -37,61 +37,42 @@ namespace trng {
   // Uniform random number generator concept
 
   // Parameter and status classes
-
-  // EqualityComparable concept
-  bool operator==(const yarn4::parameter_type &P1, const yarn4::parameter_type &P2) {
-    return P1.a1 == P2.a1 and P1.a2 == P2.a2 and P1.a3 == P2.a3 and P1.a4 == P2.a4;
-  }
-
-  bool operator!=(const yarn4::parameter_type &P1, const yarn4::parameter_type &P2) {
-    return not(P1 == P2);
-  }
-
-  // Equality comparable concept
-  bool operator==(const yarn4::status_type &S1, const yarn4::status_type &S2) {
-    return S1.r1 == S2.r1 and S1.r2 == S2.r2 and S1.r3 == S2.r3 and S1.r4 == S2.r4;
-  }
-
-  bool operator!=(const yarn4::status_type &S1, const yarn4::status_type &S2) {
-    return not(S1 == S2);
-  }
-
   const yarn4::parameter_type yarn4::LEcuyer1 =
       parameter_type(2001982722, 1412284257, 1155380217, 1668339922);
   const yarn4::parameter_type yarn4::LEcuyer2 = parameter_type(64886, 0, 0, 64322);
 
   // Random number engine concept
-  yarn4::yarn4(yarn4::parameter_type P) : P(P), S() {}
+  yarn4::yarn4(yarn4::parameter_type P) : P{P} {}
 
-  yarn4::yarn4(unsigned long s, yarn4::parameter_type P) : P(P), S() { seed(s); }
+  yarn4::yarn4(unsigned long s, yarn4::parameter_type P) : P{P} { seed(s); }
 
   void yarn4::seed() { (*this) = yarn4(); }
 
   void yarn4::seed(unsigned long s) {
-    int64_t t = s;
+    int64_t t(s);
     t %= modulus;
     if (t < 0)
       t += modulus;
-    S.r1 = static_cast<result_type>(t);
-    S.r2 = 1;
-    S.r3 = 1;
-    S.r4 = 1;
+    S.r[0] = static_cast<result_type>(t);
+    S.r[1] = 1;
+    S.r[2] = 1;
+    S.r[3] = 1;
   }
 
   void yarn4::seed(yarn4::result_type s1, yarn4::result_type s2, yarn4::result_type s3,
                    yarn4::result_type s4) {
-    S.r1 = s1 % modulus;
-    if (S.r1 < 0)
-      S.r1 += modulus;
-    S.r2 = s2 % modulus;
-    if (S.r2 < 0)
-      S.r2 += modulus;
-    S.r3 = s3 % modulus;
-    if (S.r3 < 0)
-      S.r3 += modulus;
-    S.r4 = s4 % modulus;
-    if (S.r4 < 0)
-      S.r4 += modulus;
+    S.r[0] = s1 % modulus;
+    if (S.r[0] < 0)
+      S.r[0] += modulus;
+    S.r[1] = s2 % modulus;
+    if (S.r[1] < 0)
+      S.r[1] += modulus;
+    S.r[2] = s3 % modulus;
+    if (S.r[2] < 0)
+      S.r[2] += modulus;
+    S.r[3] = s4 % modulus;
+    if (S.r[3] < 0)
+      S.r[3] += modulus;
   }
 
   // Equality comparable concept
@@ -104,6 +85,6 @@ namespace trng {
 
   const char *yarn4::name() { return name_str; }
 
-  int_math::power<yarn4::modulus, yarn4::gen> yarn4::parameter_type::g;
+  const int_math::power<yarn4::modulus, yarn4::gen> yarn4::g;
 
 }  // namespace trng

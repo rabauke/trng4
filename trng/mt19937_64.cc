@@ -49,7 +49,7 @@ namespace trng {
 
   // Equality comparable concept
   bool operator==(const mt19937_64::status_type &S1, const mt19937_64::status_type &S2) {
-    for (int i = 0; i < mt19937_64::status_type::N; ++i)
+    for (int i{0}; i < mt19937_64::status_type::N; ++i)
       if (S1.mt[i] != S2.mt[i])
         return false;
     return true;
@@ -60,9 +60,9 @@ namespace trng {
   }
 
   // Random number engine concept
-  mt19937_64::mt19937_64() : P(), S() { seed(5489u); }
+  mt19937_64::mt19937_64() { seed(5489u); }
 
-  mt19937_64::mt19937_64(unsigned long s) : P(), S() { seed(s); }
+  mt19937_64::mt19937_64(unsigned long s) { seed(s); }
 
   void mt19937_64::seed() { (*this) = mt19937_64(); }
 
@@ -70,7 +70,7 @@ namespace trng {
     S.mt[0] = s;
     for (S.mti = 1; S.mti < mt19937_64::status_type::N; ++S.mti)
       S.mt[S.mti] =
-          (6364136223846793005u * (S.mt[S.mti - 1] ^ (S.mt[S.mti - 1] >> 62)) + S.mti);
+          (6364136223846793005u * (S.mt[S.mti - 1] ^ (S.mt[S.mti - 1] >> 62u)) + S.mti);
   }
 
   // Equality comparable concept

@@ -34,10 +34,10 @@
 #if !(defined TRNG_UNIFORMXX_HPP)
 #define TRNG_UNIFORMXX_HPP
 
-#include <cstddef>
-#include <cfloat>
 #include <trng/cuda.hpp>
 #include <trng/limits.hpp>
+#include <cstddef>
+#include <cfloat>
 #include <ciso646>
 
 namespace trng {
@@ -58,7 +58,7 @@ namespace trng {
 
     template<unsigned long long top, unsigned int count = 0>
     struct Holes {
-      enum { result = Holes<top / 2, count + (~top & 1)>::result };
+      enum { result = Holes<top / 2, count + (~top & 1u)>::result };
     };
 
     template<unsigned int count>
@@ -114,34 +114,35 @@ namespace trng {
     // They should also collapse the size (sizeof(u01xx_traits<...>) to 1.
     template<typename return_type, std::size_t requested_bits, typename prng_t>
     class u01xx_traits {
-      typedef return_type ret_t;
-      typedef typename prng_t::result_type result_type;
+      using ret_t = return_type;
+      using result_type = typename prng_t::result_type;
 
       // Casting up from "simpler" types may yield better low level code sequences.
-      static const result_type domain_max0 = prng_t::max() - prng_t::min();
-      static const unsigned int domain_bits = Bits<domain_max0>::result;
-      static const unsigned int domain_full_bits =
+      static constexpr result_type domain_max0 = prng_t::max() - prng_t::min();
+      static constexpr unsigned int domain_bits = Bits<domain_max0>::result;
+      static constexpr unsigned int domain_full_bits =
           domain_bits - (Holes<domain_max0>::result > 0);
-      static const bool int_ok =
+      static constexpr bool int_ok =
           domain_bits < static_cast<unsigned int>(math::numeric_limits<unsigned int>::digits);
-      static const bool long_ok =
+      static constexpr bool long_ok =
           domain_bits < static_cast<unsigned int>(math::numeric_limits<unsigned long>::digits);
-      static const bool long_long_ok =
+      static constexpr bool long_long_ok =
           domain_bits <
           static_cast<unsigned int>(math::numeric_limits<unsigned long long>::digits);
 
-      static const unsigned int ret_bits = math::numeric_limits<ret_t>::digits;
-      static const unsigned int bits0 = (requested_bits < ret_bits) ? requested_bits : ret_bits;
-      static const unsigned int bits = (bits0 < 1) ? 1 : bits0;
-      static const std::size_t calls_needed =
+      static constexpr unsigned int ret_bits = math::numeric_limits<ret_t>::digits;
+      static constexpr unsigned int bits0 =
+          (requested_bits < ret_bits) ? requested_bits : ret_bits;
+      static constexpr unsigned int bits = (bits0 < 1) ? 1 : bits0;
+      static constexpr std::size_t calls_needed =
           (bits / domain_full_bits) + ((bits % domain_full_bits) != 0);
 
       // a ((long long)(val >> 1)) cast may give us better performance (~4X using lcg on Core2
       // x86-64) the lost bit will not usually be missed as it is ~30dB down typically (53 bit
       // mantissa from a 63 rather than 64 bit integer variate)
-      static const bool use_ll_of_shifted =
-          not long_long_ok and (domain_max0 >> 1) == (~0ULL >> 1) and bits < domain_bits;
-      static const result_type domain_max =
+      static constexpr bool use_ll_of_shifted =
+          not long_long_ok and (domain_max0 >> 1) == (~0ULL >> 1u) and bits < domain_bits;
+      static constexpr result_type domain_max =
           use_ll_of_shifted ? (domain_max0 >> 1) : domain_max0;
 
       TRNG_CUDA_ENABLE
@@ -163,7 +164,7 @@ namespace trng {
         const ret_t scale_per_step(static_cast<ret_t>(domain_max) + 1);
         const ret_t max_addin(static_cast<ret_t>(domain_max));
         ret_t ret(max_addin);
-        for (std::size_t i(1); i < calls_needed; ++i)
+        for (std::size_t i{1}; i < calls_needed; ++i)
           ret = ret * scale_per_step + max_addin;
         return ret;
       }
@@ -179,7 +180,7 @@ namespace trng {
 #endif
         const ret_t scale_per_step(ret_t(domain_max) + 1);
         ret_t ret(addin(r));
-        for (std::size_t i(1); i < calls_needed; ++i)
+        for (std::size_t i{1}; i < calls_needed; ++i)
           ret = ret * scale_per_step + addin(r);
         return ret;
       }

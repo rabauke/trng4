@@ -50,50 +50,45 @@ namespace trng {
   // non-uniform random number generator class
   class discrete_dist {
   public:
-    typedef int result_type;
-    class param_type;
+    using result_type = int;
 
     class param_type {
     private:
-      typedef std::vector<double>::size_type size_type;
-      std::vector<double> P;
-      size_type N, offset, layers;
+      using size_type = std::vector<double>::size_type;
+      std::vector<double> P_;
+      size_type N_{0}, layers_{0}, offset_{0};
+
+      explicit param_type(std::vector<double> P)
+          : P_(std::move(P)),
+            N_{P_.size()},
+            layers_{math::log2_ceil(N_)},
+            offset_{math::pow2(layers_) - 1} {
+        P_.resize(N_ + offset_);
+        std::copy_backward(P_.begin(), P_.begin() + N_, P_.end());
+        std::fill(P_.begin(), P_.begin() + offset_, 0);
+        update_all_layers();
+      }
 
     public:
-      param_type() : P(), N(0), offset(0), layers(0) {}
+      param_type() = default;
       template<typename iter>
-      param_type(iter first, iter last) : P(first, last) {
-        N = P.size();
-        layers = math::log2_ceil(N);
-        offset = math::pow2(layers) - 1;
-        P.resize(N + offset);
-        std::copy_backward(P.begin(), P.begin() + N, P.end());
-        std::fill(P.begin(), P.begin() + offset, 0);
-        update_all_layers();
-      }
-      explicit param_type(int n) : P(n, 1.0) {
-        N = P.size();
-        layers = math::log2_ceil(N);
-        offset = math::pow2(layers) - 1;
-        P.resize(N + offset);
-        std::copy_backward(P.begin(), P.begin() + N, P.end());
-        std::fill(P.begin(), P.begin() + offset, 0);
-        update_all_layers();
-      }
+      explicit param_type(iter first, iter last)
+          : param_type{std::vector<double>(first, last)} {}
+      explicit param_type(int n) : param_type{std::vector<double>(n, 1.0)} {}
 
     private:
       void update_layer(size_type layer, size_type n) {
-        size_type first = math::pow2(layer) - 1, last = first + n;
-        for (size_type i = first; i < last; ++i, ++i)
+        const size_type first{math::pow2(layer) - 1}, last{first + n};
+        for (size_type i{first}; i < last; ++i, ++i)
           if (i + 1 < last)
-            P[(i - 1) / 2] = P[i] + P[i + 1];
+            P_[(i - 1) / 2] = P_[i] + P_[i + 1];
           else
-            P[(i - 1) / 2] = P[i];
+            P_[(i - 1) / 2] = P_[i];
       }
       void update_all_layers() {
-        size_type layer = layers;
+        size_type layer = layers_;
         if (layer > 0) {
-          update_layer(layer, N);
+          update_layer(layer, N_);
           --layer;
         }
         while (layer > 0) {
@@ -120,26 +115,26 @@ namespace trng {
     // constructor
     template<typename iter>
     discrete_dist(iter first, iter last) : P(first, last) {}
-    explicit discrete_dist(int N) : P(N) {}
-    explicit discrete_dist(const param_type &P) : P(P) {}
+    explicit discrete_dist(int N) : P{N} {}
+    explicit discrete_dist(const param_type &P) : P{P} {}
     // reset internal state
     void reset() {}
     // random numbers
     template<typename R>
     int operator()(R &r) {
-      if (P.N == 0)
+      if (P.N_ == 0)
         return -1;
-      double u(utility::uniformco<double>(r) * P.P[0]);
-      param_type::size_type x(0);
-      while (x < P.offset) {
-        if (u < P.P[2 * x + 1]) {
+      double u(utility::uniformco<double>(r) * P.P_[0]);
+      param_type::size_type x{0};
+      while (x < P.offset_) {
+        if (u < P.P_[2 * x + 1]) {
           x = 2 * x + 1;
         } else {
-          u -= P.P[2 * x + 1];
+          u -= P.P_[2 * x + 1];
           x = 2 * x + 2;
         }
       }
-      return static_cast<int>(x - P.offset);
+      return static_cast<int>(x - P.offset_);
     }
     template<typename R>
     int operator()(R &r, const param_type &p) {
@@ -148,29 +143,29 @@ namespace trng {
     }
     // property methods
     int min() const { return 0; }
-    int max() const { return static_cast<int>(P.N - 1); }
+    int max() const { return static_cast<int>(P.N_ - 1); }
     param_type param() const { return P; }
     void param(const param_type &P_new) { P = P_new; }
     void param(int x, double p) {
-      x += static_cast<int>(P.offset);
-      P.P[x] = p;
+      x += static_cast<int>(P.offset_);
+      P.P_[x] = p;
       if (x > 0) {
         do {
           x = (x - 1) / 2;
-          P.P[x] = P.P[2 * x + 1] + P.P[2 * x + 2];
+          P.P_[x] = P.P_[2 * x + 1] + P.P_[2 * x + 2];
         } while (x > 0);
       }
     }
     // probability density function
     double pdf(int x) const {
-      return (x < 0 or x >= static_cast<int>(P.N)) ? 0.0 : P.P[x + P.offset] / P.P[0];
+      return (x < 0 or x >= static_cast<int>(P.N_)) ? 0.0 : P.P_[x + P.offset_] / P.P_[0];
     }
     // cumulative density function
     double cdf(int x) const {
       if (x < 0)
         return 0.0;
-      if (x < static_cast<int>(P.N))
-        return std::accumulate(&P.P[P.offset], &P.P[x + P.offset + 1], 0.0) / P.P[0];
+      if (x < static_cast<int>(P.N_))
+        return std::accumulate(&P.P_[P.offset_], &P.P_[x + P.offset_ + 1], 0.0) / P.P_[0];
       return 1.0;
     }
   };
@@ -178,13 +173,13 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const discrete_dist::param_type &p1,
-                         const discrete_dist::param_type &p2) {
-    return p1.P == p2.P;
+  inline bool operator==(const discrete_dist::param_type &P1,
+                         const discrete_dist::param_type &P2) {
+    return P1.P_ == P2.P_;
   }
-  inline bool operator!=(const discrete_dist::param_type &p1,
-                         const discrete_dist::param_type &p2) {
-    return !(p1 == p2);
+  inline bool operator!=(const discrete_dist::param_type &P1,
+                         const discrete_dist::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // Streamable concept
@@ -193,10 +188,10 @@ namespace trng {
                                                    const discrete_dist::param_type &P) {
     std::ios_base::fmtflags flags(out.flags());
     out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    out << '(' << P.N << ' ';
-    for (std::vector<double>::size_type i = P.offset; i < P.P.size(); ++i) {
-      out << std::setprecision(17) << P.P[i];
-      if (i + 1 < P.P.size())
+    out << '(' << P.N_ << ' ';
+    for (std::vector<double>::size_type i{P.offset_}; i < P.P_.size(); ++i) {
+      out << std::setprecision(17) << P.P_[i];
+      if (i + 1 < P.P_.size())
         out << ' ';
     }
     out << ')';
@@ -213,7 +208,7 @@ namespace trng {
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
     in >> utility::delim('(') >> n >> utility::delim(' ');
-    for (std::vector<double>::size_type i = 0; i < n; ++i) {
+    for (std::vector<double>::size_type i{0}; i < n; ++i) {
       in >> p;
       if (i + 1 < n)
         in >> utility::delim(' ');
@@ -250,12 +245,12 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    discrete_dist &g) {
-    discrete_dist::param_type p;
+    discrete_dist::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[discrete ") >> p >> utility::delim(']');
+    in >> utility::ignore_spaces() >> utility::delim("[discrete ") >> P >> utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

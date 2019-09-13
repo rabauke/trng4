@@ -48,13 +48,12 @@ namespace trng {
   template<typename float_t = double>
   class uniform01_dist {
   public:
-    typedef float_t result_type;
-    class param_type;
+    using result_type = float_t;
 
     class param_type {
     public:
       TRNG_CUDA_ENABLE
-      param_type() {}
+      param_type() = default;
 
       friend class uniform01_dist<float_t>;
 
@@ -86,7 +85,7 @@ namespace trng {
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    uniform01_dist() {}
+    uniform01_dist() = default;
     TRNG_CUDA_ENABLE
     explicit uniform01_dist(const param_type &p) {}
     // reset internal state
@@ -98,7 +97,7 @@ namespace trng {
       return utility::uniformco<result_type>(r);
     }
     template<typename R>
-    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
+    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &) {
       return utility::uniformco<result_type>(r);
     }
     // property methods
@@ -186,12 +185,12 @@ namespace trng {
   template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    uniform01_dist<float_t> &g) {
-    typename uniform01_dist<float_t>::param_type p;
+    typename uniform01_dist<float_t>::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[uniform01 ") >> p >> utility::delim(']');
+    in >> utility::ignore_spaces() >> utility::delim("[uniform01 ") >> P >> utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

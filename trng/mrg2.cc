@@ -37,51 +37,32 @@ namespace trng {
   // Uniform random number generator concept
 
   // Parameter and status classes
-
-  // EqualityComparable concept
-  bool operator==(const mrg2::parameter_type &P1, const mrg2::parameter_type &P2) {
-    return P1.a1 == P2.a1 and P1.a2 == P2.a2;
-  }
-
-  bool operator!=(const mrg2::parameter_type &P1, const mrg2::parameter_type &P2) {
-    return not(P1 == P2);
-  }
-
-  // Equality comparable concept
-  bool operator==(const mrg2::status_type &S1, const mrg2::status_type &S2) {
-    return S1.r1 == S2.r1 and S1.r2 == S2.r2;
-  }
-
-  bool operator!=(const mrg2::status_type &S1, const mrg2::status_type &S2) {
-    return not(S1 == S2);
-  }
-
   const mrg2::parameter_type mrg2::LEcuyer1 = parameter_type(1498809829, 1160990996);
   const mrg2::parameter_type mrg2::LEcuyer2 = parameter_type(46325, 1084587);
 
   // Random number engine concept
-  mrg2::mrg2(mrg2::parameter_type P) : P(P), S() {}
+  mrg2::mrg2(mrg2::parameter_type P) : P{P} {}
 
-  mrg2::mrg2(unsigned long s, mrg2::parameter_type P) : P(P), S() { seed(s); }
+  mrg2::mrg2(unsigned long s, mrg2::parameter_type P) : P{P} { seed(s); }
 
   void mrg2::seed() { (*this) = mrg2(); }
 
   void mrg2::seed(unsigned long s) {
-    long long t = s;
+    int64_t t(s);
     t %= modulus;
     if (t < 0)
       t += modulus;
-    S.r1 = static_cast<result_type>(t);
-    S.r2 = 1;
+    S.r[0] = static_cast<result_type>(t);
+    S.r[1] = 1;
   }
 
   void mrg2::seed(mrg2::result_type s1, mrg2::result_type s2) {
-    S.r1 = s1 % modulus;
-    if (S.r1 < 0)
-      S.r1 += modulus;
-    S.r2 = s2 % modulus;
-    if (S.r2 < 0)
-      S.r2 += modulus;
+    S.r[0] = s1 % modulus;
+    if (S.r[0] < 0)
+      S.r[0] += modulus;
+    S.r[1] = s2 % modulus;
+    if (S.r[1] < 0)
+      S.r[1] += modulus;
   }
 
   // Equality comparable concept

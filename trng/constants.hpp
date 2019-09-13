@@ -38,7 +38,7 @@
 
 #define TRNG_NEW_CONSTANT(type, value, x) \
   TRNG_CUDA_ENABLE                        \
-  static type x() noexcept { return value; }
+  static inline constexpr type x() noexcept { return value; }
 
 namespace trng {
 

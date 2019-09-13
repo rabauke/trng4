@@ -35,17 +35,15 @@
 #define TRNG_MINSTD_HPP
 
 #include <trng/limits.hpp>
+#include <trng/utility.hpp>
+#include <trng/int_types.hpp>
 #include <climits>
 #include <stdexcept>
 #include <ostream>
 #include <istream>
-#include <trng/utility.hpp>
-#include <trng/int_types.hpp>
 #include <ciso646>
 
 namespace trng {
-
-  class minstd;
 
   class minstd {
   public:
@@ -54,22 +52,20 @@ namespace trng {
     result_type operator()();
 
   private:
-    static const result_type min_ = 1u;
-    static const result_type max_ = 2147483646u;
+    static constexpr result_type min_ = 1u;
+    static constexpr result_type max_ = 2147483646u;
 
   public:
     static constexpr result_type min() { return min_; }
     static constexpr result_type max() { return max_; }
 
     // Parameter and status classes
-    class status_type;
-
     class status_type {
-      result_type r;
+      result_type r{1};
 
     public:
-      status_type() : r(1){};
-      explicit status_type(result_type r) : r(r){};
+      status_type() = default;
+      explicit status_type(result_type r) : r{r} {};
 
       friend class minstd;
 
@@ -107,7 +103,7 @@ namespace trng {
     explicit minstd(unsigned long);
 
     template<typename gen>
-    explicit minstd(gen &g) : S() {
+    explicit minstd(gen &g) {
       seed(g);
     }
 
@@ -166,8 +162,8 @@ namespace trng {
   // Inline and template methods
 
   inline void minstd::step() {
-    uint64_t t = S.r * 16807;
-    t = (t & 0x7fffffffu) + (t >> 31);
+    uint64_t t{S.r * 16807};
+    t = (t & 0x7fffffffu) + (t >> 31u);
     if (t >= 2147483647u)
       t -= 2147483647u;
     S.r = static_cast<result_type>(t);
@@ -180,7 +176,7 @@ namespace trng {
 
   inline void minstd::discard(unsigned long long n) {
     n %= minstd::max_ - minstd::min_;
-    for (unsigned long long i(0); i < n; ++i)
+    for (unsigned long long i{0}; i < n; ++i)
       step();
   }
 

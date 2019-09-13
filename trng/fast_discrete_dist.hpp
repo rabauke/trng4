@@ -57,37 +57,25 @@ namespace trng {
   // non-uniform random number generator class
   class fast_discrete_dist {
   public:
-    typedef int result_type;
-    class param_type;
+    using result_type = int;
 
     class param_type {
     private:
-      typedef std::vector<double>::size_type size_type;
+      using size_type = std::vector<double>::size_type;
       std::vector<double> P, F;
       std::vector<int> L;
       size_type N{0};
 
-    public:
-      param_type() = default;
-      template<typename iter>
-      param_type(iter first, iter last)
-          : P(first, last), F(P.size()), L(P.size()), N(P.size()) {
-        update();
-      }
-      explicit param_type(int n) : P(n, 1.0), F(P.size()), L(P.size()), N(P.size()) {
-        update();
-      }
-
-    private:
-      void update() {
-        double s = std::accumulate(P.begin(), P.end(), 0.0);
+      explicit param_type(std::vector<double> P)
+          : P(std::move(P)), F(P.size()), L(P.size()), N(P.size()) {
+        const double s{std::accumulate(P.begin(), P.end(), 0.0)};
         if (s > 0.0) {
-          for (int i = 0; i < P.size(); ++i)
-            P[i] /= s;
+          for (auto &val : P)
+            val /= s;
           std::vector<int> G, S;
           G.reserve(N);
           S.reserve(N);
-          for (int i = 0; i < F.size(); ++i) {
+          for (int i{0}; i < F.size(); ++i) {
             F[i] = N * P[i];
             if (F[i] < 1.0)
               S.push_back(i);
@@ -95,7 +83,7 @@ namespace trng {
               G.push_back(i);
           }
           while ((not S.empty()) and (not G.empty())) {
-            int k = G.back(), j = S.back();
+            const int k{G.back()}, j{S.back()};
             L[j] = k;
             F[k] -= 1.0 - F[j];
             S.pop_back();
@@ -108,6 +96,12 @@ namespace trng {
       }
 
     public:
+      param_type() = default;
+      template<typename iter>
+      explicit param_type(iter first, iter last)
+          : param_type{std::vector<double>(first, last)} {}
+      explicit param_type(int n) : param_type{std::vector<double>(n, 1.0)} {}
+
       friend class fast_discrete_dist;
       friend bool operator==(const param_type &, const param_type &);
       template<typename char_t, typename traits_t>
@@ -124,21 +118,21 @@ namespace trng {
   public:
     // constructor
     template<typename iter>
-    fast_discrete_dist(iter first, iter last) : P(first, last) {}
-    explicit fast_discrete_dist(int N) : P(N) {}
-    explicit fast_discrete_dist(const param_type &P) : P(P) {}
+    explicit fast_discrete_dist(iter first, iter last) : P{first, last} {}
+    explicit fast_discrete_dist(int N) : P{N} {}
+    explicit fast_discrete_dist(const param_type &P) : P{P} {}
     // reset internal state
     void reset() {}
     // random numbers
     template<typename R>
     int operator()(R &r) {
-      double U = utility::uniformco<double>(r) * P.N;
-      int I = static_cast<int>(U);
+      const double U{utility::uniformco<double>(r) * P.N};
+      const int I{static_cast<int>(U)};
       return U - I <= P.F[I] ? I : P.L[I];
     }
     template<typename R>
-    int operator()(R &r, const param_type &p) {
-      fast_discrete_dist g(p);
+    int operator()(R &r, const param_type &P) {
+      fast_discrete_dist g(P);
       return g(r);
     }
     // property methods
@@ -156,18 +150,18 @@ namespace trng {
         return std::accumulate(P.P.begin(), P.P.begin() + x + 1, 0.0);
       return 1.0;
     }
-  };
+  };  // namespace trng
 
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const fast_discrete_dist::param_type &p1,
-                         const fast_discrete_dist::param_type &p2) {
-    return p1.P == p2.P;
+  inline bool operator==(const fast_discrete_dist::param_type &P1,
+                         const fast_discrete_dist::param_type &P2) {
+    return P1.P == P2.P;
   }
-  inline bool operator!=(const fast_discrete_dist::param_type &p1,
-                         const fast_discrete_dist::param_type &p2) {
-    return !(p1 == p2);
+  inline bool operator!=(const fast_discrete_dist::param_type &P1,
+                         const fast_discrete_dist::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // Streamable concept
@@ -196,7 +190,7 @@ namespace trng {
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
     in >> utility::delim('(') >> n >> utility::delim(' ');
-    for (std::vector<double>::size_type i = 0; i < n; ++i) {
+    for (std::vector<double>::size_type i{0}; i < n; ++i) {
       in >> p;
       if (i + 1 < n)
         in >> utility::delim(' ');
@@ -233,13 +227,13 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    fast_discrete_dist &g) {
-    fast_discrete_dist::param_type p;
+    fast_discrete_dist::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[fast_discrete ") >> p >>
+    in >> utility::ignore_spaces() >> utility::delim("[fast_discrete ") >> P >>
         utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

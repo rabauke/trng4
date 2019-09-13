@@ -49,12 +49,11 @@ namespace trng {
   template<typename float_t = double>
   class uniform_dist {
   public:
-    typedef float_t result_type;
-    class param_type;
+    using result_type = float_t;
 
     class param_type {
     private:
-      result_type a_, b_, d_;
+      result_type a_{0}, b_{1}, d_{1};
       TRNG_CUDA_ENABLE
       result_type d() const { return d_; }
 
@@ -74,92 +73,92 @@ namespace trng {
         d_ = b_ - a_;
       }
       TRNG_CUDA_ENABLE
-      param_type() : a_(0), b_(1), d_(1) {}
+      param_type() = default;
       TRNG_CUDA_ENABLE
-      param_type(result_type a, result_type b) : a_(a), b_(b), d_(b - a) {}
+      explicit param_type(result_type a, result_type b) : a_(a), b_(b), d_(b - a) {}
 
       friend class uniform_dist<float_t>;
 
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
-          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
+          std::basic_ostream<char_t, traits_t> &out, const param_type &P) {
         std::ios_base::fmtflags flags(out.flags());
         out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-        out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1) << p.a()
-            << ' ' << p.b() << ')';
+        out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1) << P.a()
+            << ' ' << P.b() << ')';
         out.flags(flags);
         return out;
       }
 
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &operator>>(
-          std::basic_istream<char_t, traits_t> &in, param_type &p) {
+          std::basic_istream<char_t, traits_t> &in, param_type &P) {
         float_t a, b;
         std::ios_base::fmtflags flags(in.flags());
         in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         in >> utility::delim('(') >> a >> utility::delim(' ') >> b >> utility::delim(')');
         if (in)
-          p = param_type(a, b);
+          P = param_type(a, b);
         in.flags(flags);
         return in;
       }
     };
 
   private:
-    param_type p;
+    param_type P;
 
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    uniform_dist(result_type a, result_type b) : p(a, b) {}
+    uniform_dist(result_type a, result_type b) : P{a, b} {}
     TRNG_CUDA_ENABLE
-    explicit uniform_dist(const param_type &p) : p(p) {}
+    explicit uniform_dist(const param_type &P) : P{P} {}
     // reset internal state
     TRNG_CUDA_ENABLE
     void reset() {}
     // random numbers
     template<typename R>
     TRNG_CUDA_ENABLE result_type operator()(R &r) {
-      return p.d() * utility::uniformco<result_type>(r) + p.a();
+      return P.d() * utility::uniformco<result_type>(r) + P.a();
     }
     template<typename R>
-    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
-      uniform_dist g(p);
+    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &P) {
+      uniform_dist g(P);
       return g(r);
     }
     // property methods
     TRNG_CUDA_ENABLE
-    result_type min() const { return p.a(); }
+    result_type min() const { return P.a(); }
     TRNG_CUDA_ENABLE
-    result_type max() const { return p.b(); }
+    result_type max() const { return P.b(); }
     TRNG_CUDA_ENABLE
-    param_type param() const { return p; }
+    param_type param() const { return P; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { p = p_new; }
+    void param(const param_type &p_new) { P = p_new; }
     TRNG_CUDA_ENABLE
-    result_type a() const { return p.a(); }
+    result_type a() const { return P.a(); }
     TRNG_CUDA_ENABLE
-    void a(result_type a_new) { p.a(a_new); }
+    void a(result_type a_new) { P.a(a_new); }
     TRNG_CUDA_ENABLE
-    result_type b() const { return p.b(); }
+    result_type b() const { return P.b(); }
     TRNG_CUDA_ENABLE
-    void b(result_type b_new) { p.b(b_new); }
+    void b(result_type b_new) { P.b(b_new); }
     // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
-      if (x < p.a() or x >= p.b())
+      if (x < P.a() or x >= P.b())
         return 0.0;
-      return 1.0 / p.d();
+      return 1.0 / P.d();
     }
     // cumulative density function
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
-      if (x < p.a())
+      if (x < P.a())
         return 0;
-      if (x >= p.b())
+      if (x >= P.b())
         return 1;
-      return (x - p.a()) / p.d();
+      return (x - P.a()) / P.d();
     }
     // inverse cumulative density function
     TRNG_CUDA_ENABLE
@@ -170,7 +169,7 @@ namespace trng {
 #endif
         return math::numeric_limits<result_type>::quiet_NaN();
       }
-      return x * p.d() + p.a();
+      return x * P.d() + P.a();
     }
   };
 
@@ -178,31 +177,29 @@ namespace trng {
 
   // EqualityComparable concept
   template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator==(
-      const typename uniform_dist<float_t>::param_type &p1,
-      const typename uniform_dist<float_t>::param_type &p2) {
-    return p1.a() == p2.a() and p1.b() == p2.b();
+  TRNG_CUDA_ENABLE bool operator==(const typename uniform_dist<float_t>::param_type &P1,
+                                   const typename uniform_dist<float_t>::param_type &P2) {
+    return P1.a() == P2.a() and P1.b() == P2.b();
   }
 
   template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator!=(
-      const typename uniform_dist<float_t>::param_type &p1,
-      const typename uniform_dist<float_t>::param_type &p2) {
-    return not(p1 == p2);
+  TRNG_CUDA_ENABLE bool operator!=(const typename uniform_dist<float_t>::param_type &P1,
+                                   const typename uniform_dist<float_t>::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
   template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator==(const uniform_dist<float_t> &g1,
-                                          const uniform_dist<float_t> &g2) {
+  TRNG_CUDA_ENABLE bool operator==(const uniform_dist<float_t> &g1,
+                                   const uniform_dist<float_t> &g2) {
     return g1.param() == g2.param();
   }
 
   template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator!=(const uniform_dist<float_t> &g1,
-                                          const uniform_dist<float_t> &g2) {
+  TRNG_CUDA_ENABLE bool operator!=(const uniform_dist<float_t> &g1,
+                                   const uniform_dist<float_t> &g2) {
     return g1.param() != g2.param();
   }
 
@@ -222,12 +219,12 @@ namespace trng {
   template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    uniform_dist<float_t> &g) {
-    typename uniform_dist<float_t>::param_type p;
+    typename uniform_dist<float_t>::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[uniform ") >> p >> utility::delim(']');
+    in >> utility::ignore_spaces() >> utility::delim("[uniform ") >> P >> utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

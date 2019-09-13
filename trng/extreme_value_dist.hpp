@@ -50,12 +50,11 @@ namespace trng {
   template<typename float_t = double>
   class extreme_value_dist {
   public:
-    typedef float_t result_type;
-    class param_type;
+    using result_type = float_t;
 
     class param_type {
     private:
-      result_type theta_, eta_;
+      result_type theta_{1}, eta_{0};
 
     public:
       TRNG_CUDA_ENABLE
@@ -67,58 +66,58 @@ namespace trng {
       TRNG_CUDA_ENABLE
       void eta(result_type eta_new) { eta_ = eta_new; }
       TRNG_CUDA_ENABLE
-      param_type() : theta_(1), eta_(0) {}
+      param_type() = default;
       TRNG_CUDA_ENABLE
-      param_type(result_type theta, result_type eta) : theta_(theta), eta_(eta) {}
+      explicit param_type(result_type theta, result_type eta) : theta_{theta}, eta_{eta} {}
 
       friend class extreme_value_dist;
 
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
-          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
+          std::basic_ostream<char_t, traits_t> &out, const param_type &P) {
         std::ios_base::fmtflags flags(out.flags());
         out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1)
-            << p.theta() << ' ' << p.eta() << ')';
+            << P.theta() << ' ' << P.eta() << ')';
         out.flags(flags);
         return out;
       }
 
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &operator>>(
-          std::basic_istream<char_t, traits_t> &in, param_type &p) {
+          std::basic_istream<char_t, traits_t> &in, param_type &P) {
         float_t theta, eta;
         std::ios_base::fmtflags flags(in.flags());
         in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         in >> utility::delim('(') >> theta >> utility::delim(' ') >> eta >> utility::delim(')');
         if (in)
-          p = param_type(theta, eta);
+          P = param_type(theta, eta);
         in.flags(flags);
         return in;
       }
     };
 
   private:
-    param_type p;
+    param_type P;
 
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    extreme_value_dist(result_type theta, result_type eta) : p(theta, eta) {}
+    explicit extreme_value_dist(result_type theta, result_type eta) : P{theta, eta} {}
     TRNG_CUDA_ENABLE
-    explicit extreme_value_dist(const param_type &p) : p(p) {}
+    explicit extreme_value_dist(const param_type &P) : P{P} {}
     // reset internal state
     TRNG_CUDA_ENABLE
     void reset() {}
     // random numbers
     template<typename R>
     TRNG_CUDA_ENABLE result_type operator()(R &r) {
-      return p.eta() + p.theta() * math::ln(-math::ln(utility::uniformoo<result_type>(r)));
+      return P.eta() + P.theta() * math::ln(-math::ln(utility::uniformoo<result_type>(r)));
     }
     template<typename R>
-    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
-      extreme_value_dist g(p);
+    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &P) {
+      extreme_value_dist g(P);
       return g(r);
     }
     // property methods
@@ -127,29 +126,29 @@ namespace trng {
     TRNG_CUDA_ENABLE
     result_type max() const { return math::numeric_limits<result_type>::infinity(); }
     TRNG_CUDA_ENABLE
-    param_type param() const { return p; }
+    param_type param() const { return P; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { p = p_new; }
+    void param(const param_type &P_new) { P = P_new; }
     TRNG_CUDA_ENABLE
-    result_type theta() const { return p.theta(); }
+    result_type theta() const { return P.theta(); }
     TRNG_CUDA_ENABLE
-    void theta(result_type theta_new) { p.theta(theta_new); }
+    void theta(result_type theta_new) { P.theta(theta_new); }
     TRNG_CUDA_ENABLE
-    result_type eta() const { return p.eta(); }
+    result_type eta() const { return P.eta(); }
     TRNG_CUDA_ENABLE
-    void eta(result_type eta_new) { p.eta(eta_new); }
+    void eta(result_type eta_new) { P.eta(eta_new); }
     // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
-      x -= p.eta();
-      x /= p.theta();
-      return math::exp(x - math::exp(x)) / p.theta();
+      x -= P.eta();
+      x /= P.theta();
+      return math::exp(x - math::exp(x)) / P.theta();
     }
     // cumulative density function
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
-      x -= p.eta();
-      x /= p.theta();
+      x -= P.eta();
+      x /= P.theta();
       return 1 - math::exp(-math::exp(x));
     }
     // inverse cumulative density function
@@ -165,7 +164,7 @@ namespace trng {
         return -math::numeric_limits<result_type>::infinity();
       if (x == 1)
         return math::numeric_limits<result_type>::infinity();
-      return p.eta() + p.theta() * math::ln(-math::ln(1 - x));
+      return P.eta() + P.theta() * math::ln(-math::ln(1 - x));
     }
   };
 
@@ -174,16 +173,16 @@ namespace trng {
   // EqualityComparable concept
   template<typename float_t>
   TRNG_CUDA_ENABLE inline bool operator==(
-      const typename extreme_value_dist<float_t>::param_type &p1,
-      const typename extreme_value_dist<float_t>::param_type &p2) {
-    return p1.theta() == p2.theta() and p1.eta() == p2.eta();
+      const typename extreme_value_dist<float_t>::param_type &P1,
+      const typename extreme_value_dist<float_t>::param_type &P2) {
+    return P1.theta() == P2.theta() and P1.eta() == P2.eta();
   }
 
   template<typename float_t>
   TRNG_CUDA_ENABLE inline bool operator!=(
-      const typename extreme_value_dist<float_t>::param_type &p1,
-      const typename extreme_value_dist<float_t>::param_type &p2) {
-    return not(p1 == p2);
+      const typename extreme_value_dist<float_t>::param_type &P1,
+      const typename extreme_value_dist<float_t>::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // -------------------------------------------------------------------
@@ -215,13 +214,13 @@ namespace trng {
   template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    extreme_value_dist<float_t> &g) {
-    typename extreme_value_dist<float_t>::param_type p;
+    typename extreme_value_dist<float_t>::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[extreme_value ") >> p >>
+    in >> utility::ignore_spaces() >> utility::delim("[extreme_value ") >> P >>
         utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

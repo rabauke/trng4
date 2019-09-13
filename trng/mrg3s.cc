@@ -37,55 +37,36 @@ namespace trng {
   // Uniform random number generator concept
 
   // Parameter and status classes
-
-  // EqualityComparable concept
-  bool operator==(const mrg3s::parameter_type &P1, const mrg3s::parameter_type &P2) {
-    return P1.a1 == P2.a1 and P1.a2 == P2.a2 and P1.a3 == P2.a3;
-  }
-
-  bool operator!=(const mrg3s::parameter_type &P1, const mrg3s::parameter_type &P2) {
-    return not(P1 == P2);
-  }
-
-  // Equality comparable concept
-  bool operator==(const mrg3s::status_type &S1, const mrg3s::status_type &S2) {
-    return S1.r1 == S2.r1 and S1.r2 == S2.r2 and S1.r3 == S2.r3;
-  }
-
-  bool operator!=(const mrg3s::status_type &S1, const mrg3s::status_type &S2) {
-    return not(S1 == S2);
-  }
-
   const mrg3s::parameter_type mrg3s::trng0 = parameter_type(2025213985, 1112953677, 2038969601);
   const mrg3s::parameter_type mrg3s::trng1 = parameter_type(1287767370, 1045931779, 58150106);
 
   // Random number engine concept
-  mrg3s::mrg3s(mrg3s::parameter_type P) : P(P), S() {}
+  mrg3s::mrg3s(mrg3s::parameter_type P) : P{P} {}
 
-  mrg3s::mrg3s(unsigned long s, mrg3s::parameter_type P) : P(P), S() { seed(s); }
+  mrg3s::mrg3s(unsigned long s, mrg3s::parameter_type P) : P{P} { seed(s); }
 
   void mrg3s::seed() { (*this) = mrg3s(); }
 
   void mrg3s::seed(unsigned long s) {
-    int64_t t = s;
+    int64_t t(s);
     t %= modulus;
     if (t < 0)
       t += modulus;
-    S.r1 = static_cast<result_type>(t);
-    S.r2 = 1;
-    S.r3 = 1;
+    S.r[0] = static_cast<result_type>(t);
+    S.r[1] = 1;
+    S.r[2] = 1;
   }
 
   void mrg3s::seed(mrg3s::result_type s1, mrg3s::result_type s2, mrg3s::result_type s3) {
-    S.r1 = s1 % modulus;
-    if (S.r1 < 0)
-      S.r1 += modulus;
-    S.r2 = s2 % modulus;
-    if (S.r2 < 0)
-      S.r2 += modulus;
-    S.r3 = s3 % modulus;
-    if (S.r3 < 0)
-      S.r3 += modulus;
+    S.r[0] = s1 % modulus;
+    if (S.r[0] < 0)
+      S.r[0] += modulus;
+    S.r[1] = s2 % modulus;
+    if (S.r[1] < 0)
+      S.r[1] += modulus;
+    S.r[2] = s3 % modulus;
+    if (S.r[2] < 0)
+      S.r[2] += modulus;
   }
 
   // Equality comparable concept

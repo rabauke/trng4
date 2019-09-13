@@ -49,21 +49,19 @@ namespace trng {
   // non-uniform random number generator class
   class zero_truncated_poisson_dist {
   public:
-    typedef int result_type;
-    class param_type;
+    using result_type = int;
 
     class param_type {
     private:
-      double mu_;
+      double mu_{0};
       std::vector<double> P_;
 
       void calc_probabilities() {
         P_ = std::vector<double>();
-        int x = 1;
-        double p = 0;
-        P_.push_back(p);
+        int x{1};
+        P_.push_back(0);
         while (x < 7 or x < 2 * mu_) {
-          p = (math::exp(mu_) * math::GammaQ(x + 1.0, mu_) - 1) / math::expm1(mu_);
+          const double p{(math::exp(mu_) * math::GammaQ(x + 1.0, mu_) - 1) / math::expm1(mu_)};
           P_.push_back(p);
           ++x;
         }
@@ -76,8 +74,8 @@ namespace trng {
         mu_ = mu_new;
         calc_probabilities();
       }
-      param_type() : mu_(0) {}
-      explicit param_type(double mu) : mu_(mu) { calc_probabilities(); }
+      param_type() = default;
+      explicit param_type(double mu) : mu_{mu} { calc_probabilities(); }
       friend class zero_truncated_poisson_dist;
     };
 
@@ -86,15 +84,15 @@ namespace trng {
 
   public:
     // constructor
-    explicit zero_truncated_poisson_dist(double mu) : P(mu) {}
-    explicit zero_truncated_poisson_dist(const param_type &P) : P(P) {}
+    explicit zero_truncated_poisson_dist(double mu) : P{mu} {}
+    explicit zero_truncated_poisson_dist(const param_type &P) : P{P} {}
     // reset internal state
     void reset() {}
     // random numbers
     template<typename R>
     int operator()(R &r) {
-      double p(utility::uniformco<double>(r));
-      int x(utility::discrete(p, P.P_.begin(), P.P_.end()));
+      double p{utility::uniformco<double>(r)};
+      int x{utility::discrete(p, P.P_.begin(), P.P_.end())};
       if (x + 1 == P.P_.size()) {
         p -= cdf(x);
         while (p > 0) {
@@ -133,13 +131,13 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const zero_truncated_poisson_dist::param_type &p1,
-                         const zero_truncated_poisson_dist::param_type &p2) {
-    return p1.mu() == p2.mu();
+  inline bool operator==(const zero_truncated_poisson_dist::param_type &P1,
+                         const zero_truncated_poisson_dist::param_type &P2) {
+    return P1.mu() == P2.mu();
   }
-  inline bool operator!=(const zero_truncated_poisson_dist::param_type &p1,
-                         const zero_truncated_poisson_dist::param_type &p2) {
-    return !(p1 == p2);
+  inline bool operator!=(const zero_truncated_poisson_dist::param_type &P1,
+                         const zero_truncated_poisson_dist::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // Streamable concept
@@ -193,13 +191,13 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    zero_truncated_poisson_dist &g) {
-    zero_truncated_poisson_dist::param_type p;
+    zero_truncated_poisson_dist::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[zero-truncated poisson ") >> p >>
+    in >> utility::ignore_spaces() >> utility::delim("[zero-truncated poisson ") >> P >>
         utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

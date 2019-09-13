@@ -68,13 +68,12 @@ namespace trng {
       parameter_type(3935559000370003845u, 1u);
 
   // Random number engine concept
-  lcg64_shift::lcg64_shift(lcg64_shift::parameter_type P) : P(P), S() {}
+  lcg64_shift::lcg64_shift(lcg64_shift::parameter_type P) : P{P} {}
 
-  lcg64_shift::lcg64_shift(unsigned long s, lcg64_shift::parameter_type P) : P(P), S() {
-    seed(s);
+  lcg64_shift::lcg64_shift(unsigned long s, lcg64_shift::parameter_type P) : P{P} { seed(s);
   }
 
-  lcg64_shift::lcg64_shift(unsigned long long s, lcg64_shift::parameter_type P) : P(P), S() {
+  lcg64_shift::lcg64_shift(unsigned long long s, lcg64_shift::parameter_type P) : P{P} {
     seed(s);
   }
 

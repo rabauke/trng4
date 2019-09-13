@@ -50,12 +50,11 @@ namespace trng {
   template<typename float_t = double>
   class weibull_dist {
   public:
-    typedef float_t result_type;
-    class param_type;
+    using result_type = float_t;
 
     class param_type {
     private:
-      result_type theta_, beta_;
+      result_type theta_{1}, beta_{1};
 
     public:
       TRNG_CUDA_ENABLE
@@ -67,59 +66,59 @@ namespace trng {
       TRNG_CUDA_ENABLE
       void beta(result_type beta_new) { beta_ = beta_new; }
       TRNG_CUDA_ENABLE
-      param_type() : theta_(1), beta_(1) {}
+      param_type() = default;
       TRNG_CUDA_ENABLE
-      param_type(result_type theta, result_type beta) : theta_(theta), beta_(beta) {}
+      explicit param_type(result_type theta, result_type beta) : theta_(theta), beta_(beta) {}
 
       friend class weibull_dist;
 
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
-          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
+          std::basic_ostream<char_t, traits_t> &out, const param_type &P) {
         std::ios_base::fmtflags flags(out.flags());
         out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1)
-            << p.theta() << ' ' << p.beta() << ')';
+            << P.theta() << ' ' << P.beta() << ')';
         out.flags(flags);
         return out;
       }
 
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &operator>>(
-          std::basic_istream<char_t, traits_t> &in, param_type &p) {
+          std::basic_istream<char_t, traits_t> &in, param_type &P) {
         float_t theta, beta;
         std::ios_base::fmtflags flags(in.flags());
         in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         in >> utility::delim('(') >> theta >> utility::delim(' ') >> beta >>
             utility::delim(')');
         if (in)
-          p = param_type(theta, beta);
+          P = param_type(theta, beta);
         in.flags(flags);
         return in;
       }
     };
 
   private:
-    param_type p;
+    param_type P;
 
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    weibull_dist(result_type theta, result_type beta) : p(theta, beta) {}
+    weibull_dist(result_type theta, result_type beta) : P(theta, beta) {}
     TRNG_CUDA_ENABLE
-    explicit weibull_dist(const param_type &p) : p(p) {}
+    explicit weibull_dist(const param_type &P) : P(P) {}
     // reset internal state
     TRNG_CUDA_ENABLE
     void reset() {}
     // random numbers
     template<typename R>
     TRNG_CUDA_ENABLE result_type operator()(R &r) {
-      return p.theta() * math::pow(-math::ln(utility::uniformoc<result_type>(r)), 1 / p.beta());
+      return P.theta() * math::pow(-math::ln(utility::uniformoc<result_type>(r)), 1 / P.beta());
     }
     template<typename R>
-    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
-      weibull_dist g(p);
+    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &P) {
+      weibull_dist g(P);
       return g(r);
     }
     // property methods
@@ -128,42 +127,42 @@ namespace trng {
     TRNG_CUDA_ENABLE
     result_type max() const { return math::numeric_limits<result_type>::infinity(); }
     TRNG_CUDA_ENABLE
-    param_type param() const { return p; }
+    param_type param() const { return P; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { p = p_new; }
+    void param(const param_type &P_new) { P = P_new; }
     TRNG_CUDA_ENABLE
-    result_type theta() const { return p.theta(); }
+    result_type theta() const { return P.theta(); }
     TRNG_CUDA_ENABLE
-    void theta(result_type theta_new) { p.theta(theta_new); }
+    void theta(result_type theta_new) { P.theta(theta_new); }
     TRNG_CUDA_ENABLE
-    result_type beta() const { return p.beta(); }
+    result_type beta() const { return P.beta(); }
     TRNG_CUDA_ENABLE
-    void beta(result_type beta_new) { p.beta(beta_new); }
+    void beta(result_type beta_new) { P.beta(beta_new); }
     // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
       if (x < 0)
         return 0;
-      x /= p.theta();
+      x /= P.theta();
       if (x > 0) {
-        const result_type t1(math::pow(x, p.beta()));
-        const result_type t2(t1 / x);
-        return p.beta() / p.theta() * t2 * math::exp(-t1);
+        const result_type t1{math::pow(x, P.beta())};
+        const result_type t2{t1 / x};
+        return P.beta() / P.theta() * t2 * math::exp(-t1);
       }
       // x==0
-      if (p.beta() == 1)
-        return 1 / p.theta();
-      if (p.beta() > 1)
+      if (P.beta() == 1)
+        return 1 / P.theta();
+      if (P.beta() > 1)
         return 0;
       return math::numeric_limits<result_type>::quiet_NaN();
     }
     // cumulative density function
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
-      x /= p.theta();
+      x /= P.theta();
       if (x <= 0)
         return 0;
-      return -math::expm1(-math::pow(x, p.beta()));
+      return -math::expm1(-math::pow(x, P.beta()));
     }
     // inverse cumulative density function
     TRNG_CUDA_ENABLE
@@ -174,7 +173,7 @@ namespace trng {
 #endif
         return math::numeric_limits<result_type>::quiet_NaN();
       }
-      return p.theta() * math::pow(-math::ln1p(-x), 1 / p.beta());
+      return P.theta() * math::pow(-math::ln1p(-x), 1 / P.beta());
     }
   };
 
@@ -183,16 +182,16 @@ namespace trng {
   // EqualityComparable concept
   template<typename float_t>
   TRNG_CUDA_ENABLE inline bool operator==(
-      const typename weibull_dist<float_t>::param_type &p1,
-      const typename weibull_dist<float_t>::param_type &p2) {
-    return p1.theta() == p2.theta() and p1.beta() == p2.beta();
+      const typename weibull_dist<float_t>::param_type &P1,
+      const typename weibull_dist<float_t>::param_type &P2) {
+    return P1.theta() == P2.theta() and P1.beta() == P2.beta();
   }
 
   template<typename float_t>
   TRNG_CUDA_ENABLE inline bool operator!=(
-      const typename weibull_dist<float_t>::param_type &p1,
-      const typename weibull_dist<float_t>::param_type &p2) {
-    return not(p1 == p2);
+      const typename weibull_dist<float_t>::param_type &P1,
+      const typename weibull_dist<float_t>::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // -------------------------------------------------------------------
@@ -224,12 +223,12 @@ namespace trng {
   template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    weibull_dist<float_t> &g) {
-    typename weibull_dist<float_t>::param_type p;
+    typename weibull_dist<float_t>::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[weibull ") >> p >> utility::delim(']');
+    in >> utility::ignore_spaces() >> utility::delim("[weibull ") >> P >> utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

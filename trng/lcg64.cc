@@ -62,11 +62,11 @@ namespace trng {
   const lcg64::parameter_type lcg64::LEcuyer3 = parameter_type(3935559000370003845u, 1u);
 
   // Random number engine concept
-  lcg64::lcg64(lcg64::parameter_type P) : P(P), S() {}
+  lcg64::lcg64(lcg64::parameter_type P) : P{P} {}
 
-  lcg64::lcg64(unsigned long s, lcg64::parameter_type P) : P(P), S() { seed(s); }
+  lcg64::lcg64(unsigned long s, lcg64::parameter_type P) : P{P} { seed(s); }
 
-  lcg64::lcg64(unsigned long long s, lcg64::parameter_type P) : P(P), S() { seed(s); }
+  lcg64::lcg64(unsigned long long s, lcg64::parameter_type P) : P{P} { seed(s); }
 
   void lcg64::seed() { (*this) = lcg64(); }
 

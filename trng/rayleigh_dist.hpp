@@ -50,12 +50,11 @@ namespace trng {
   template<typename float_t = double>
   class rayleigh_dist {
   public:
-    typedef double result_type;
-    class param_type;
+    using result_type = double;
 
     class param_type {
     private:
-      result_type nu_;
+      result_type nu_{1};
 
     public:
       TRNG_CUDA_ENABLE
@@ -63,7 +62,7 @@ namespace trng {
       TRNG_CUDA_ENABLE
       void nu(result_type nu_new) { nu_ = nu_new; }
       TRNG_CUDA_ENABLE
-      param_type() : nu_(1) {}
+      param_type() = default;
       TRNG_CUDA_ENABLE
       explicit param_type(result_type nu) : nu_(nu) {}
 
@@ -72,10 +71,10 @@ namespace trng {
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
-          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
+          std::basic_ostream<char_t, traits_t> &out, const param_type &P) {
         std::ios_base::fmtflags flags(out.flags());
         out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-        out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1) << p.nu()
+        out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1) << P.nu()
             << ')';
         out.flags(flags);
         return out;
@@ -83,27 +82,27 @@ namespace trng {
 
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &operator>>(
-          std::basic_istream<char_t, traits_t> &in, param_type &p) {
+          std::basic_istream<char_t, traits_t> &in, param_type &P) {
         float_t nu;
         std::ios_base::fmtflags flags(in.flags());
         in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         in >> utility::delim('(') >> nu >> utility::delim(')');
         if (in)
-          p = rayleigh_dist::param_type(nu);
+          P = rayleigh_dist::param_type(nu);
         in.flags(flags);
         return in;
       }
     };
 
   private:
-    param_type p;
+    param_type P;
 
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    explicit rayleigh_dist(result_type nu) : p(nu) {}
+    explicit rayleigh_dist(result_type nu) : P{nu} {}
     TRNG_CUDA_ENABLE
-    explicit rayleigh_dist(const param_type &p) : p(p) {}
+    explicit rayleigh_dist(const param_type &P) : P{P} {}
     // reset internal state
     TRNG_CUDA_ENABLE
     void reset() {}
@@ -113,8 +112,8 @@ namespace trng {
       return icdf(utility::uniformoo<result_type>(r));
     }
     template<typename R>
-    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
-      rayleigh_dist g(p);
+    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &P) {
+      rayleigh_dist g(P);
       return g(r);
     }
     // property methods
@@ -123,19 +122,19 @@ namespace trng {
     TRNG_CUDA_ENABLE
     result_type max() const { return math::numeric_limits<result_type>::infinity(); }
     TRNG_CUDA_ENABLE
-    param_type param() const { return p; }
+    param_type param() const { return P; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { p = p_new; }
+    void param(const param_type &p_new) { P = p_new; }
     TRNG_CUDA_ENABLE
-    result_type nu() const { return p.nu(); }
+    result_type nu() const { return P.nu(); }
     TRNG_CUDA_ENABLE
-    void nu(result_type nu_new) { p.nu(nu_new); }
+    void nu(result_type nu_new) { P.nu(nu_new); }
     // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
       if (x <= 0)
         return 0;
-      result_type t = x / (p.nu() * p.nu());
+      const result_type t{x / (P.nu() * P.nu())};
       return t * math::exp(-t * x / 2);
     }
     // cumulative density function
@@ -143,7 +142,7 @@ namespace trng {
     result_type cdf(result_type x) const {
       if (x <= 0)
         return 0;
-      return 1 - math::exp(-x * x / (2 * p.nu() * p.nu()));
+      return 1 - math::exp(-x * x / (2 * P.nu() * P.nu()));
     }
     // inverse cumulative density function
     TRNG_CUDA_ENABLE
@@ -154,7 +153,7 @@ namespace trng {
 #endif
         return math::numeric_limits<result_type>::quiet_NaN();
       }
-      return p.nu() * math::sqrt(-2 * math::ln(1 - x));
+      return P.nu() * math::sqrt(-2 * math::ln(1 - x));
     }
   };
 

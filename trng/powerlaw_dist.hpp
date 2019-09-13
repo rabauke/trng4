@@ -50,12 +50,11 @@ namespace trng {
   template<typename float_t = double>
   class powerlaw_dist {
   public:
-    typedef float_t result_type;
-    class param_type;
+    using result_type = float_t;
 
     class param_type {
     private:
-      result_type gamma_, theta_;
+      result_type gamma_{1}, theta_{1};
 
     public:
       TRNG_CUDA_ENABLE
@@ -67,55 +66,56 @@ namespace trng {
       TRNG_CUDA_ENABLE
       void theta(result_type theta_new) { theta_ = theta_new; }
       TRNG_CUDA_ENABLE
-      param_type() : gamma_(1), theta_(1) {}
+      param_type() = default;
       TRNG_CUDA_ENABLE
-      param_type(result_type gamma, result_type theta) : gamma_(gamma), theta_(theta) {}
+      explicit param_type(result_type gamma, result_type theta)
+          : gamma_{gamma}, theta_{theta} {}
 
       friend class powerlaw_dist;
 
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
-          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
+          std::basic_ostream<char_t, traits_t> &out, const param_type &P) {
         std::ios_base::fmtflags flags(out.flags());
         out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         out << '(' << std::setprecision(math::numeric_limits<float_t>::digits10 + 1)
-            << p.gamma() << ' ' << p.theta() << ')';
+            << P.gamma() << ' ' << P.theta() << ')';
         out.flags(flags);
         return out;
       }
 
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &operator>>(
-          std::basic_istream<char_t, traits_t> &in, param_type &p) {
+          std::basic_istream<char_t, traits_t> &in, param_type &P) {
         float_t gamma, theta;
         std::ios_base::fmtflags flags(in.flags());
         in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         in >> utility::delim('(') >> gamma >> utility::delim(' ') >> theta >>
             utility::delim(')');
         if (in)
-          p = param_type(gamma, theta);
+          P = param_type(gamma, theta);
         in.flags(flags);
         return in;
       }
     };
 
   private:
-    param_type p;
+    param_type P;
 
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    powerlaw_dist(result_type gamma, result_type theta) : p(gamma, theta) {}
+    explicit powerlaw_dist(result_type gamma, result_type theta) : P{gamma, theta} {}
     TRNG_CUDA_ENABLE
-    explicit powerlaw_dist(const param_type &p) : p(p) {}
+    explicit powerlaw_dist(const param_type &P) : P{P} {}
     // reset internal state
     TRNG_CUDA_ENABLE
     void reset() {}
     // random numbers
     template<typename R>
     TRNG_CUDA_ENABLE result_type operator()(R &r) {
-      return p.theta() * math::pow(utility::uniformoc<result_type>(r), -1 / p.gamma());
+      return P.theta() * math::pow(utility::uniformoc<result_type>(r), -1 / P.gamma());
     }
     template<typename R>
     TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
@@ -124,36 +124,34 @@ namespace trng {
     }
     // property methods
     TRNG_CUDA_ENABLE
-    result_type min() const { return p.theta(); }
+    result_type min() const { return P.theta(); }
     TRNG_CUDA_ENABLE
     result_type max() const { return math::numeric_limits<result_type>::infinity(); }
     TRNG_CUDA_ENABLE
-    param_type param() const { return p; }
+    param_type param() const { return P; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { p = p_new; }
+    void param(const param_type &p_new) { P = p_new; }
     TRNG_CUDA_ENABLE
-    result_type gamma() const { return p.gamma(); }
+    result_type gamma() const { return P.gamma(); }
     TRNG_CUDA_ENABLE
-    void gamma(result_type gamma_new) { p.gamma(gamma_new); }
+    void gamma(result_type gamma_new) { P.gamma(gamma_new); }
     TRNG_CUDA_ENABLE
-    result_type theta() const { return p.theta(); }
+    result_type theta() const { return P.theta(); }
     TRNG_CUDA_ENABLE
-    void theta(result_type theta_new) { p.theta(theta_new); }
+    void theta(result_type theta_new) { P.theta(theta_new); }
     // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
-      if (x < p.theta())
+      if (x < P.theta())
         return 0;
-      else
-        return p.gamma() / p.theta() * math::pow(x / p.theta(), -p.gamma() - 1);
+      return P.gamma() / P.theta() * math::pow(x / P.theta(), -P.gamma() - 1);
     }
     // cumulative density function
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
       if (x <= 0)
         return 0;
-      else
-        return 1 - math::pow(x / p.theta(), -p.gamma());
+      return 1 - math::pow(x / P.theta(), -P.gamma());
     }
     // inverse cumulative density function
     TRNG_CUDA_ENABLE
@@ -165,10 +163,10 @@ namespace trng {
         return math::numeric_limits<result_type>::quiet_NaN();
       }
       if (x == 0)
-        return p.theta();
+        return P.theta();
       if (x == 1)
         return math::numeric_limits<result_type>::infinity();
-      return p.theta() * math::pow(1 - x, -1 / p.gamma());
+      return P.theta() * math::pow(1 - x, -1 / P.gamma());
     }
   };
 

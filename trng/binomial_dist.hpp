@@ -48,32 +48,32 @@ namespace trng {
   // non-uniform random number generator class
   class binomial_dist {
   public:
-    typedef int result_type;
-    class param_type;
+    using result_type = int;
 
     class param_type {
     private:
-      double p_;
-      int n_;
+      double p_{0.5};
+      int n_{0};
       std::vector<double> P_;
 
       void calc_probabilities() {
         P_ = std::vector<double>();
-        double ln_binom = 0.0;
-        const double ln_p = math::ln(p_);
-        const double ln_1_p = math::ln(1.0 - p_);
-        for (int i = 0; i <= n_; ++i) {
-          double ln_prob =
-              ln_binom + static_cast<double>(i) * ln_p + static_cast<double>(n_ - i) * ln_1_p;
+        P_.reserve(n_ + 1);
+        double ln_binom{0.0};
+        const double ln_p{math::ln(p_)};
+        const double ln_1_p{math::ln(1.0 - p_)};
+        for (int i{0}; i <= n_; ++i) {
+          const double ln_prob{ln_binom + static_cast<double>(i) * ln_p +
+                               static_cast<double>(n_ - i) * ln_1_p};
           P_.push_back(math::exp(ln_prob));
           ln_binom += math::ln(static_cast<double>(n_ - i));
           ln_binom -= math::ln(static_cast<double>(i + 1));
         }
         // build list with cumulative density function
-        for (std::vector<double>::size_type i(1); i < P_.size(); ++i)
+        for (std::vector<double>::size_type i{1}; i < P_.size(); ++i)
           P_[i] += P_[i - 1];
         // normailze, just in case of rounding errors
-        for (std::vector<double>::size_type i(0); i < P_.size(); ++i)
+        for (std::vector<double>::size_type i{0}; i < P_.size(); ++i)
           P_[i] /= P_.back();
       }
 
@@ -88,8 +88,8 @@ namespace trng {
         n_ = n_new;
         calc_probabilities();
       }
-      param_type() : p_(0.5), n_(0) {}
-      param_type(double p, int n) : p_(p), n_(n) { calc_probabilities(); }
+      param_type() = default;
+      explicit param_type(double p, int n) : p_(p), n_(n) { calc_probabilities(); }
       friend class binomial_dist;
     };
 
@@ -98,8 +98,8 @@ namespace trng {
 
   public:
     // constructor
-    binomial_dist(double p, int n) : P(p, n) {}
-    explicit binomial_dist(const param_type &P) : P(P) {}
+    explicit binomial_dist(double p, int n) : P{p, n} {}
+    explicit binomial_dist(const param_type &P) : P{P} {}
     // reset internal state
     void reset() {}
     // random numbers
@@ -108,8 +108,8 @@ namespace trng {
       return utility::discrete(utility::uniformoo<double>(r), P.P_.begin(), P.P_.end());
     }
     template<typename R>
-    int operator()(R &r, const param_type &p) {
-      binomial_dist g(p);
+    int operator()(R &r, const param_type &P) {
+      binomial_dist g(P);
       return g(r);
     }
     // property methods
@@ -142,13 +142,13 @@ namespace trng {
   // -------------------------------------------------------------------
 
   // EqualityComparable concept
-  inline bool operator==(const binomial_dist::param_type &p1,
-                         const binomial_dist::param_type &p2) {
-    return p1.p() == p2.p() and p1.n() == p2.n();
+  inline bool operator==(const binomial_dist::param_type &P1,
+                         const binomial_dist::param_type &P2) {
+    return P1.p() == P2.p() and P1.n() == P2.n();
   }
-  inline bool operator!=(const binomial_dist::param_type &p1,
-                         const binomial_dist::param_type &p2) {
-    return not(p1 == p2);
+  inline bool operator!=(const binomial_dist::param_type &P1,
+                         const binomial_dist::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // Streamable concept
@@ -200,12 +200,12 @@ namespace trng {
   template<typename char_t, typename traits_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    binomial_dist &g) {
-    binomial_dist::param_type p;
+    binomial_dist::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[binomial ") >> p >> utility::delim(']');
+    in >> utility::ignore_spaces() >> utility::delim("[binomial ") >> P >> utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }

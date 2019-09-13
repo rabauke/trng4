@@ -51,12 +51,11 @@ namespace trng {
   template<typename float_t = double>
   class snedecor_f_dist {
   public:
-    typedef float_t result_type;
-    class param_type;
+    using result_type = float_t;
 
     class param_type {
     private:
-      int n_, m_;
+      int n_{1}, m_{1};
 
     public:
       TRNG_CUDA_ENABLE
@@ -68,54 +67,54 @@ namespace trng {
       TRNG_CUDA_ENABLE
       void m(int m_new) { m_ = m_new; }
       TRNG_CUDA_ENABLE
-      param_type() : n_(1), m_(1) {}
+      param_type() = default;
       TRNG_CUDA_ENABLE
-      param_type(int n, int m) : n_(n), m_(m) {}
+      explicit param_type(int n, int m) : n_{n}, m_{m} {}
 
       friend class snedecor_f_dist;
 
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
-          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
+          std::basic_ostream<char_t, traits_t> &out, const param_type &P) {
         std::ios_base::fmtflags flags(out.flags());
         out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-        out << '(' << p.n() << ' ' << p.m() << ')';
+        out << '(' << P.n() << ' ' << P.m() << ')';
         out.flags(flags);
         return out;
       }
 
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &operator>>(
-          std::basic_istream<char_t, traits_t> &in, param_type &p) {
+          std::basic_istream<char_t, traits_t> &in, param_type &P) {
         int n, m;
         std::ios_base::fmtflags flags(in.flags());
         in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         in >> utility::delim('(') >> n >> utility::delim(' ') >> m >> utility::delim(')');
         if (in)
-          p = snedecor_f_dist::param_type(n, m);
+          P = snedecor_f_dist::param_type(n, m);
         in.flags(flags);
         return in;
       }
     };
 
   private:
-    param_type p;
+    param_type P;
 
     // inverse cumulative density function
     TRNG_CUDA_ENABLE
     result_type icdf_(result_type x) const {
-      result_type t = math::inv_Beta_I(x, result_type(1) / result_type(2) * p.n(),
-                                       result_type(1) / result_type(2) * p.m());
-      return t / (1 - t) * static_cast<result_type>(p.m()) / static_cast<result_type>(p.n());
+      const result_type t{math::inv_Beta_I(x, result_type(1) / result_type(2) * P.n(),
+                                           result_type(1) / result_type(2) * P.m())};
+      return t / (1 - t) * static_cast<result_type>(P.m()) / static_cast<result_type>(P.n());
     }
 
   public:
     // constructor
     TRNG_CUDA_ENABLE
-    snedecor_f_dist(int n, int m) : p(n, m) {}
+    explicit snedecor_f_dist(int n, int m) : P{n, m} {}
     TRNG_CUDA_ENABLE
-    explicit snedecor_f_dist(const param_type &p) : p(p) {}
+    explicit snedecor_f_dist(const param_type &P) : P{P} {}
     // reset internal state
     void reset() {}
     // random numbers
@@ -124,8 +123,8 @@ namespace trng {
       return icdf_(utility::uniformco<result_type>(r));
     }
     template<typename R>
-    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &p) {
-      snedecor_f_dist g(p);
+    TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &P) {
+      snedecor_f_dist g(P);
       return g(r);
     }
     // property methods
@@ -133,22 +132,22 @@ namespace trng {
     TRNG_CUDA_ENABLE
     result_type max() const { return math::numeric_limits<result_type>::infinity(); }
     TRNG_CUDA_ENABLE
-    param_type param() const { return p; }
+    param_type param() const { return P; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) { p = p_new; }
+    void param(const param_type &p_new) { P = p_new; }
     TRNG_CUDA_ENABLE
-    int n() const { return p.n(); }
+    int n() const { return P.n(); }
     TRNG_CUDA_ENABLE
-    void n(int n_new) { p.n(n_new); }
+    void n(int n_new) { P.n(n_new); }
     TRNG_CUDA_ENABLE
-    int m() const { return p.m(); }
+    int m() const { return P.m(); }
     TRNG_CUDA_ENABLE
-    void m(int m_new) { p.m(m_new); }
+    void m(int m_new) { P.m(m_new); }
     // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
-      const result_type n = static_cast<result_type>(p.n()),
-                        m = static_cast<result_type>(p.m());
+      const result_type n{static_cast<result_type>(P.n())};
+      const result_type m{static_cast<result_type>(P.m())};
       // return math::exp(math::ln(n)*result_type(1)/result_type(2)*n +
       // math::ln(m)*result_type(1)/result_type(2)*m -
       // 		       math::ln(m+n*x)*result_type(1)/result_type(2)*(m+n) +
@@ -165,8 +164,8 @@ namespace trng {
     // cumulative density function
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
-      const result_type n = static_cast<result_type>(p.n()),
-                        m = static_cast<result_type>(p.m());
+      const result_type n{static_cast<result_type>(P.n())};
+      const result_type m{static_cast<result_type>(P.m())};
       return math::Beta_I(n * x / (m + n * x), result_type(1) / result_type(2) * n,
                           result_type(1) / result_type(2) * m);
     }
@@ -192,16 +191,16 @@ namespace trng {
   // EqualityComparable concept
   template<typename float_t>
   TRNG_CUDA_ENABLE inline bool operator==(
-      const typename snedecor_f_dist<float_t>::param_type &p1,
-      const typename snedecor_f_dist<float_t>::param_type &p2) {
-    return p1.n() == p2.n() and p1.m() == p2.m();
+      const typename snedecor_f_dist<float_t>::param_type &P1,
+      const typename snedecor_f_dist<float_t>::param_type &P2) {
+    return P1.n() == P2.n() and P1.m() == P2.m();
   }
 
   template<typename float_t>
   TRNG_CUDA_ENABLE inline bool operator!=(
-      const typename snedecor_f_dist<float_t>::param_type &p1,
-      const typename snedecor_f_dist<float_t>::param_type &p2) {
-    return not(p1 == p2);
+      const typename snedecor_f_dist<float_t>::param_type &P1,
+      const typename snedecor_f_dist<float_t>::param_type &P2) {
+    return not(P1 == P2);
   }
 
   // -------------------------------------------------------------------
@@ -233,13 +232,13 @@ namespace trng {
   template<typename char_t, typename traits_t, typename float_t>
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    snedecor_f_dist<float_t> &g) {
-    typename snedecor_f_dist<float_t>::param_type p;
+    typename snedecor_f_dist<float_t>::param_type P;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    in >> utility::ignore_spaces() >> utility::delim("[snedecor_f ") >> p >>
+    in >> utility::ignore_spaces() >> utility::delim("[snedecor_f ") >> P >>
         utility::delim(']');
     if (in)
-      g.param(p);
+      g.param(P);
     in.flags(flags);
     return in;
   }
