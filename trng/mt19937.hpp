@@ -165,7 +165,7 @@ namespace trng {
     void seed();
     template<typename gen>
     void seed(gen &g) {
-      const unsigned long r{g()};
+      const unsigned long r(g());
       seed(r);
     }
     void seed(unsigned long);
@@ -218,23 +218,22 @@ namespace trng {
   // Inline and template methods
 
   mt19937::result_type mt19937::operator()() {
-    result_type x;
     const result_type mag01[2]{0u, 0x9908b0dfu};
     if (S.mti >= N) {  // generate N words at one time
       int i{0};
       for (; i < N - M; ++i) {
-        x = (S.mt[i] & mt19937::UM) | (S.mt[i + 1] & mt19937::LM);
+        const result_type x{(S.mt[i] & mt19937::UM) | (S.mt[i + 1] & mt19937::LM)};
         S.mt[i] = S.mt[i + M] ^ (x >> 1u) ^ mag01[x & 0x1u];
       }
       for (; i < N - 1; ++i) {
-        x = (S.mt[i] & mt19937::UM) | (S.mt[i + 1] & LM);
+        const result_type x{(S.mt[i] & mt19937::UM) | (S.mt[i + 1] & LM)};
         S.mt[i] = S.mt[i + (M - N)] ^ (x >> 1u) ^ mag01[x & 0x1u];
       }
-      x = (S.mt[N - 1] & mt19937::UM) | (S.mt[0] & mt19937::LM);
+      const result_type x{(S.mt[N - 1] & mt19937::UM) | (S.mt[0] & mt19937::LM)};
       S.mt[N - 1] = S.mt[M - 1] ^ (x >> 1u) ^ mag01[x & 0x1u];
       S.mti = 0;
     }
-    x = S.mt[S.mti++];
+    result_type x{S.mt[S.mti++]};
     x ^= (x >> 11u);
     x ^= (x << 7u) & 0x9d2c5680u;
     x ^= (x << 15u) & 0xefc60000u;

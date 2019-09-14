@@ -60,8 +60,6 @@
 
 namespace trng {
 
-  class mt19937_64;
-
   class mt19937_64 {
   public:
     // Uniform random number generator concept
@@ -228,24 +226,22 @@ namespace trng {
   // Inline and template methods
 
   inline mt19937_64::result_type mt19937_64::operator()() {
-    result_type x;
     const result_type mag01[2]{0u, 0xB5026F5AA96619E9u};
-
     if (S.mti >= mt19937_64::N) {  // generate N words at one time
       int i{0};
       for (; i < mt19937_64::N - mt19937_64::M; ++i) {
-        x = (S.mt[i] & mt19937_64::UM) | (S.mt[i + 1] & mt19937_64::LM);
+        const result_type x{(S.mt[i] & mt19937_64::UM) | (S.mt[i + 1] & mt19937_64::LM)};
         S.mt[i] = S.mt[i + mt19937_64::M] ^ (x >> 1u) ^ mag01[(int)(x & 1u)];
       }
       for (; i < mt19937_64::N - 1; ++i) {
-        x = (S.mt[i] & mt19937_64::UM) | (S.mt[i + 1] & mt19937_64::LM);
+        const result_type x{(S.mt[i] & mt19937_64::UM) | (S.mt[i + 1] & mt19937_64::LM)};
         S.mt[i] = S.mt[i + (mt19937_64::M - mt19937_64::N)] ^ (x >> 1u) ^ mag01[(int)(x & 1u)];
       }
-      x = (S.mt[mt19937_64::N - 1] & UM) | (S.mt[0] & LM);
+      const result_type x{(S.mt[mt19937_64::N - 1] & UM) | (S.mt[0] & LM)};
       S.mt[N - 1] = S.mt[mt19937_64::M - 1] ^ (x >> 1u) ^ mag01[(int)(x & 1u)];
       S.mti = 0;
     }
-    x = S.mt[S.mti++];
+    result_type x{S.mt[S.mti++]};
     x ^= (x >> 29u) & 0x5555555555555555u;
     x ^= (x << 17u) & 0x71D67FFFEDA60000u;
     x ^= (x << 37u) & 0xFFF7EEE000000000u;
