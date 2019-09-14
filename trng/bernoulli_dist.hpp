@@ -52,26 +52,22 @@ namespace trng {
 
     class param_type {
       template<typename type>
-      static constexpr typename std::enable_if<
-          std::is_integral<type>::value or std::is_floating_point<type>::value, type>::type
+      static constexpr typename std::enable_if<std::is_arithmetic<type>::value, type>::type
       init_head() {
-        return type(0);
+        return type(1);
       }
       template<typename type>
-      static constexpr typename std::enable_if<
-          not(std::is_integral<type>::value or std::is_floating_point<type>::value), type>::type
+      static constexpr typename std::enable_if<not std::is_arithmetic<type>::value, type>::type
       init_head() {
         return type{};
       }
       template<typename type>
-      static constexpr typename std::enable_if<
-          std::is_integral<type>::value or std::is_floating_point<type>::value, type>::type
+      static constexpr typename std::enable_if<std::is_arithmetic<type>::value, type>::type
       init_tail() {
-        return type(1);
+        return type(0);
       }
       template<typename type>
-      static constexpr typename std::enable_if<
-          not(std::is_integral<type>::value or std::is_floating_point<type>::value), type>::type
+      static constexpr typename std::enable_if<not std::is_arithmetic<type>::value, type>::type
       init_tail() {
         return type{};
       }
@@ -95,7 +91,10 @@ namespace trng {
       void tail(const T &tail_new) { tail_ = tail_new; }
       param_type() = default;
       TRNG_CUDA_ENABLE
-      explicit param_type(double p) : p_{p} {}
+      explicit param_type(double p) : p_{p} {
+        static_assert(std::is_arithmetic<T>::value,
+                      "head and tail values must be specified explicitly");
+      }
       TRNG_CUDA_ENABLE
       explicit param_type(double p, const T &head, const T &tail)
           : p_{p}, head_{head}, tail_{tail} {}
@@ -128,9 +127,9 @@ namespace trng {
     }
     // property methods
     TRNG_CUDA_ENABLE
-    T min() const { return P.head(); }
+    T min() const { return P.head() < P.tail() ? P.head() : P.tail(); }
     TRNG_CUDA_ENABLE
-    T max() const { return P.tail(); }
+    T max() const { return P.head() > P.tail() ? P.head() : P.tail(); }
     TRNG_CUDA_ENABLE
     param_type param() const { return P; }
     TRNG_CUDA_ENABLE
@@ -159,11 +158,19 @@ namespace trng {
     // cumulative density function
     TRNG_CUDA_ENABLE
     double cdf(const T &x) const {
-      if (x == P.head())
-        return P.p();
-      if (x == P.tail())
+      if (P.head() < P.tail()) {
+        if (x < P.head())
+          return 0.0;
+        if (x < P.tail())
+          return P.p();
         return 1.0;
-      return 0.0;
+      } else {
+        if (x < P.tail())
+          return 0.0;
+        if (x < P.head())
+          return 1.0 - P.p();
+        return 1.0;
+      }
     }
   };
 
