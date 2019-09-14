@@ -39,6 +39,7 @@
 #include <trng/utility.hpp>
 #include <ostream>
 #include <istream>
+#include <type_traits>
 #include <ciso646>
 
 namespace trng {
@@ -50,9 +51,34 @@ namespace trng {
     using result_type = T;
 
     class param_type {
+      template<typename type>
+      static constexpr typename std::enable_if<
+          std::is_integral<type>::value or std::is_floating_point<type>::value, type>::type
+      init_head() {
+        return type(0);
+      }
+      template<typename type>
+      static constexpr typename std::enable_if<
+          not(std::is_integral<type>::value or std::is_floating_point<type>::value), type>::type
+      init_head() {
+        return type{};
+      }
+      template<typename type>
+      static constexpr typename std::enable_if<
+          std::is_integral<type>::value or std::is_floating_point<type>::value, type>::type
+      init_tail() {
+        return type(1);
+      }
+      template<typename type>
+      static constexpr typename std::enable_if<
+          not(std::is_integral<type>::value or std::is_floating_point<type>::value), type>::type
+      init_tail() {
+        return type{};
+      }
+
     private:
       double p_{0.5};
-      T head_{}, tail_{};
+      T head_{init_head<T>()}, tail_{init_tail<T>()};
 
     public:
       TRNG_CUDA_ENABLE
@@ -69,6 +95,8 @@ namespace trng {
       void tail(const T &tail_new) { tail_ = tail_new; }
       param_type() = default;
       TRNG_CUDA_ENABLE
+      explicit param_type(double p) : p_{p} {}
+      TRNG_CUDA_ENABLE
       explicit param_type(double p, const T &head, const T &tail)
           : p_{p}, head_{head}, tail_{tail} {}
       friend class bernoulli_dist;
@@ -79,6 +107,8 @@ namespace trng {
 
   public:
     // constructor
+    TRNG_CUDA_ENABLE
+    explicit bernoulli_dist(double p) : P{p} {}
     TRNG_CUDA_ENABLE
     explicit bernoulli_dist(double p, const T &head, const T &tail) : P{p, head, tail} {}
     TRNG_CUDA_ENABLE

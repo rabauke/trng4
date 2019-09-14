@@ -412,7 +412,7 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(test_suite_discrete_distributions)
 
 BOOST_AUTO_TEST_CASE(test_bernoulli_dist) {
-  trng::bernoulli_dist<int> d(0.4, 0, 1);
+  trng::bernoulli_dist<int> d(0.4);
   BOOST_TEST(discrete_dist_test(d));
   BOOST_TEST(discrete_dist_test_chi2_test(d));
 }
