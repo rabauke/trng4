@@ -49,8 +49,7 @@ namespace trng {
 
     template<typename result_type, typename R>
     TRNG_CUDA_ENABLE inline
-        typename std::enable_if<not math::numeric_limits<result_type>::is_integer,
-                                result_type>::type
+        typename std::enable_if<math::numeric_limits<result_type>::is_iec559, result_type>::type
         generate_canonical_impl(R &r, result_type) {
       return utility::uniformoo<result_type>(r);
     }
