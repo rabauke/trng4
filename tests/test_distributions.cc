@@ -35,7 +35,6 @@
 #include <limits>
 #include <ciso646>
 
-#define BOOST_TEST_MODULE test engines
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
