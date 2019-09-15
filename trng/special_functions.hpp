@@ -493,16 +493,31 @@ namespace trng {
 
     TRNG_CUDA_ENABLE
     inline float Phi(float x) {
-      return 0.5f + 0.5f * erf(constants<float>::one_over_sqrt_2() * x);
+      x *= constants<float>::one_over_sqrt_2();
+      if (x < -0.6744897501960817f * constants<float>::one_over_sqrt_2())
+        return 0.5f * erfc(-x);
+      if (x > +0.6744897501960817f * constants<float>::one_over_sqrt_2())
+        return 1.0f - 0.5f * erfc(x);
+      return 0.5f + 0.5f * erf(x);
     }
 
     TRNG_CUDA_ENABLE
     inline double Phi(double x) {
-      return 0.5 + 0.5 * erf(constants<double>::one_over_sqrt_2() * x);
+      x *= constants<double>::one_over_sqrt_2();
+      if (x < -0.6744897501960817 * constants<double>::one_over_sqrt_2())
+        return 0.5 * erfc(-x);
+      if (x > +0.6744897501960817 * constants<double>::one_over_sqrt_2())
+        return 1.0 - 0.5 * erfc(x);
+      return 0.5 + 0.5 * erf(x);
     }
 
     inline long double Phi(long double x) {
-      return 0.5l + 0.5l * erf(constants<long double>::one_over_sqrt_2() * x);
+      x *= constants<long double>::one_over_sqrt_2();
+      if (x < -0.6744897501960817l * constants<long double>::one_over_sqrt_2())
+        return 0.5 * erfc(-x);
+      if (x > +0.6744897501960817l * constants<long double>::one_over_sqrt_2())
+        return 1.0l - 0.5l * erfc(x);
+      return 0.5l + 0.5l * erf(x);
     }
 
     // --- inverse of normal distribution function  --------------------
