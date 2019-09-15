@@ -130,12 +130,12 @@ namespace trng {
       // by series expansion
       template<typename T, bool by_Gamma_a>
       TRNG_CUDA_ENABLE T GammaP_ser(T a, T x) {
-        const int itmax = 32;
-        const T eps = T(4) * numeric_limits<T>::epsilon();
+        const int itmax{32};
+        const T eps{T(4) * numeric_limits<T>::epsilon()};
         if (x < eps)
           return T(0);
-        T xx(T(1) / a), n(a), sum(xx);
-        int i(0);
+        T xx{T(1) / a}, n{a}, sum{xx};
+        int i{0};
         do {
           ++n;
           ++i;
@@ -143,7 +143,7 @@ namespace trng {
           sum += xx;
         } while (abs(xx) > eps * abs(sum) and i < itmax);
         if (by_Gamma_a)
-          return exp(-x + a * ln(x) - math::ln_Gamma(a)) * sum;
+          return exp(-x + a * ln(x) - ln_Gamma(a)) * sum;
         return exp(-x + a * ln(x)) * sum;
       }
 
@@ -158,14 +158,14 @@ namespace trng {
       // by continued fraction
       template<typename T, bool by_Gamma_a>
       TRNG_CUDA_ENABLE T GammaQ_cf(T a, T x) {
-        const T itmax = T(32);
-        const T eps = T(4) * numeric_limits<T>::epsilon();
-        const T min = T(4) * numeric_limits<T>::min();
+        const T itmax{T(32)};
+        const T eps{T(4) * numeric_limits<T>::epsilon()};
+        const T min{T(4) * numeric_limits<T>::min()};
         // set up for evaluating continued fraction by modied Lentz's method
-        T del, bi(x + T(1) - a), ci(T(1) / min), di(T(1) / bi), h(di), i(T(0));
+        T del, bi{x + T(1) - a}, ci{T(1) / min}, di{T(1) / bi}, h{di}, i{T(0)};
         do {  // iterate
           ++i;
-          T ai = -i * (i - a);
+          T ai{-i * (i - a)};
           bi += T(2);
           di = ai * di + bi;
           if (abs(di) < min)
@@ -178,7 +178,7 @@ namespace trng {
           h *= del;
         } while ((abs(del - T(1)) > eps) and i < itmax);
         if (by_Gamma_a)
-          return exp(-x + a * ln(x) - math::ln_Gamma(a)) * h;
+          return exp(-x + a * ln(x) - ln_Gamma(a)) * h;
         return exp(-x + a * ln(x)) * h;
       }
 
@@ -194,7 +194,7 @@ namespace trng {
         }
         if (x < a + T(1))
           return GammaP_ser<T, false>(a, x);
-        return math::Gamma(a) - GammaQ_cf<T, false>(a, x);
+        return Gamma(a) - GammaQ_cf<T, false>(a, x);
       }
 
       // Q(a, x) and Gamma(a, x)
@@ -208,7 +208,7 @@ namespace trng {
           return GammaQ_cf<T, true>(a, x);
         }
         if (x < a + T(1))
-          return math::Gamma(a) - GammaP_ser<T, false>(a, x);
+          return Gamma(a) - GammaP_ser<T, false>(a, x);
         return GammaQ_cf<T, false>(a, x);
       }
 

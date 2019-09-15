@@ -33,6 +33,7 @@
 #include <vector>
 #include <iterator>
 #include <limits>
+#include <cmath>
 #include <ciso646>
 
 #define BOOST_TEST_DYN_LINK
