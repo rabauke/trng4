@@ -68,6 +68,90 @@ BOOST_AUTO_TEST_SUITE(test_suite_math)
 //-----------------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE(test_suite_special_functions)
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_asech, T, floats) {
+  const std::string &name{type_name<T>::name};
+  struct test_values {
+    const T x, y;
+  };
+  const std::vector<test_values> values{
+      {9.5367431640625000e-07l, 1.45560907917586241240864312e+01l},
+      {9.7656250000000000e-04l, 7.62461874774073403685358701e+00l},
+      {7.8125000000000000e-03l, 5.54516218534124216700376390e+00l},
+      {1.0000000000000000e+00l, 0.00000000000000000000000000e+00l}};
+  for (auto &v : values) {
+    const T x{v.x};
+    const T y{trng::math::asech(x)};
+    const T err{std::abs(y - v.y)};
+    const T rel_err{err / std::abs(v.y)};
+    std::stringstream mes;
+    mes << "sufficent accuracy, x = " << x << ", asech(x) = " << y << ", err = " << err
+        << ", rel_err = " << rel_err << " for " << name;
+    auto y_min_max = bounds(v.y);
+    const T y_min{std::get<0>(y_min_max)};
+    const T y_max{std::get<1>(y_min_max)};
+    BOOST_TEST((y_min <= y and y <= y_max), mes.str().c_str());
+  }
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_acsch, T, floats) {
+  const std::string &name{type_name<T>::name};
+  struct test_values {
+    const T x, y;
+  };
+  const std::vector<test_values> values{
+      {9.5367431640625000e-07l, 1.45560907917590788714373177e+01l},
+      {9.7656250000000000e-04l, 7.62461922457789224006893719e+00l},
+      {1.0000000000000000e+00l, 8.81373587019543025232609325e-01l},
+      {1.0240000000000000e+03l, 9.76562344779637510763910959e-04l},
+      {1.0485760000000000e+06l, 9.53674316406105439710335325e-07l}};
+  for (auto &v : values) {
+    const T x{v.x};
+    const T y{trng::math::acsch(x)};
+    const T err{std::abs(y - v.y)};
+    const T rel_err{err / std::abs(v.y)};
+    std::stringstream mes;
+    mes << "sufficent accuracy, x = " << x << ", acsch(x) = " << y << ", err = " << err
+        << ", rel_err = " << rel_err << " for " << name;
+    auto y_min_max = bounds(v.y);
+    const T y_min{std::get<0>(y_min_max)};
+    const T y_max{std::get<1>(y_min_max)};
+    BOOST_TEST((y_min <= y and y <= y_max), mes.str().c_str());
+  }
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_acoth, T, floats) {
+  const std::string &name{type_name<T>::name};
+  struct test_values {
+    const T x, y;
+  };
+  const std::vector<test_values> values{
+      {1.0009765625000000e+00l, 3.81255357411944987738904519e+00l},
+      {1.0078125000000000e+00l, 2.77453804244760989917589716e+00l},
+      {2.0000000000000000e+00l, 5.49306144334054845697622618e-01l},
+      {1.2800000000000000e+02l, 7.81265895154042091032347128e-03l},
+      {1.0240000000000000e+03l, 9.76562810441035840964450030e-04l}};
+  for (auto &v : values) {
+    const T x{v.x};
+    const T y{trng::math::acoth(x)};
+    const T err{std::abs(y - v.y)};
+    const T rel_err{err / std::abs(v.y)};
+    std::stringstream mes;
+    mes << "sufficent accuracy, x = " << x << ", aocth(x) = " << y << ", err = " << err
+        << ", rel_err = " << rel_err << " for " << name;
+    auto y_min_max = bounds(v.y);
+    const T y_min{std::get<0>(y_min_max)};
+    const T y_max{std::get<1>(y_min_max)};
+    BOOST_TEST((y_min <= y and y <= y_max), mes.str().c_str());
+  }
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+//-----------------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_SUITE(test_suite_special_functions)
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_Phi, T, floats) {
   const std::string &name{type_name<T>::name};
   struct test_values {
@@ -105,11 +189,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_Phi, T, floats) {
     BOOST_TEST((y_min <= y and y <= y_max), mes.str().c_str());
   }
 }
-BOOST_AUTO_TEST_SUITE_END()
 
-//-----------------------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(test_suite_special_functions)
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_GammaP, T, floats) {
   const std::string &name{type_name<T>::name};
   struct test_values {
@@ -139,11 +220,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_GammaP, T, floats) {
     BOOST_TEST((y_min <= y and y <= y_max), mes.str().c_str());
   }
 }
-BOOST_AUTO_TEST_SUITE_END()
 
-//-----------------------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(test_suite_special_functions)
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_GammaQ, T, floats) {
   const std::string &name{type_name<T>::name};
   struct test_values {
@@ -175,6 +253,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_GammaQ, T, floats) {
     BOOST_TEST((y_min <= y and y <= y_max), mes.str().c_str());
   }
 }
+
 BOOST_AUTO_TEST_SUITE_END()
 
 //-----------------------------------------------------------------------------------------

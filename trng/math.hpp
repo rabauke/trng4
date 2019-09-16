@@ -103,24 +103,13 @@ namespace trng {
     using ::std::acosh;
     using ::std::atanh;
 
-    inline float asech(float x) { return ::std::log((1.0f + ::std::sqrt(1.0f - x * x)) / x); }
-    inline double asech(double x) { return ::std::log((1.0 + ::std::sqrt(1.0 - x * x)) / x); }
-    inline long double asech(long double x) {
-      return ::std::log((1.0l + ::std::sqrt(1.0l - x * x)) / x);
-    }
+    inline float asech(float x) { return ::std::acosh(1.0f / x); }
+    inline double asech(double x) { return ::std::acosh(1.0 / x); }
+    inline long double asech(long double x) { return ::std::acosh(1.0l / x); }
 
-    inline float acsch(float x) {
-      const float t = 1.0f / x;
-      return ::std::log(t + ::std::sqrt(1.0f + t * t));
-    }
-    inline double acsch(double x) {
-      const double t = 1.0 / x;
-      return ::std::log(t + ::std::sqrt(1.0 + t * t));
-    }
-    inline long double acsch(long double x) {
-      const long double t = 1.0l / x;
-      return ::std::log(t + ::std::sqrt(1.0l + t * t));
-    }
+    inline float acsch(float x) { return ::std::asinh(1.0f / x); }
+    inline double acsch(double x) { return ::std::asinh(1.0 / x); }
+    inline long double acsch(long double x) { return ::std::asinh(1.0l / x); }
 
     inline float acoth(float x) { return 0.5f * ::std::log((x + 1.0f) / (x - 1.0f)); }
     inline double acoth(double x) { return 0.5 * ::std::log((x + 1.0) / (x - 1.0)); }
