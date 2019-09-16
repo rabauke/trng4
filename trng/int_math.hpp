@@ -179,50 +179,32 @@ namespace trng {
 
     // ---------------------------------------------------------------
 
-    template<int32_t m>
-    struct log2_floor {
-      static constexpr int32_t value = 1 + log2_floor<m / 2>::value;
-    };
+    template<typename T>
+    constexpr T pow2(const T x) {
+      return T(1) << x;
+    }
 
-    template<>
-    struct log2_floor<0> {
-      static constexpr int32_t value = 0;
-    };
+    template<typename T>
+    constexpr T log2_floor(const T x) {
+      return x <= T(1) ? T(0) : T(1) + log2_floor(x / T(2));
+    }
 
-    template<>
-    struct log2_floor<1> {
-      static constexpr int32_t value = 0;
-    };
+    template<typename T>
+    constexpr T log2_ceil(const T x) {
+      return pow2(log2_floor(x)) < x ? log2_floor(x) + 1 : log2_floor(x);
+    }
 
-    template<int32_t m>
-    struct log2_ceil {
-      static constexpr int32_t value =
-          (1ul << log2_floor<m>::value) < m ? log2_floor<m>::value + 1 : log2_floor<m>::value;
-    };
+    // round upwards to next power of 2
+    template<typename T>
+    constexpr T ceil2(const T x) {
+      return x <= T(1) ? x : T(2) * ceil2((x + T(1)) / T(2));
+    }
 
-    // ---------------------------------------------------------------
-
-    template<unsigned int x>
-    struct ceil2 {
-      static constexpr unsigned int result = 2 * ceil2<(x + 1) / 2>::result;
-    };
-
-    template<>
-    struct ceil2<0> {
-      static constexpr unsigned int result = 0;
-    };
-
-    template<>
-    struct ceil2<1> {
-      static constexpr unsigned int result = 1;
-    };
-
-    // ---------------------------------------------------------------
-
-    template<unsigned int x>
-    struct mask {
-      static constexpr unsigned int result = ceil2<x + 1>::result - 1;
-    };
+    // sets all bits below the argument's most significant bit to one
+    template<typename T>
+    constexpr T mask(const T x) {
+      return ceil2(x + T(1)) - T(1);
+    }
 
     // ---------------------------------------------------------------
 
@@ -231,7 +213,7 @@ namespace trng {
 
     template<int32_t m>
     class modulo_helper<m, 0> {
-      static constexpr int32_t e = log2_ceil<m>::value;
+      static constexpr int32_t e = log2_ceil(m);
       static constexpr int32_t k = (1ul << e) - m;
       static constexpr uint32_t mask = (1ul << e) - 1ul;
 
@@ -257,7 +239,7 @@ namespace trng {
 
     template<int32_t m>
     class modulo_helper<m, 1> {
-      static constexpr int32_t e = log2_ceil<m>::value;
+      static constexpr int32_t e = log2_ceil(m);
       static constexpr int32_t k = (static_cast<uint32_t>(1) << e) - m;
       static constexpr uint32_t mask = (static_cast<uint32_t>(1) << e) - 1u;
 
@@ -287,7 +269,7 @@ namespace trng {
 
     template<int32_t m>
     class modulo_helper<m, 2> {
-      static constexpr int32_t e = log2_ceil<m>::value;
+      static constexpr int32_t e = log2_ceil(m);
       static constexpr int32_t k = (static_cast<uint32_t>(1) << e) - m;
       static constexpr uint32_t mask = (static_cast<uint32_t>(1) << e) - 1u;
 
@@ -321,7 +303,9 @@ namespace trng {
 
     template<int32_t m, int32_t r>
     TRNG_CUDA_ENABLE inline int32_t modulo(uint64_t x) {
-      return modulo_helper<m, log2_floor<r>::value>::modulo(x);
+      static_assert(m > 0, "must be positive");
+      static_assert(r > 0, "must be positive");
+      return modulo_helper<m, log2_floor(r)>::modulo(x);
     }
 
     //------------------------------------------------------------------

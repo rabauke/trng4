@@ -68,9 +68,9 @@ namespace trng {
 
     // Parameter and status classes
     class status_type {
-      result_type r[int_math::ceil2<D>::result]{};
+      result_type r[int_math::ceil2(D)]{};
       unsigned int index{0};
-      static constexpr unsigned int size() { return int_math::ceil2<D>::result; }
+      static constexpr unsigned int size() { return int_math::ceil2(D); }
 
     public:
       friend class lagfib4xor;
@@ -208,11 +208,10 @@ namespace trng {
 
     void step() {
       S.index++;
-      S.index &= int_math::mask<D>::result;
-      S.r[S.index] = S.r[(S.index - A) & int_math::mask<D>::result] ^
-                     S.r[(S.index - B) & int_math::mask<D>::result] ^
-                     S.r[(S.index - C) & int_math::mask<D>::result] ^
-                     S.r[(S.index - D) & int_math::mask<D>::result];
+      S.index &= int_math::mask(D);
+      S.r[S.index] =
+          S.r[(S.index - A) & int_math::mask(D)] ^ S.r[(S.index - B) & int_math::mask(D)] ^
+          S.r[(S.index - C) & int_math::mask(D)] ^ S.r[(S.index - D) & int_math::mask(D)];
     }
   };
 

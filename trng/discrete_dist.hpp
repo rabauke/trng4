@@ -36,7 +36,7 @@
 
 #include <trng/limits.hpp>
 #include <trng/utility.hpp>
-#include <trng/math.hpp>
+#include <trng/int_math.hpp>
 #include <ostream>
 #include <iomanip>
 #include <istream>
@@ -61,8 +61,8 @@ namespace trng {
       explicit param_type(std::vector<double> P)
           : P_(std::move(P)),
             N_{P_.size()},
-            layers_{math::log2_ceil(N_)},
-            offset_{math::pow2(layers_) - 1} {
+            layers_{int_math::log2_ceil(N_)},
+            offset_{int_math::pow2(layers_) - 1} {
         P_.resize(N_ + offset_);
         std::copy_backward(P_.begin(), P_.begin() + N_, P_.end());
         std::fill(P_.begin(), P_.begin() + offset_, 0);
@@ -78,7 +78,7 @@ namespace trng {
 
     private:
       void update_layer(size_type layer, size_type n) {
-        const size_type first{math::pow2(layer) - 1}, last{first + n};
+        const size_type first{int_math::pow2(layer) - 1}, last{first + n};
         for (size_type i{first}; i < last; ++i, ++i)
           if (i + 1 < last)
             P_[(i - 1) / 2] = P_[i] + P_[i + 1];
@@ -92,7 +92,7 @@ namespace trng {
           --layer;
         }
         while (layer > 0) {
-          update_layer(layer, math::pow2(layer));
+          update_layer(layer, int_math::pow2(layer));
           --layer;
         }
       }
