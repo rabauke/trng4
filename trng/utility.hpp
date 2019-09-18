@@ -197,7 +197,7 @@ namespace trng {
 
     // random number
     template<typename iter>
-    int discrete(double x, iter first, iter last) {
+    std::size_t discrete(double x, iter first, iter last) {
       using difference_type = typename std::iterator_traits<iter>::difference_type;
       if (x < (*first))
         return 0;
@@ -209,7 +209,7 @@ namespace trng {
         else
           i1 = i3;
       }
-      return i2;
+      return static_cast<std::size_t>(i2);
     }
 
   }  // namespace utility

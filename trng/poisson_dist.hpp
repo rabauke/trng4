@@ -38,6 +38,7 @@
 #include <trng/utility.hpp>
 #include <trng/math.hpp>
 #include <trng/special_functions.hpp>
+#include <cstddef>
 #include <ostream>
 #include <istream>
 #include <iomanip>
@@ -90,7 +91,7 @@ namespace trng {
     template<typename R>
     int operator()(R &r) {
       double p(utility::uniformco<double>(r));
-      int x(utility::discrete(p, P.P_.begin(), P.P_.end()));
+      std::size_t x(utility::discrete(p, P.P_.begin(), P.P_.end()));
       if (x + 1 == P.P_.size()) {
         p -= cdf(x);
         while (p > 0) {
@@ -98,7 +99,7 @@ namespace trng {
           p -= pdf(x);
         }
       }
-      return x;
+      return static_cast<int>(x);
     }
     template<typename R>
     int operator()(R &r, const param_type &p) {

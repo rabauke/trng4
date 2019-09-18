@@ -210,11 +210,13 @@ namespace trng {
     b[1] = P.a[1];
     b[2] = 1;
     b[3] = 0;
-    for (unsigned int i{0}; i < s; ++i)
-      if ((i & 1u) == 0)
-        int_math::matrix_mult<2>(b, b, c, modulus);
-      else
-        int_math::matrix_mult<2>(c, c, b, modulus);
+    for (unsigned int i{0}; i < s; ++i) {
+      int_math::matrix_mult<2>(b, b, c, modulus);
+      ++i;
+      if (not(i < s))
+        break;
+      int_math::matrix_mult<2>(c, c, b, modulus);
+    }
     r[0] = S.r[0];
     r[1] = S.r[1];
     if ((s & 1u) == 0)

@@ -60,7 +60,7 @@ namespace trng {
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
-          std::basic_ostream<char_t, traits_t> &out, const param_type &p) {
+          std::basic_ostream<char_t, traits_t> &out, const param_type &) {
         std::ios_base::fmtflags flags(out.flags());
         out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         out << '(' << ')';
@@ -70,7 +70,7 @@ namespace trng {
 
       template<typename char_t, typename traits_t>
       friend std::basic_istream<char_t, traits_t> &operator>>(
-          std::basic_istream<char_t, traits_t> &in, param_type &p) {
+          std::basic_istream<char_t, traits_t> &in, param_type &) {
         std::ios_base::fmtflags flags(in.flags());
         in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
         in >> utility::delim('(') >> utility::delim(')');
@@ -87,7 +87,7 @@ namespace trng {
     TRNG_CUDA_ENABLE
     uniform01_dist() = default;
     TRNG_CUDA_ENABLE
-    explicit uniform01_dist(const param_type &p) {}
+    explicit uniform01_dist(const param_type &) {}
     // reset internal state
     TRNG_CUDA_ENABLE
     void reset() {}
@@ -109,7 +109,7 @@ namespace trng {
     TRNG_CUDA_ENABLE
     param_type param() const { return p; }
     TRNG_CUDA_ENABLE
-    void param(const param_type &p_new) {}
+    void param(const param_type &) {}
     // probability density function
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
