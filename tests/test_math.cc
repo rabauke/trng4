@@ -254,6 +254,99 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_GammaQ, T, floats) {
   }
 }
 
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_inc_gamma, T, floats) {
+  const std::string &name{type_name<T>::name};
+  struct test_values {
+    const T s, x, y;
+  };
+  const std::vector<test_values> values{{6.0l, 2.0l, 1.98763301767373266843244038e+00l},
+                                        {6.0l, 4.0l, 2.57843535563513765691144986e+01l},
+                                        {6.0l, 6.0l, 6.65184430362466506643774675e+01l},
+                                        {6.0l, 8.0l, 9.70516725504449701299064127e+01l},
+                                        {6.0l, 10.0l, 1.11949684454516186125708912e+02l},
+                                        {6.0l, 12.0l, 1.17559076469968595452748762e+02l},
+                                        {6.0l, 14.0l, 1.19336154036275981201164822e+02l}};
+  for (auto &v : values) {
+    const T s{v.s};
+    const T x{v.x};
+    const T y{trng::math::inc_gamma(s, x)};
+    const T err{std::abs(y - v.y)};
+    const T rel_err{err / std::abs(v.y)};
+    std::stringstream mes;
+    mes << "sufficent accuracy, s = " << s << ", x = " << x << ", inc_gamma(s, x) = " << y
+        << ", err = " << err << ", rel_err = " << rel_err << " for " << name;
+    auto y_min_max = bounds(v.y);
+    const T y_min{std::get<0>(y_min_max)};
+    const T y_max{std::get<1>(y_min_max)};
+    BOOST_TEST((y_min <= y and y <= y_max), mes.str().c_str());
+  }
+}
+
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_inc_Gamma, T, floats) {
+  const std::string &name{type_name<T>::name};
+  struct test_values {
+    const T s, x, y;
+  };
+  const std::vector<test_values> values{{6.0l, 2.0l, 1.18012366982326267331567560e+02l},
+                                        {6.0l, 4.0l, 9.42156464436486234308855014e+01l},
+                                        {6.0l, 6.0l, 5.34815569637533493356225325e+01l},
+                                        {6.0l, 8.0l, 2.29483274495550298700935873e+01l},
+                                        {6.0l, 10.0l, 8.05031554548381387429108754e+00l},
+                                        {6.0l, 12.0l, 2.44092353003140454725123793e+00l},
+                                        {6.0l, 14.0l, 6.63845963724018798835178155e-01l}};
+  for (auto &v : values) {
+    const T s{v.s};
+    const T x{v.x};
+    const T y{trng::math::inc_Gamma(s, x)};
+    const T err{std::abs(y - v.y)};
+    const T rel_err{err / std::abs(v.y)};
+    std::stringstream mes;
+    mes << "sufficent accuracy, s = " << s << ", x = " << x << ", inc_Gamma(s, x) = " << y
+        << ", err = " << err << ", rel_err = " << rel_err << " for " << name;
+    auto y_min_max = bounds(v.y);
+    const T y_min{std::get<0>(y_min_max)};
+    const T y_max{std::get<1>(y_min_max)};
+    BOOST_TEST((y_min <= y and y <= y_max), mes.str().c_str());
+  }
+}
+
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_inv_GammaP, T, floats) {
+  const std::string &name{type_name<T>::name};
+  struct test_values {
+    const T s, x, y;
+  };
+  const std::vector<test_values> values{{2.0l, 0.025l, 2.42209278543964902902040257e-01l},
+                                        {2.0l, 0.050l, 3.55361510698662052223826033e-01l},
+                                        {2.0l, 0.100l, 5.31811608389612020145630298e-01l},
+                                        {2.0l, 0.200l, 8.24388309032984609379573008e-01l},
+                                        {2.0l, 0.300l, 1.09734921070349164962301800e+00l},
+                                        {2.0l, 0.400l, 1.37642134206288679917880939e+00l},
+                                        {2.0l, 0.500l, 1.67834699001666065341288451e+00l},
+                                        {2.0l, 0.600l, 2.02231324532465691594936386e+00l},
+                                        {2.0l, 0.800l, 2.99430834700212208501332324e+00l},
+                                        {2.0l, 0.800l, 2.99430834700212208501332324e+00l},
+                                        {2.0l, 0.900l, 3.88972016986742905790398022e+00l},
+                                        {2.0l, 0.950l, 4.74386451839057837585027379e+00l},
+                                        {2.0l, 0.975l, 5.57164339093889859722728276e+00l}};
+  for (auto &v : values) {
+    const T s{v.s};
+    const T x{v.x};
+    const T y{trng::math::inv_GammaP(s, x)};
+    const T err{std::abs(y - v.y)};
+    const T rel_err{err / std::abs(v.y)};
+    std::stringstream mes;
+    mes << "sufficent accuracy, s = " << s << ", x = " << x << ", inv_GammaP(s, x) = " << y
+        << ", err = " << err << ", rel_err = " << rel_err << " for " << name;
+    auto y_min_max = bounds(v.y);
+    const T y_min{std::get<0>(y_min_max)};
+    const T y_max{std::get<1>(y_min_max)};
+    BOOST_TEST((y_min <= y and y <= y_max), mes.str().c_str());
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 //-----------------------------------------------------------------------------------------

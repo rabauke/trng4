@@ -127,14 +127,14 @@ namespace trng {
       //
       //  P(a, x) = gamma(a, x) / Gamma(a)
       //
-      // by series expansion
+      // by series expansion, see "Numerical Recipes" by W. H. Press et al., 3rd edition
       template<typename T, bool by_Gamma_a>
       TRNG_CUDA_ENABLE T GammaP_ser(T a, T x) {
         const int itmax{32};
-        const T eps{T(4) * numeric_limits<T>::epsilon()};
+        const T eps{T{4} * numeric_limits<T>::epsilon()};
         if (x < eps)
-          return T(0);
-        T xx{T(1) / a}, n{a}, sum{xx};
+          return T{0};
+        T xx{T{1} / a}, n{a}, sum{xx};
         int i{0};
         do {
           ++n;
@@ -142,9 +142,14 @@ namespace trng {
           xx *= x / n;
           sum += xx;
         } while (abs(xx) > eps * abs(sum) and i < itmax);
+#if __cplusplus >= 201703L
+        if constexpr (by_Gamma_a)
+#else
         if (by_Gamma_a)
+#endif
           return exp(-x + a * ln(x) - ln_Gamma(a)) * sum;
-        return exp(-x + a * ln(x)) * sum;
+        else
+          return exp(-x + a * ln(x)) * sum;
       }
 
       // compute complementary incomplete Gamma function
@@ -155,61 +160,76 @@ namespace trng {
       //
       //  Q(a, x) = Gamma(a, x) / Gamma(a) = 1 - P(a, x)
       //
-      // by continued fraction
+      // by continued fraction, see "Numerical Recipes" by W. H. Press et al., 3rd edition
       template<typename T, bool by_Gamma_a>
       TRNG_CUDA_ENABLE T GammaQ_cf(T a, T x) {
-        const T itmax{T(32)};
-        const T eps{T(4) * numeric_limits<T>::epsilon()};
-        const T min{T(4) * numeric_limits<T>::min()};
-        // set up for evaluating continued fraction by modied Lentz's method
-        T del, bi{x + T(1) - a}, ci{T(1) / min}, di{T(1) / bi}, h{di}, i{T(0)};
+        const T itmax{T{32}};
+        const T eps{T{4} * numeric_limits<T>::epsilon()};
+        const T min{T{4} * numeric_limits<T>::min()};
+        // set up for evaluating continued fraction by modified Lentz's method
+        T del, bi{x + T{1} - a}, ci{T{1} / min}, di{T{1} / bi}, h{di}, i{T{0}};
         do {  // iterate
           ++i;
           T ai{-i * (i - a)};
-          bi += T(2);
+          bi += T{2};
           di = ai * di + bi;
           if (abs(di) < min)
             di = min;
           ci = bi + ai / ci;
           if (abs(ci) < min)
             ci = min;
-          di = T(1) / di;
+          di = T{1} / di;
           del = di * ci;
           h *= del;
-        } while ((abs(del - T(1)) > eps) and i < itmax);
+        } while ((abs(del - T{1}) > eps) and i < itmax);
+#if __cplusplus >= 201703L
+        if constexpr (by_Gamma_a)
+#else
         if (by_Gamma_a)
+#endif
           return exp(-x + a * ln(x) - ln_Gamma(a)) * h;
-        return exp(-x + a * ln(x)) * h;
+        else
+          return exp(-x + a * ln(x)) * h;
       }
 
       // P(a, x) and gamma(a, x)
       template<typename T, bool by_Gamma_a>
       TRNG_CUDA_ENABLE T GammaP(T a, T x) {
-        if (x < T(0) or a <= T(0))
+        if (x < T{0} or a <= T{0})
           return numeric_limits<T>::signaling_NaN();
+#if __cplusplus >= 201703L
+        if constexpr (by_Gamma_a) {
+#else
         if (by_Gamma_a) {
-          if (x < a + T(1))
+#endif
+          if (x < a + T{1})
             return GammaP_ser<T, true>(a, x);
-          return T(1) - GammaQ_cf<T, true>(a, x);
+          return T{1} - GammaQ_cf<T, true>(a, x);
+        } else {
+          if (x < a + T{1})
+            return GammaP_ser<T, false>(a, x);
+          return Gamma(a) - GammaQ_cf<T, false>(a, x);
         }
-        if (x < a + T(1))
-          return GammaP_ser<T, false>(a, x);
-        return Gamma(a) - GammaQ_cf<T, false>(a, x);
       }
 
       // Q(a, x) and Gamma(a, x)
       template<typename T, bool by_Gamma_a>
       TRNG_CUDA_ENABLE T GammaQ(T a, T x) {
-        if (x < T(0) or a <= T(0))
+        if (x < T{0} or a <= T{0})
           return numeric_limits<T>::signaling_NaN();
+#if __cplusplus >= 201703L
+        if constexpr (by_Gamma_a) {
+#else
         if (by_Gamma_a) {
-          if (x < a + T(1))
-            return T(1) - GammaP_ser<T, true>(a, x);
+#endif
+          if (x < a + T{1})
+            return T{1} - GammaP_ser<T, true>(a, x);
           return GammaQ_cf<T, true>(a, x);
+        } else {
+          if (x < a + T{1})
+            return Gamma(a) - GammaP_ser<T, false>(a, x);
+          return GammaQ_cf<T, false>(a, x);
         }
-        if (x < a + T(1))
-          return Gamma(a) - GammaP_ser<T, false>(a, x);
-        return GammaQ_cf<T, false>(a, x);
       }
 
     }  // namespace detail
@@ -255,51 +275,57 @@ namespace trng {
 
     // Gamma(x, a)
     TRNG_CUDA_ENABLE
-    inline float cinc_gamma(float a, float x) { return detail::GammaQ<float, false>(a, x); }
+    inline float inc_Gamma(float a, float x) { return detail::GammaQ<float, false>(a, x); }
 
     TRNG_CUDA_ENABLE
-    inline double cinc_gamma(double a, double x) { return detail::GammaQ<double, false>(a, x); }
+    inline double inc_Gamma(double a, double x) { return detail::GammaQ<double, false>(a, x); }
 
 #if !(defined __CUDA_ARCH__)
-    inline long double cinc_gamma(long double a, long double x) {
+    inline long double inc_Gamma(long double a, long double x) {
       return detail::GammaQ<long double, false>(a, x);
     }
 #endif
 
     namespace detail {
 
+      // compute inverse of the incomplete Gamma function p = P(a, x), see "Numerical Recipes"
+      // by W. H. Press et al., 3rd edition
       template<typename T>
       TRNG_CUDA_ENABLE T inv_GammaP(T a, T p) {
-        const T eps = sqrt(numeric_limits<T>::epsilon()), a1 = a - T(1),
-                glna = math::ln_Gamma(a), lna1 = ln(a1), afac = exp(a1 * (lna1 - T(1)) - glna);
-        T x, t;
+        const T eps{sqrt(numeric_limits<T>::epsilon())};
+        T a1{a - T{1}};
+        T glna{ln_Gamma(a)};
+        T lna1{ln(a1)};
+        T afac{exp(a1 * (lna1 - T{1}) - glna)};
+        T x;
         // initial guess
-        if (a > T(1)) {
-          const T pp = p < T(1) / T(2) ? p : T(1) - p;
-          t = sqrt(-T(2) * ln(pp));
-          x = static_cast<T>((2.30753 + t * 0.27061) / (1.0 + t * (0.99229 + t * 0.04481)) - t);
-          x = p < T(1) / T(2) ? -x : x;
-          x = utility::max(T(1) / T(1000),
-                           a * pow(T(1) - T(1) / (T(9) * a) - x / (T(3) * sqrt(a)), T(3)));
+        if (a > T{1}) {
+          const T pp{p < T{1} / T{2} ? p : T{1} - p};
+          const T t = {sqrt(-T{2} * ln(pp))};
+          x = (T{2.30753} + t * T{0.27061}) / (T{1} + t * (T{0.99229} + t * T{0.04481})) - t;
+          x = p < T{1} / T{2} ? -x : x;
+          x = utility::max(T{1} / T{1000},
+                           a * pow(T{1} - T{1} / (T{9} * a) - x / (T{3} * sqrt(a)), T{3}));
         } else {
-          t = static_cast<T>(1.0 - a * (0.253 + a * 0.12));
-          x = p < t ? (pow(p / t, T(1) / a)) : (T(1) - ln(T(1) - (p - t) / (T(1) - t)));
+          const T t{T{1} - a * (T{0.253} + a * T{0.12})};
+          x = p < t ? pow(p / t, T{1} / a) : T{1} - ln1p(-(p - t) / (T{1} - t));
         }
         // refinement by Halley's method
-        for (int i = 0; i < 16; ++i) {
-          if (x < T(0)) {
-            x = T(0);
+        for (int i{0}; i < 16; ++i) {
+          if (x <= T{0}) {
+            x = T{0};
             break;
           }
-          const T err = GammaP<T, true>(a, x) - p;
-          if (a > T(1))
+          const T err{GammaP<T, true>(a, x) - p};
+          T t;
+          if (a > T{1})
             t = afac * exp(-(x - a1) + a1 * (ln(x) - lna1));
           else
             t = exp(-x + a1 * ln(x) - glna);
-          const T u = err / t;
-          t = u / (T(1) - utility::min(T(1), u * ((a - T(1)) / x - T(1))) / T(2));
+          const T u{err / t};
+          t = u / (T{1} - utility::min(T{1}, u * ((a - T{1}) / x - T{1})) / T{2});
           x -= t;
-          x = x <= T(0) ? (x + t) / T(2) : x;
+          x = x <= T{0} ? (x + t) / T{2} : x;
           if (abs(t) < eps * x)
             break;
         }
