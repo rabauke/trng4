@@ -501,29 +501,10 @@ namespace trng {
     }
 #endif
 
-    // --- error function ----------------------------------------------
+    // --- error function and complementary error function--------------
 
-    TRNG_CUDA_ENABLE
-    inline float erf(float x) { return ::std::erf(x); }
-
-    TRNG_CUDA_ENABLE
-    inline double erf(double x) { return ::std::erf(x); }
-
-#if !(defined __CUDA_ARCH__)
-    inline long double erf(long double x) { return ::std::erf(x); }
-#endif
-
-    // --- complementary error function --------------------------------
-
-    TRNG_CUDA_ENABLE
-    inline float erfc(float x) { return ::std::erfc(x); }
-
-    TRNG_CUDA_ENABLE
-    inline double erfc(double x) { return ::std::erfc(x); }
-
-#if !(defined __CUDA_ARCH__)
-    inline long double erfc(long double x) { return std::erfc(x); }
-#endif
+    using ::std::erf;
+    using ::std::erfc;
 
     // --- normal distribution function  -------------------------------
 
