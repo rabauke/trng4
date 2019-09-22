@@ -89,17 +89,17 @@ namespace trng {
 
     TRNG_CUDA_ENABLE
     inline float ln_binomial(float n, float m) {
-      return ln_Gamma(n + 1.f) - ln_Gamma(m + 1.f) - ln_Gamma(n - m + 1.f);
+      return ln_Gamma(n + 1) - ln_Gamma(m + 1) - ln_Gamma(n - m + 1);
     }
 
     TRNG_CUDA_ENABLE
     inline double ln_binomial(double n, double m) {
-      return ln_Gamma(n + 1.) - ln_Gamma(m + 1.) - ln_Gamma(n - m + 1.);
+      return ln_Gamma(n + 1) - ln_Gamma(m + 1) - ln_Gamma(n - m + 1);
     }
 
 #if !(defined __CUDA_ARCH__)
     inline long double ln_binomial(long double n, long double m) {
-      return ln_Gamma(n + 1.l) - ln_Gamma(m + 1.l) - ln_Gamma(n - m + 1.l);
+      return ln_Gamma(n + 1) - ln_Gamma(m + 1) - ln_Gamma(n - m + 1);
     }
 #endif
 
@@ -131,10 +131,10 @@ namespace trng {
       template<typename T, bool by_Gamma_a>
       TRNG_CUDA_ENABLE T GammaP_ser(T a, T x) {
         const int itmax{32};
-        const T eps{T{4} * numeric_limits<T>::epsilon()};
+        const T eps{4 * numeric_limits<T>::epsilon()};
         if (x < eps)
           return T{0};
-        T xx{T{1} / a}, n{a}, sum{xx};
+        T xx{1 / a}, n{a}, sum{xx};
         int i{0};
         do {
           ++n;
@@ -163,25 +163,25 @@ namespace trng {
       // by continued fraction, see "Numerical Recipes" by W. H. Press et al., 3rd edition
       template<typename T, bool by_Gamma_a>
       TRNG_CUDA_ENABLE T GammaQ_cf(T a, T x) {
-        const T itmax{T{32}};
-        const T eps{T{4} * numeric_limits<T>::epsilon()};
-        const T min{T{4} * numeric_limits<T>::min()};
+        const T itmax{32};
+        const T eps{4 * numeric_limits<T>::epsilon()};
+        const T min{4 * numeric_limits<T>::min()};
         // set up for evaluating continued fraction by modified Lentz's method
-        T del, bi{x + T{1} - a}, ci{T{1} / min}, di{T{1} / bi}, h{di}, i{T{0}};
+        T del, bi{x + 1 - a}, ci{1 / min}, di{1 / bi}, h{di}, i{0};
         do {  // iterate
           ++i;
           T ai{-i * (i - a)};
-          bi += T{2};
+          bi += 2;
           di = ai * di + bi;
           if (abs(di) < min)
             di = min;
           ci = bi + ai / ci;
           if (abs(ci) < min)
             ci = min;
-          di = T{1} / di;
+          di = 1 / di;
           del = di * ci;
           h *= del;
-        } while ((abs(del - T{1}) > eps) and i < itmax);
+        } while ((abs(del - 1) > eps) and i < itmax);
 #if __cplusplus >= 201703L
         if constexpr (by_Gamma_a)
 #else
@@ -195,18 +195,18 @@ namespace trng {
       // P(a, x) and gamma(a, x)
       template<typename T, bool by_Gamma_a>
       TRNG_CUDA_ENABLE T GammaP(T a, T x) {
-        if (x < T{0} or a <= T{0})
+        if (x < 0 or a <= 0)
           return numeric_limits<T>::signaling_NaN();
 #if __cplusplus >= 201703L
         if constexpr (by_Gamma_a) {
 #else
         if (by_Gamma_a) {
 #endif
-          if (x < a + T{1})
+          if (x < a + 1)
             return GammaP_ser<T, true>(a, x);
-          return T{1} - GammaQ_cf<T, true>(a, x);
+          return 1 - GammaQ_cf<T, true>(a, x);
         } else {
-          if (x < a + T{1})
+          if (x < a + 1)
             return GammaP_ser<T, false>(a, x);
           return Gamma(a) - GammaQ_cf<T, false>(a, x);
         }
@@ -215,18 +215,18 @@ namespace trng {
       // Q(a, x) and Gamma(a, x)
       template<typename T, bool by_Gamma_a>
       TRNG_CUDA_ENABLE T GammaQ(T a, T x) {
-        if (x < T{0} or a <= T{0})
+        if (x < 0 or a <= 0)
           return numeric_limits<T>::signaling_NaN();
 #if __cplusplus >= 201703L
         if constexpr (by_Gamma_a) {
 #else
         if (by_Gamma_a) {
 #endif
-          if (x < a + T{1})
+          if (x < a + 1)
             return T{1} - GammaP_ser<T, true>(a, x);
           return GammaQ_cf<T, true>(a, x);
         } else {
-          if (x < a + T{1})
+          if (x < a + 1)
             return Gamma(a) - GammaP_ser<T, false>(a, x);
           return GammaQ_cf<T, false>(a, x);
         }
@@ -293,39 +293,38 @@ namespace trng {
       template<typename T>
       TRNG_CUDA_ENABLE T inv_GammaP(T a, T p) {
         const T eps{sqrt(numeric_limits<T>::epsilon())};
-        T a1{a - T{1}};
+        T a1{a - 1};
         T glna{ln_Gamma(a)};
         T lna1{ln(a1)};
-        T afac{exp(a1 * (lna1 - T{1}) - glna)};
+        T afac{exp(a1 * (lna1 - 1) - glna)};
         T x;
         // initial guess
         if (a > T{1}) {
-          const T pp{p < T{1} / T{2} ? p : T{1} - p};
-          const T t = {sqrt(-T{2} * ln(pp))};
-          x = (T{2.30753} + t * T{0.27061}) / (T{1} + t * (T{0.99229} + t * T{0.04481})) - t;
+          const T pp{p < T{1} / T{2} ? p : 1 - p};
+          const T t = {sqrt(-2 * ln(pp))};
+          x = (T{2.30753} + t * T{0.27061}) / (1 + t * (T{0.99229} + t * T{0.04481})) - t;
           x = p < T{1} / T{2} ? -x : x;
-          x = utility::max(T{1} / T{1000},
-                           a * pow(T{1} - T{1} / (T{9} * a) - x / (T{3} * sqrt(a)), T{3}));
+          x = utility::max(T{1} / T{1000}, a * pow(1 - 1 / (9 * a) - x / (3 * sqrt(a)), T{3}));
         } else {
-          const T t{T{1} - a * (T{0.253} + a * T{0.12})};
-          x = p < t ? pow(p / t, T{1} / a) : T{1} - ln1p(-(p - t) / (T{1} - t));
+          const T t{1 - a * (T{0.253} + a * T{0.12})};
+          x = p < t ? pow(p / t, 1 / a) : 1 - ln1p(-(p - t) / (1 - t));
         }
         // refinement by Halley's method
         for (int i{0}; i < 16; ++i) {
-          if (x <= T{0}) {
-            x = T{0};
+          if (x <= 0) {
+            x = 0;
             break;
           }
           const T err{GammaP<T, true>(a, x) - p};
           T t;
-          if (a > T{1})
+          if (a > 1)
             t = afac * exp(-(x - a1) + a1 * (ln(x) - lna1));
           else
             t = exp(-x + a1 * ln(x) - glna);
           const T u{err / t};
-          t = u / (T{1} - utility::min(T{1}, u * ((a - T{1}) / x - T{1})) / T{2});
+          t = u / (1 - utility::min(T{1}, u * ((a - 1) / x - 1)) / 2);
           x -= t;
-          x = x <= T{0} ? (x + t) / T{2} : x;
+          x = x <= 0 ? (x + t) / 2 : x;
           if (abs(t) < eps * x)
             break;
         }
@@ -363,16 +362,16 @@ namespace trng {
 #endif
           return numeric_limits<T>::quiet_NaN();
         }
-        const T eps = 4 * numeric_limits<T>::epsilon();
-        T psq = p + q, cx = 1 - x;
-        const bool flag = (p < psq * x);
+        const T eps{4 * numeric_limits<T>::epsilon()};
+        T psq{p + q}, cx{1 - x};
+        const bool flag{p < psq * x};
         if (flag) {
-          // use  I(x, p, q) = 1-I(1-x, q, p)
+          // use  I(x, p, q) = 1 - I(1 - x, q, p)
           utility::swap(x, cx);
           utility::swap(p, q);
         }
-        T term = 1, i = 1, y = 1, rx = x / cx, temp = q - i;
-        int s = static_cast<int>(q + cx * psq);
+        T term{1}, i{1}, y{1}, rx{x / cx}, temp{q - i};
+        int s{static_cast<int>(q + cx * psq)};
         if (s == 0)
           rx = x;
         while (true) {
@@ -381,8 +380,8 @@ namespace trng {
           temp = abs(term);
           if (temp <= eps and temp <= eps * y)
             break;
-          i++;
-          s--;
+          ++i;
+          --s;
           if (s >= 0) {
             temp = q - i;
             if (s == 0)
@@ -434,25 +433,36 @@ namespace trng {
 
       template<typename T>
       TRNG_CUDA_ENABLE inline T inv_Beta_I(T x, T p, T q, T norm) {
-        if (x < math::numeric_limits<T>::epsilon())
+        if (x < numeric_limits<T>::epsilon())
           return 0;
-        if (1 - x < math::numeric_limits<T>::epsilon())
+        if (1 - x < numeric_limits<T>::epsilon())
           return 1;
         // solve via Newton method
-        T y(T(1) / T(2));
+        T y{0};
         if (2 * p >= 1 and 2 * q >= 1)
           y = (3 * p - 1) / (3 * p + 3 * q - 2);  // the approximate median
-        for (int i = 0; i < math::numeric_limits<T>::digits; ++i) {
-          const T f(math::Beta_I(y, p, q, norm) - x);
-          const T df(math::pow(1 - y, q - 1) * math::pow(y, p - 1) / norm);
+        else {
+          // following initial guess given in "Numerical Recipes" by W. H. Press et al., 3rd
+          // edition
+          const T lnp{ln(p / (p + q))};
+          const T lnq{ln(q / (p + q))};
+          const T t{exp(p * lnp) / p};
+          const T u{exp(q * lnq) / q};
+          const T w{t + u};
+          if (x < t / w)
+            y = pow(p * w * x, 1 / p);
+          else
+            y = 1 - pow(q * w * (1 - x), 1 / q);
+        }
+        for (int i{0}; i < numeric_limits<T>::digits; ++i) {
+          const T f{Beta_I(y, p, q, norm) - x};
+          const T df{pow(1 - y, q - 1) * pow(y, p - 1) / norm};
           T dy(f / df);
-          if (math::abs(dy) < 2 * math::numeric_limits<T>::epsilon())
+          if (abs(f / y) < 2 * numeric_limits<T>::epsilon())
             break;
           // avoid overshooting
-          while (y - dy < 0 or y - dy > 1) {
-            dy *= 3;
-            dy /= 4;
-          }
+          while (y - dy <= 0 or y - dy >= 1)
+            dy *= T{3} / T{4};
           y -= dy;
         }
         return y;
