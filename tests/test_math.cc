@@ -482,6 +482,85 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_inv_Phi, T, floats) {
   }
 }
 
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_inv_erf, T, floats) {
+  const std::string &name{type_name<T>::name};
+  struct test_values {
+    const T x, y;
+  };
+  const std::vector<test_values> values{{-9.990234375e-01l, -2.33146777362194767232054591e+00l},
+                                        {-9.3750e-01l, -1.31715033498613074888392979e+00l},
+                                        {-8.1250e-01l, -9.31974443161097089363200659e-01l},
+                                        {-6.8750e-01l, -7.14170897608128346814053118e-01l},
+                                        {-5.6250e-01l, -5.49013092368501520432904144e-01l},
+                                        {-4.3750e-01l, -4.09508279134131520041358232e-01l},
+                                        {-3.1250e-01l, -2.84433748921723653919336055e-01l},
+                                        {-1.8750e-01l, -1.67727220018138601178021875e-01l},
+                                        {-6.2500e-02l, -5.54459487727820202989893755e-02l},
+                                        {6.2500e-02l, 5.54459487727820202989893755e-02l},
+                                        {1.8750e-01l, 1.67727220018138601178021875e-01l},
+                                        {3.1250e-01l, 2.84433748921723653919336055e-01l},
+                                        {4.3750e-01l, 4.09508279134131520041358232e-01l},
+                                        {5.6250e-01l, 5.49013092368501520432904144e-01l},
+                                        {6.8750e-01l, 7.14170897608128346814053118e-01l},
+                                        {8.1250e-01l, 9.31974443161097089363200659e-01l},
+                                        {9.3750e-01l, 1.31715033498613074888392979e+00l},
+                                        {9.990234375e-01l, 2.33146777362194767232054591e+00l}};
+  for (auto &v : values) {
+    const T x{v.x};
+    const T y{trng::math::inv_erf(x)};
+    const T err{std::abs(y - v.y)};
+    const T rel_err{err / std::abs(v.y)};
+    std::stringstream mes;
+    mes << "sufficent accuracy, x = " << x << ", inv_erf(x) = " << y << ", err = " << err
+        << ", rel_err = " << rel_err << " for " << name;
+    auto y_min_max = bounds(v.y);
+    const T y_min{std::get<0>(y_min_max)};
+    const T y_max{std::get<1>(y_min_max)};
+    BOOST_TEST((y_min <= y and y <= y_max), mes.str().c_str());
+  }
+}
+
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_inv_erfc, T, floats) {
+  const std::string &name{type_name<T>::name};
+  struct test_values {
+    const T x, y;
+  };
+  const std::vector<test_values> values{
+      {9.765625000e-04l, 2.33146777362194767232054591e+00l},
+      {6.2500e-02l, 1.31715033498613074888392979e+00l},
+      {1.8750e-01l, 9.31974443161097089363200659e-01l},
+      {3.1250e-01l, 7.14170897608128346814053118e-01l},
+      {4.3750e-01l, 5.49013092368501520432904144e-01l},
+      {5.6250e-01l, 4.09508279134131520041358232e-01l},
+      {6.8750e-01l, 2.84433748921723653919336055e-01l},
+      {8.1250e-01l, 1.67727220018138601178021875e-01l},
+      {9.3750e-01l, 5.54459487727820202989893755e-02l},
+      {1.0625e+00l, -5.54459487727820202989893755e-02l},
+      {1.1875e+00l, -1.67727220018138601178021875e-01l},
+      {1.3125e+00l, -2.84433748921723653919336055e-01l},
+      {1.4375e+00l, -4.09508279134131520041358232e-01l},
+      {1.5625e+00l, -5.49013092368501520432904144e-01l},
+      {1.6875e+00l, -7.14170897608128346814053118e-01l},
+      {1.8125e+00l, -9.31974443161097089363200659e-01l},
+      {1.9375e+00l, -1.31715033498613074888392979e+00l},
+      {1.9990234375e+00l, -2.33146777362194767232054591e+00l}};
+  for (auto &v : values) {
+    const T x{v.x};
+    const T y{trng::math::inv_erfc(x)};
+    const T err{std::abs(y - v.y)};
+    const T rel_err{err / std::abs(v.y)};
+    std::stringstream mes;
+    mes << "sufficent accuracy, x = " << x << ", inv_erfc(x) = " << y << ", err = " << err
+        << ", rel_err = " << rel_err << " for " << name;
+    auto y_min_max = bounds(v.y);
+    const T y_min{std::get<0>(y_min_max)};
+    const T y_max{std::get<1>(y_min_max)};
+    BOOST_TEST((y_min <= y and y <= y_max), mes.str().c_str());
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 //-----------------------------------------------------------------------------------------

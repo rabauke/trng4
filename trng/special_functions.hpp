@@ -579,7 +579,7 @@ namespace trng {
       // ---------------------------------------------------------------
 
       template<typename T>
-      TRNG_CUDA_ENABLE T inv_Phi(T x) {
+      TRNG_CUDA_ENABLE T inv_Phi_approx(T x) {
         using traits = inv_Phi_traits<T>;
         if (x < 0 or x > 1) {
 #if !(defined __CUDA_ARCH__)
@@ -628,11 +628,46 @@ namespace trng {
               ((((traits::d[0] * q + traits::d[1]) * q + traits::d[2]) * q + traits::d[3]) * q +
                1);
         }
-        // refinement by Halley rational method
-        const T e{(Phi(t) - x)};
-        const T u{e * constants<T>::sqrt_2pi * exp(t * t * traits::one_half)};
-        t -= u / (1 + t * u * traits::one_half);
         return t;
+      }
+
+      template<typename T>
+      TRNG_CUDA_ENABLE T inv_Phi(T x) {
+        using traits = inv_Phi_traits<T>;
+        T y{inv_Phi_approx(x)};
+        if (isfinite(y)) {  // refinement by Halley rational method
+          const T e{(Phi(y) - x)};
+          const T u{e * constants<T>::sqrt_2pi * exp(y * y * traits::one_half)};
+          y -= u / (1 + y * u * traits::one_half);
+        }
+        return y;
+      }
+
+      template<typename T>
+      TRNG_CUDA_ENABLE T inv_erf(T x) {
+        T y{inv_Phi_approx((x + 1) / 2) * constants<T>::one_over_sqrt_2};
+        if (isfinite(y)) {  // refinement by Halley rational method
+          const T e{erf(y) - x};
+          const T u{e * (constants<T>::sqrt_pi_over_2) * exp(y * y)};
+          y -= u / (1 + y * u);
+        }
+        return y;
+      }
+
+      template<typename T>
+      TRNG_CUDA_ENABLE T inv_erfc(T x) {
+        // step size in the Halley step is proportiaonal to erfc, use symmetry to increase
+        // numerical accuracy
+        const bool flag{x > 1};
+        if (flag)
+          x = -(x - 1) + 1;
+        T y{-inv_Phi_approx(x / 2) * constants<T>::one_over_sqrt_2};
+        if (isfinite(y)) {  // refinement by Halley rational method
+          const T e{erfc(y) - x};
+          const T u{-e * (constants<T>::sqrt_pi_over_2) * exp(y * y)};
+          y -= u / (1 + y * u);
+        }
+        return flag ? -y : y;
       }
 
     }  // namespace detail
@@ -649,60 +684,26 @@ namespace trng {
 
     // --- inverse of error function  ----------------------------------
 
-    // see http://mathworld.wolfram.com/InverseErf.html
-    // see The On-Line Encyclopedia of Integer Sequences!
-    // http://www.research.att.com/~njas/sequences/A007019
-    // http://www.research.att.com/~njas/sequences/A092676
+    TRNG_CUDA_ENABLE
+    inline float inv_erf(float x) { return detail::inv_erf(x); }
 
     TRNG_CUDA_ENABLE
-    inline float inv_erf(float x) {
-      if (abs(x) < 1.0f / 8.0f) {
-        x *= constants<float>::sqrt_pi_over_2;
-        const float x2{x * x}, x3{x2 * x}, x4{x2 * x2};
-        return x + (1.0f / 3.0f + 7.0f / 30.0f * x2 + 127.0f / 630.0f * x4) * x3;
-      }
-      return inv_Phi(0.5f * (x + 1.0f)) * constants<float>::one_over_sqrt_2;
-    }
-
-    TRNG_CUDA_ENABLE
-    inline double inv_erf(double x) {
-      if (abs(x) < 1.0 / 20.0) {
-        x *= constants<double>::sqrt_pi_over_2;
-        const double x2{x * x}, x3{x2 * x}, x4{x2 * x2}, x5{x3 * x2};
-        return x + (1.0 / 3.0 + 127.0 / 630.0 * x4) * x3 +
-               (7.0 / 30.0 + 4369.0 / 22680.0 * x4) * x5;
-      }
-      return inv_Phi(0.5 * (x + 1.0)) * constants<double>::one_over_sqrt_2;
-    }
+    inline double inv_erf(double x) { return detail::inv_erf(x); }
 
 #if !(defined __CUDA_ARCH__)
-    inline long double inv_erf(long double x) {
-      if (abs(x) < 1.0l / 24.0l) {
-        x *= constants<long double>::sqrt_pi_over_2;
-        const long double x2{x * x}, x3{x2 * x}, x4{x2 * x2}, x5{x3 * x2}, x7{x3 * x4};
-        return x + 1.0l / 3.0l * x3 + 7.0l / 30.0l * x5 + 127.0l / 630.0l * x7 +
-               4369.0l / 22680.0l * x4 * x5 + 34807.0l / 178200.0l * x4 * x7;
-      }
-      return inv_Phi(0.5l * (x + 1.0l)) * constants<long double>::one_over_sqrt_2;
-    }
+    inline long double inv_erf(long double x) { return detail::inv_erf(x); }
 #endif
 
     // --- inverse of complementary error function  --------------------
 
     TRNG_CUDA_ENABLE
-    inline float inv_erfc(float x) {
-      return -inv_Phi(0.5f * x) * constants<float>::one_over_sqrt_2;
-    }
+    inline float inv_erfc(float x) { return detail::inv_erfc(x); }
 
     TRNG_CUDA_ENABLE
-    inline double inv_erfc(double x) {
-      return -inv_Phi(0.5 * x) * constants<double>::one_over_sqrt_2;
-    }
+    inline double inv_erfc(double x) { return detail::inv_erfc(x); }
 
 #if !(defined __CUDA_ARCH__)
-    inline long double inv_erfc(long double x) {
-      return -inv_Phi(0.5l * x) * constants<long double>::one_over_sqrt_2;
-    }
+    inline long double inv_erfc(long double x) { return detail::inv_erfc(x); }
 #endif
 
   }  // namespace math

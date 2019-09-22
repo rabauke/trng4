@@ -193,6 +193,10 @@ namespace trng {
       return ::std::modf(x, &dummy);
     }
 
+    using ::std::isfinite;
+    using ::std::isnan;
+    using ::std::isnormal;
+
   }  // namespace math
 
 }  // namespace trng
