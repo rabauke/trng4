@@ -190,7 +190,7 @@ namespace trng {
     result_type pdf(result_type x) const {
       x -= P.mu();
       x /= P.sigma();
-      return math::constants<result_type>::one_over_sqrt_2pi() / P.sigma() *
+      return math::constants<result_type>::one_over_sqrt_2pi / P.sigma() *
              math::exp(-0.5 * x * x) / (P.Phi_b - P.Phi_a);
     }
     // cumulative density function

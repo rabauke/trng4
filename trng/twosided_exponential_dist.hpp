@@ -153,8 +153,8 @@ namespace trng {
         return math::numeric_limits<result_type>::infinity();
       if (x == 0)
         return -math::numeric_limits<result_type>::infinity();
-      return x < math::constants<result_type>::one_half() ? P.mu() * math::ln(2 * x)
-                                                          : -P.mu() * math::ln(2 - 2 * x);
+      return x < math::constants<result_type>::one_half ? P.mu() * math::ln(2 * x)
+                                                        : -P.mu() * math::ln(2 - 2 * x);
     }
   };
 

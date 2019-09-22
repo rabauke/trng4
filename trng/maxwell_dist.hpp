@@ -132,14 +132,14 @@ namespace trng {
     result_type pdf(result_type x) const {
       const result_type x2{x * x};
       const result_type t2{P.theta() * P.theta()};
-      return math::constants<result_type>::sqrt_2_over_pi() * x2 * math::exp(-x2 / (2 * t2)) /
+      return math::constants<result_type>::sqrt_2_over_pi * x2 * math::exp(-x2 / (2 * t2)) /
              (t2 * P.theta());
     }
     // cumulative density function
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
-      return math::erf(x * math::constants<result_type>::one_over_sqrt_2() / P.theta()) -
-             math::constants<result_type>::sqrt_2_over_pi() * x *
+      return math::erf(x * math::constants<result_type>::one_over_sqrt_2 / P.theta()) -
+             math::constants<result_type>::sqrt_2_over_pi * x *
                  math::exp(-x * x / (2 * P.theta() * P.theta())) / (P.theta());
     }
     // inverse cumulative density function
@@ -155,7 +155,7 @@ namespace trng {
         return math::numeric_limits<result_type>::infinity();
       if (x == 0)
         return 0;
-      result_type y(2 * P.theta() * math::constants<result_type>::sqrt_2_over_pi());
+      result_type y(2 * P.theta() * math::constants<result_type>::sqrt_2_over_pi);
       for (int i{0}; i < math::numeric_limits<result_type>::digits + 2; ++i) {
         result_type y_old = y;
         y -= (cdf(y) - x) / pdf(y);

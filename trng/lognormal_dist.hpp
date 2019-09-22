@@ -145,7 +145,7 @@ namespace trng {
       if (x <= 0)
         return 0;
       result_type t((math::ln(x) - P.mu()) / P.sigma());
-      return math::constants<result_type>::one_over_sqrt_2pi() / (x * P.sigma()) *
+      return math::constants<result_type>::one_over_sqrt_2pi / (x * P.sigma()) *
              math::exp(-t * t / 2);
     }
     // cumulative density function
@@ -153,8 +153,7 @@ namespace trng {
     result_type cdf(result_type x) const {
       if (x <= 0)
         return 0;
-      return math::erfc(math::constants<result_type>::one_over_sqrt_2() *
-                        (P.mu() - math::ln(x)) / P.sigma()) /
+      return math::erfc(math::constants<result_type>::one_over_sqrt_2 * (P.mu() - math::ln(x)) / P.sigma()) /
              2;
     }
     // inverse cumulative density function

@@ -142,7 +142,7 @@ namespace trng {
     result_type pdf(result_type x) const {
       const result_type norm{math::exp(math::ln_Gamma((P.nu() + 1) / result_type(2)) -
                                        math::ln_Gamma(P.nu() / result_type(2))) /
-                             math::sqrt(math::constants<result_type>::pi() * P.nu())};
+                             math::sqrt(math::constants<result_type>::pi * P.nu())};
       return norm * math::pow(1 + x * x / P.nu(), (P.nu() + 1) / result_type(-2));
     }
     // cumulative density function

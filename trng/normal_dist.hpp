@@ -142,7 +142,7 @@ namespace trng {
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
       const result_type t{x - P.mu()};
-      return math::constants<result_type>::one_over_sqrt_2pi() / P.sigma() *
+      return math::constants<result_type>::one_over_sqrt_2pi / P.sigma() *
              math::exp(t * t / (-2 * P.sigma() * P.sigma()));
     }
     // cumulative density function

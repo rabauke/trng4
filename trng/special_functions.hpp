@@ -510,29 +510,29 @@ namespace trng {
 
     TRNG_CUDA_ENABLE
     inline float Phi(float x) {
-      x *= constants<float>::one_over_sqrt_2();
-      if (x < -0.6744897501960817f * constants<float>::one_over_sqrt_2())
+      x *= constants<float>::one_over_sqrt_2;
+      if (x < -0.6744897501960817f * constants<float>::one_over_sqrt_2)
         return 0.5f * erfc(-x);
-      if (x > +0.6744897501960817f * constants<float>::one_over_sqrt_2())
+      if (x > +0.6744897501960817f * constants<float>::one_over_sqrt_2)
         return 1.0f - 0.5f * erfc(x);
       return 0.5f + 0.5f * erf(x);
     }
 
     TRNG_CUDA_ENABLE
     inline double Phi(double x) {
-      x *= constants<double>::one_over_sqrt_2();
-      if (x < -0.6744897501960817 * constants<double>::one_over_sqrt_2())
+      x *= constants<double>::one_over_sqrt_2;
+      if (x < -0.6744897501960817 * constants<double>::one_over_sqrt_2)
         return 0.5 * erfc(-x);
-      if (x > +0.6744897501960817 * constants<double>::one_over_sqrt_2())
+      if (x > +0.6744897501960817 * constants<double>::one_over_sqrt_2)
         return 1.0 - 0.5 * erfc(x);
       return 0.5 + 0.5 * erf(x);
     }
 
     inline long double Phi(long double x) {
-      x *= constants<long double>::one_over_sqrt_2();
-      if (x < -0.6744897501960817l * constants<long double>::one_over_sqrt_2())
+      x *= constants<long double>::one_over_sqrt_2;
+      if (x < -0.6744897501960817l * constants<long double>::one_over_sqrt_2)
         return 0.5 * erfc(-x);
-      if (x > +0.6744897501960817l * constants<long double>::one_over_sqrt_2())
+      if (x > +0.6744897501960817l * constants<long double>::one_over_sqrt_2)
         return 1.0l - 0.5l * erfc(x);
       return 0.5l + 0.5l * erf(x);
     }
@@ -540,217 +540,84 @@ namespace trng {
     // --- inverse of normal distribution function  --------------------
 
     // this function is based on an approximation by Peter J. Acklam
-    // see http://home.online.no/~pjacklam/notes/invnorm/ for details
+    // see http://home.online.no/~pjacklam/notes/invnorm/ or
+    // https://web.archive.org/web/20151030215612/http://home.online.no/~pjacklam/notes/invnorm/
+    // for details
 
     namespace detail {
 
       template<typename T>
-      struct inv_Phi_traits;
-
-      template<>
-      struct inv_Phi_traits<float> {
-        TRNG_CUDA_ENABLE
-        static float a(int i) noexcept {
-          const float a_[] = {-3.969683028665376e+01f, 2.209460984245205e+02f,
-                              -2.759285104469687e+02f, 1.383577518672690e+02f,
-                              -3.066479806614716e+01f, 2.506628277459239e+00f};
-          return a_[i];
-        }
-        TRNG_CUDA_ENABLE
-        static float b(int i) noexcept {
-          const float b_[] = {-5.447609879822406e+01f, 1.615858368580409e+02f,
-                              -1.556989798598866e+02f, 6.680131188771972e+01f,
-                              -1.328068155288572e+01f};
-          return b_[i];
-        }
-        TRNG_CUDA_ENABLE
-        static float c(int i) noexcept {
-          const float c_[] = {-7.784894002430293e-03f, -3.223964580411365e-01f,
-                              -2.400758277161838e+00f, -2.549732539343734e+00f,
-                              4.374664141464968e+00f,  2.938163982698783e+00f};
-          return c_[i];
-        }
-        TRNG_CUDA_ENABLE
-        static float d(int i) noexcept {
-          const float d_[] = {7.784695709041462e-03f, 3.224671290700398e-01f,
-                              2.445134137142996e+00f, 3.754408661907416e+00f};
-          return d_[i];
-        }
-        TRNG_CUDA_ENABLE
-        static float x_low() noexcept { return 0.02425f; }
-        TRNG_CUDA_ENABLE
-        static float x_high() noexcept { return 1.0f - 0.02425f; }
-        TRNG_CUDA_ENABLE
-        static float zero() noexcept { return 0.0f; }
-        TRNG_CUDA_ENABLE
-        static float one() noexcept { return 1.0f; }
-        TRNG_CUDA_ENABLE
-        static float one_half() noexcept { return 0.5f; }
-        TRNG_CUDA_ENABLE
-        static float minus_two() noexcept { return -2.0f; }
-      };
-
-      template<>
-      struct inv_Phi_traits<double> {
-        TRNG_CUDA_ENABLE
-        static double a(int i) noexcept {
-          const double a_[] = {-3.969683028665376e+01, 2.209460984245205e+02,
-                               -2.759285104469687e+02, 1.383577518672690e+02,
-                               -3.066479806614716e+01, 2.506628277459239e+00};
-          return a_[i];
-        }
-        TRNG_CUDA_ENABLE
-        static double b(int i) noexcept {
-          const double b_[] = {-5.447609879822406e+01, 1.615858368580409e+02,
-                               -1.556989798598866e+02, 6.680131188771972e+01,
-                               -1.328068155288572e+01};
-          return b_[i];
-        }
-        TRNG_CUDA_ENABLE
-        static double c(int i) noexcept {
-          const double c_[] = {-7.784894002430293e-03, -3.223964580411365e-01,
-                               -2.400758277161838e+00, -2.549732539343734e+00,
-                               4.374664141464968e+00,  2.938163982698783e+00};
-          return c_[i];
-        }
-        TRNG_CUDA_ENABLE
-        static double d(int i) noexcept {
-          const double d_[] = {7.784695709041462e-03, 3.224671290700398e-01,
-                               2.445134137142996e+00, 3.754408661907416e+00};
-          return d_[i];
-        }
-        TRNG_CUDA_ENABLE
-        static double x_low() noexcept { return 0.02425; }
-        TRNG_CUDA_ENABLE
-        static double x_high() noexcept { return 1.0 - 0.02425; }
-        TRNG_CUDA_ENABLE
-        static double zero() noexcept { return 0.0; }
-        TRNG_CUDA_ENABLE
-        static double one() noexcept { return 1.0; }
-        TRNG_CUDA_ENABLE
-        static double one_half() noexcept { return 0.5; }
-        TRNG_CUDA_ENABLE
-        static double minus_two() noexcept { return -2.0; }
-      };
-
-      template<>
-      struct inv_Phi_traits<long double> {
-        TRNG_CUDA_ENABLE
-        static long double a(int i) noexcept {
-          const long double a_[] = {-3.969683028665376e+01l, 2.209460984245205e+02l,
-                                    -2.759285104469687e+02l, 1.383577518672690e+02l,
-                                    -3.066479806614716e+01l, 2.506628277459239e+00l};
-          return a_[i];
-        }
-        TRNG_CUDA_ENABLE
-        static long double b(int i) noexcept {
-          const long double b_[] = {-5.447609879822406e+01l, 1.615858368580409e+02l,
-                                    -1.556989798598866e+02l, 6.680131188771972e+01l,
-                                    -1.328068155288572e+01l};
-          return b_[i];
-        }
-        TRNG_CUDA_ENABLE
-        static long double c(int i) noexcept {
-          const long double c_[] = {-7.784894002430293e-03l, -3.223964580411365e-01l,
-                                    -2.400758277161838e+00l, -2.549732539343734e+00l,
-                                    4.374664141464968e+00l,  2.938163982698783e+00l};
-          return c_[i];
-        }
-        TRNG_CUDA_ENABLE
-        static long double d(int i) noexcept {
-          const long double d_[] = {7.784695709041462e-03l, 3.224671290700398e-01l,
-                                    2.445134137142996e+00l, 3.754408661907416e+00l};
-          return d_[i];
-        }
-        TRNG_CUDA_ENABLE
-        static long double x_low() noexcept { return 0.02425l; }
-        TRNG_CUDA_ENABLE
-        static long double x_high() noexcept { return 1.0l - 0.02425l; }
-        TRNG_CUDA_ENABLE
-        static long double zero() noexcept { return 0.0l; }
-        TRNG_CUDA_ENABLE
-        static long double one() noexcept { return 1.0l; }
-        TRNG_CUDA_ENABLE
-        static long double one_half() noexcept { return 0.5l; }
-        TRNG_CUDA_ENABLE
-        static long double minus_two() noexcept { return -2.0l; }
+      struct inv_Phi_traits {
+        static constexpr T a[] = {-3.969683028665376e+01l, 2.209460984245205e+02l,
+                                  -2.759285104469687e+02l, 1.383577518672690e+02l,
+                                  -3.066479806614716e+01l, 2.506628277459239e+00l};
+        static constexpr T b[] = {-5.447609879822406e+01l, 1.615858368580409e+02l,
+                                  -1.556989798598866e+02l, 6.680131188771972e+01l,
+                                  -1.328068155288572e+01l};
+        static constexpr T c[] = {-7.784894002430293e-03l, -3.223964580411365e-01l,
+                                  -2.400758277161838e+00l, -2.549732539343734e+00l,
+                                  4.374664141464968e+00l,  2.938163982698783e+00l};
+        static constexpr T d[] = {7.784695709041462e-03l, 3.224671290700398e-01l,
+                                  2.445134137142996e+00l, 3.754408661907416e+00l};
+        static constexpr T x_low = 0.02425l;
+        static constexpr T x_high = 1.0l - 0.02425l;
+        static constexpr T one_half = 0.5l;
       };
 
       template<typename T>
       TRNG_CUDA_ENABLE T inv_Phi(T x) {
-        if (x < inv_Phi_traits<T>::zero() or x > inv_Phi_traits<T>::one()) {
+        using traits = inv_Phi_traits<T>;
+        if (x < 0 or x > 1) {
 #if !(defined __CUDA_ARCH__)
           errno = EDOM;
 #endif
           return numeric_limits<T>::quiet_NaN();
         }
-        if (x == inv_Phi_traits<T>::zero())
+        if (x == 0)
           return -numeric_limits<T>::infinity();
-        if (x == inv_Phi_traits<T>::one())
+        if (x == 1)
           return numeric_limits<T>::infinity();
         T t, q;
-        if (x < inv_Phi_traits<T>::x_low()) {
+        if (x < traits::x_low) {
           // Rational approximation for lower region
-          q = sqrt(inv_Phi_traits<T>::minus_two() * ln(x));
-          t = (((((inv_Phi_traits<T>::c(0) * q + inv_Phi_traits<T>::c(1)) * q +
-                  inv_Phi_traits<T>::c(2)) *
-                     q +
-                 inv_Phi_traits<T>::c(3)) *
+          q = sqrt(-2 * ln(x));
+          t = (((((traits::c[0] * q + traits::c[1]) * q + traits::c[2]) * q + traits::c[3]) *
                     q +
-                inv_Phi_traits<T>::c(4)) *
+                traits::c[4]) *
                    q +
-               inv_Phi_traits<T>::c(5)) /
-              ((((inv_Phi_traits<T>::d(0) * q + inv_Phi_traits<T>::d(1)) * q +
-                 inv_Phi_traits<T>::d(2)) *
-                    q +
-                inv_Phi_traits<T>::d(3)) *
-                   q +
-               inv_Phi_traits<T>::one());
-        } else if (x < inv_Phi_traits<T>::x_high()) {
+               traits::c[5]) /
+              ((((traits::d[0] * q + traits::d[1]) * q + traits::d[2]) * q + traits::d[3]) * q +
+               1);
+        } else if (x < traits::x_high) {
           // Rational approximation for central region
-          q = x - inv_Phi_traits<T>::one_half();
+          q = x - traits::one_half;
           T r = q * q;
-          t = (((((inv_Phi_traits<T>::a(0) * r + inv_Phi_traits<T>::a(1)) * r +
-                  inv_Phi_traits<T>::a(2)) *
-                     r +
-                 inv_Phi_traits<T>::a(3)) *
+          t = (((((traits::a[0] * r + traits::a[1]) * r + traits::a[2]) * r + traits::a[3]) *
                     r +
-                inv_Phi_traits<T>::a(4)) *
+                traits::a[4]) *
                    r +
-               inv_Phi_traits<T>::a(5)) *
+               traits::a[5]) *
               q /
-              (((((inv_Phi_traits<T>::b(0) * r + inv_Phi_traits<T>::b(1)) * r +
-                  inv_Phi_traits<T>::b(2)) *
-                     r +
-                 inv_Phi_traits<T>::b(3)) *
+              (((((traits::b[0] * r + traits::b[1]) * r + traits::b[2]) * r + traits::b[3]) *
                     r +
-                inv_Phi_traits<T>::b(4)) *
+                traits::b[4]) *
                    r +
-               inv_Phi_traits<T>::one());
+               1);
         } else {
           // Rational approximation for upper region
-          q = sqrt(inv_Phi_traits<T>::minus_two() * ln(1 - x));
-          t = -(((((inv_Phi_traits<T>::c(0) * q + inv_Phi_traits<T>::c(1)) * q +
-                   inv_Phi_traits<T>::c(2)) *
-                      q +
-                  inv_Phi_traits<T>::c(3)) *
+          q = sqrt(-2 * ln1p(-x));
+          t = -(((((traits::c[0] * q + traits::c[1]) * q + traits::c[2]) * q + traits::c[3]) *
                      q +
-                 inv_Phi_traits<T>::c(4)) *
+                 traits::c[4]) *
                     q +
-                inv_Phi_traits<T>::c(5)) /
-              ((((inv_Phi_traits<T>::d(0) * q + inv_Phi_traits<T>::d(1)) * q +
-                 inv_Phi_traits<T>::d(2)) *
-                    q +
-                inv_Phi_traits<T>::d(3)) *
-                   q +
-               inv_Phi_traits<T>::one());
+                traits::c[5]) /
+              ((((traits::d[0] * q + traits::d[1]) * q + traits::d[2]) * q + traits::d[3]) * q +
+               1);
         }
         // refinement by Halley rational method
-        if (numeric_limits<T>::epsilon() < 1e-9) {
-          T e(Phi(t) - x);
-          T u(e * constants<T>::sqrt_2pi() * exp(t * t * inv_Phi_traits<T>::one_half()));
-          t -= u / (inv_Phi_traits<T>::one() + t * u * inv_Phi_traits<T>::one_half());
-        }
+        const T e{(Phi(t) - x)};
+        const T u{e * constants<T>::sqrt_2pi * exp(t * t * traits::one_half)};
+        t -= u / (1 + t * u * traits::one_half);
         return t;
       }
 
@@ -776,33 +643,33 @@ namespace trng {
     TRNG_CUDA_ENABLE
     inline float inv_erf(float x) {
       if (abs(x) < 1.0f / 8.0f) {
-        x *= 0.886226925452758013649085f;  // sqrt(pi)/2
-        float x2 = x * x, x3 = x2 * x, x4 = x2 * x2;
+        x *= constants<float>::sqrt_pi_over_2;
+        const float x2{x * x}, x3{x2 * x}, x4{x2 * x2};
         return x + (1.0f / 3.0f + 7.0f / 30.0f * x2 + 127.0f / 630.0f * x4) * x3;
       }
-      return inv_Phi(0.5f * (x + 1.0f)) * constants<float>::one_over_sqrt_2();
+      return inv_Phi(0.5f * (x + 1.0f)) * constants<float>::one_over_sqrt_2;
     }
 
     TRNG_CUDA_ENABLE
     inline double inv_erf(double x) {
       if (abs(x) < 1.0 / 20.0) {
-        x *= 0.886226925452758013649085;  // sqrt(pi)/2
-        double x2 = x * x, x3 = x2 * x, x4 = x2 * x2, x5 = x3 * x2;
+        x *= constants<double>::sqrt_pi_over_2;
+        const double x2{x * x}, x3{x2 * x}, x4{x2 * x2}, x5{x3 * x2};
         return x + (1.0 / 3.0 + 127.0 / 630.0 * x4) * x3 +
                (7.0 / 30.0 + 4369.0 / 22680.0 * x4) * x5;
       }
-      return inv_Phi(0.5 * (x + 1.0)) * constants<double>::one_over_sqrt_2();
+      return inv_Phi(0.5 * (x + 1.0)) * constants<double>::one_over_sqrt_2;
     }
 
 #if !(defined __CUDA_ARCH__)
     inline long double inv_erf(long double x) {
       if (abs(x) < 1.0l / 24.0l) {
-        x *= 0.886226925452758013649085l;  // sqrt(pi)/2
-        long double x2 = x * x, x3 = x2 * x, x4 = x2 * x2, x5 = x3 * x2, x7 = x3 * x4;
+        x *= constants<long double>::sqrt_pi_over_2;
+        const long double x2{x * x}, x3{x2 * x}, x4{x2 * x2}, x5{x3 * x2}, x7{x3 * x4};
         return x + 1.0l / 3.0l * x3 + 7.0l / 30.0l * x5 + 127.0l / 630.0l * x7 +
                4369.0l / 22680.0l * x4 * x5 + 34807.0l / 178200.0l * x4 * x7;
       }
-      return inv_Phi(0.5l * (x + 1.0l)) * constants<long double>::one_over_sqrt_2();
+      return inv_Phi(0.5l * (x + 1.0l)) * constants<long double>::one_over_sqrt_2;
     }
 #endif
 
@@ -810,17 +677,17 @@ namespace trng {
 
     TRNG_CUDA_ENABLE
     inline float inv_erfc(float x) {
-      return -inv_Phi(0.5f * x) * constants<float>::one_over_sqrt_2();
+      return -inv_Phi(0.5f * x) * constants<float>::one_over_sqrt_2;
     }
 
     TRNG_CUDA_ENABLE
     inline double inv_erfc(double x) {
-      return -inv_Phi(0.5 * x) * constants<double>::one_over_sqrt_2();
+      return -inv_Phi(0.5 * x) * constants<double>::one_over_sqrt_2;
     }
 
 #if !(defined __CUDA_ARCH__)
     inline long double inv_erfc(long double x) {
-      return -inv_Phi(0.5l * x) * constants<long double>::one_over_sqrt_2();
+      return -inv_Phi(0.5l * x) * constants<long double>::one_over_sqrt_2;
     }
 #endif
 

@@ -50,14 +50,15 @@ using floats = boost::mpl::list<float, double, long double>;
 template<typename T>
 std::tuple<T, T> bounds(T y) {
   const T eps{32 * std::numeric_limits<T>::epsilon()};
-  T y_min{(1 - eps) * std::abs(y)};
-  T y_max{(1 + eps) * std::abs(y)};
+  const T min{32 * std::numeric_limits<T>::min()};
+  T y_min{(1 - eps) * y};
+  T y_max{(1 + eps) * y};
   if (y_min > y_max)
     std::swap(y_min, y_max);
-  if (std::abs(y_min) < 32 * std::numeric_limits<T>::min())
-    y_min = -32 * std::numeric_limits<T>::min();
-  if (std::abs(y_max) < 32 * std::numeric_limits<T>::min())
-    y_max = +32 * std::numeric_limits<T>::min();
+  if (std::abs(y_min) < min)
+    y_min = -min;
+  if (std::abs(y_max) < min)
+    y_max = +min;
   return {y_min, y_max};
 }
 
@@ -151,45 +152,6 @@ BOOST_AUTO_TEST_SUITE_END()
 //-----------------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE(test_suite_special_functions)
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(test_Phi, T, floats) {
-  const std::string &name{type_name<T>::name};
-  struct test_values {
-    const T x, y;
-  };
-  const std::vector<test_values> values{
-      {-8.00000000000000000000000000e+00l, 6.22096057427178412351599517e-16l},
-      {-7.00000000000000000000000000e+00l, 1.27981254388583500438362369e-12l},
-      {-6.00000000000000000000000000e+00l, 9.86587645037698140700864132e-10l},
-      {-5.00000000000000000000000000e+00l, 2.86651571879193911673752333e-07l},
-      {-4.00000000000000000000000000e+00l, 3.16712418331199212537707567e-05l},
-      {-3.00000000000000000000000000e+00l, 1.34989803163009452665181477e-03l},
-      {-2.00000000000000000000000000e+00l, 2.27501319481792072002826372e-02l},
-      {-1.00000000000000000000000000e+00l, 1.58655253931457051414767454e-01l},
-      {0.00000000000000000000000000e+00l, 5.00000000000000000000000000e-01l},
-      {1.00000000000000000000000000e+00l, 8.41344746068542948585232546e-01l},
-      {2.00000000000000000000000000e+00l, 9.77249868051820792799717363e-01l},
-      {3.00000000000000000000000000e+00l, 9.98650101968369905473348185e-01l},
-      {4.00000000000000000000000000e+00l, 9.99968328758166880078746229e-01l},
-      {5.00000000000000000000000000e+00l, 9.99999713348428120806088326e-01l},
-      {6.00000000000000000000000000e+00l, 9.99999999013412354962301859e-01l},
-      {7.00000000000000000000000000e+00l, 9.99999999998720187456114165e-01l},
-      {8.00000000000000000000000000e+00l, 9.99999999999999377903942573e-01l}};
-  for (auto &v : values) {
-    const T x{v.x};
-    const T y{trng::math::Phi(x)};
-    const T err{std::abs(y - v.y)};
-    const T rel_err{err / std::abs(v.y)};
-    std::stringstream mes;
-    mes << "sufficent accuracy, x = " << x << ", Phi(x) = " << y << ", err = " << err
-        << ", rel_err = " << rel_err << " for " << name;
-    auto y_min_max = bounds(v.y);
-    const T y_min{std::get<0>(y_min_max)};
-    const T y_max{std::get<1>(y_min_max)};
-    BOOST_TEST((y_min <= y and y <= y_max), mes.str().c_str());
-  }
-}
-
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_GammaP, T, floats) {
   const std::string &name{type_name<T>::name};
@@ -437,6 +399,82 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_inv_Beta_I, T, floats) {
     mes << "sufficent accuracy, x = " << x << ", a = " << a << ", b = " << b
         << ", inv_Beta_I(x, a, b) = " << y << ", err = " << err << ", rel_err = " << rel_err
         << " for " << name;
+    auto y_min_max = bounds(v.y);
+    const T y_min{std::get<0>(y_min_max)};
+    const T y_max{std::get<1>(y_min_max)};
+    BOOST_TEST((y_min <= y and y <= y_max), mes.str().c_str());
+  }
+}
+
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_Phi, T, floats) {
+  const std::string &name{type_name<T>::name};
+  struct test_values {
+    const T x, y;
+  };
+  const std::vector<test_values> values{{-8.0e+00l, 6.22096057427178412351599517e-16l},
+                                        {-7.0e+00l, 1.27981254388583500438362369e-12l},
+                                        {-6.0e+00l, 9.86587645037698140700864132e-10l},
+                                        {-5.0e+00l, 2.86651571879193911673752333e-07l},
+                                        {-4.0e+00l, 3.16712418331199212537707567e-05l},
+                                        {-3.0e+00l, 1.34989803163009452665181477e-03l},
+                                        {-2.0e+00l, 2.27501319481792072002826372e-02l},
+                                        {-1.0e+00l, 1.58655253931457051414767454e-01l},
+                                        {0.0e+00l, 5.00000000000000000000000000e-01l},
+                                        {1.0e+00l, 8.41344746068542948585232546e-01l},
+                                        {2.0e+00l, 9.77249868051820792799717363e-01l},
+                                        {3.0e+00l, 9.98650101968369905473348185e-01l},
+                                        {4.0e+00l, 9.99968328758166880078746229e-01l},
+                                        {5.0e+00l, 9.99999713348428120806088326e-01l},
+                                        {6.0e+00l, 9.99999999013412354962301859e-01l},
+                                        {7.0e+00l, 9.99999999998720187456114165e-01l},
+                                        {8.0e+00l, 9.99999999999999377903942573e-01l}};
+  for (auto &v : values) {
+    const T x{v.x};
+    const T y{trng::math::Phi(x)};
+    const T err{std::abs(y - v.y)};
+    const T rel_err{err / std::abs(v.y)};
+    std::stringstream mes;
+    mes << "sufficent accuracy, x = " << x << ", Phi(x) = " << y << ", err = " << err
+        << ", rel_err = " << rel_err << " for " << name;
+    auto y_min_max = bounds(v.y);
+    const T y_min{std::get<0>(y_min_max)};
+    const T y_max{std::get<1>(y_min_max)};
+    BOOST_TEST((y_min <= y and y <= y_max), mes.str().c_str());
+  }
+}
+
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_inv_Phi, T, floats) {
+  const std::string &name{type_name<T>::name};
+  struct test_values {
+    const T x, y;
+  };
+  const std::vector<test_values> values{{9.765625000e-04l, -3.09726907819878446236483050e+00l},
+                                        {6.2500e-02l, -1.53412054435254631170839906e+00l},
+                                        {1.2500e-01l, -1.15034938037600817829676531e+00l},
+                                        {1.8750e-01l, -8.87146559018876056685664260e-01l},
+                                        {2.5000e-01l, -6.74489750196081743202227015e-01l},
+                                        {3.1250e-01l, -4.88776411114669498910885783e-01l},
+                                        {3.7500e-01l, -3.18639363964375163021948464e-01l},
+                                        {4.3750e-01l, -1.57310684610170695522370718e-01l},
+                                        {5.0000e-01l, 0.00000000000000000000000000e+00l},
+                                        {5.6250e-01l, 1.57310684610170695522370718e-01l},
+                                        {6.2500e-01l, 3.18639363964375163021948464e-01l},
+                                        {6.8750e-01l, 4.88776411114669498910885783e-01l},
+                                        {7.5000e-01l, 6.74489750196081743202227015e-01l},
+                                        {8.1250e-01l, 8.87146559018876056685664260e-01l},
+                                        {8.7500e-01l, 1.15034938037600817829676531e+00l},
+                                        {9.3750e-01l, 1.53412054435254631170839906e+00l},
+                                        {9.990234375e-01l, 3.09726907819878446236483050e+00l}};
+  for (auto &v : values) {
+    const T x{v.x};
+    const T y{trng::math::inv_Phi(x)};
+    const T err{std::abs(y - v.y)};
+    const T rel_err{err / std::abs(v.y)};
+    std::stringstream mes;
+    mes << "sufficent accuracy, x = " << x << ", inv_Phi(x) = " << y << ", err = " << err
+        << ", rel_err = " << rel_err << " for " << name;
     auto y_min_max = bounds(v.y);
     const T y_min{std::get<0>(y_min_max)};
     const T y_max{std::get<1>(y_min_max)};

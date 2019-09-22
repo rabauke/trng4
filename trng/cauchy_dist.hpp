@@ -105,7 +105,7 @@ namespace trng {
     // inverse cumulative density function
     TRNG_CUDA_ENABLE
     result_type icdf_(result_type x) const {
-      const result_type t{x * math::constants<result_type>::pi()};
+      const result_type t{x * math::constants<result_type>::pi};
       return P.eta() - P.theta() * math::cos(t) / math::sin(t);
     }
 
@@ -150,14 +150,14 @@ namespace trng {
     result_type pdf(result_type x) const {
       x -= P.eta();
       x /= P.theta();
-      return math::constants<result_type>::one_over_pi() / (1 + x * x) / P.theta();
+      return math::constants<result_type>::one_over_pi / (1 + x * x) / P.theta();
     }
     // cumulative density function
     TRNG_CUDA_ENABLE
     result_type cdf(result_type x) const {
       x -= P.eta();
       x /= P.theta();
-      return math::constants<result_type>::one_over_pi() * math::atan(x) +
+      return math::constants<result_type>::one_over_pi * math::atan(x) +
              result_type(1) / result_type(2);
     }
     // inverse cumulative density function
