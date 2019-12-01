@@ -24,6 +24,7 @@ set(HEADER_FILES
         lcg64.hpp
         lcg64_shift.hpp
         limits.hpp
+        linear_algebra.hpp
         logistic_dist.hpp
         lognormal_dist.hpp
         math.hpp

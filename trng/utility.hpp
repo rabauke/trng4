@@ -46,6 +46,7 @@
 #include <cstring>
 #include <vector>
 #include <iterator>
+#include <type_traits>
 #include <ciso646>
 
 namespace trng {
@@ -211,6 +212,18 @@ namespace trng {
       }
       return static_cast<std::size_t>(i2);
     }
+
+    // -----------------------------------------------------------------
+
+    template<typename T1, typename T2, typename... Ts>
+    struct is_same
+        : std::integral_constant<bool, is_same<T1, T2>::value && is_same<T2, Ts...>::value> {};
+
+    template<typename T1, typename T2>
+    struct is_same<T1, T2> : std::false_type {};
+
+    template<typename T>
+    struct is_same<T, T> : std::true_type {};
 
   }  // namespace utility
 
