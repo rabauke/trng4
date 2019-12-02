@@ -190,7 +190,7 @@ namespace trng {
 
 
   template<typename T, std::size_t n>
-  matrix<T, n> power(const matrix<T, n> &a, int m) {
+  matrix<T, n> power(const matrix<T, n> &a, unsigned long long m) {
     using size_type = typename matrix<T, n>::size_type;
 
     if (m < 0)
@@ -199,14 +199,14 @@ namespace trng {
         utility::throw_this(std::invalid_argument("invalid argument in trng::power"));
 #endif
 
-    const int num_powers{int_math::log2_floor(m)};
+    const unsigned long long num_powers{int_math::log2_floor(m)};
     auto unit = [&](size_type i, size_type j) -> T { return i == j ? 1 : 0; };
     matrix<T, n> res(unit);
     matrix<T, n> powers(a);
-    for (int i{0}; i <= num_powers; ++i) {
-      if ((m & 1) == 1)
+    for (unsigned long long i{0}; i <= num_powers; ++i) {
+      if ((m & 1ull) == 1ull)
         res = res * powers;
-      m >>= 1;
+      m >>= 1u;
       powers = powers * powers;
     }
     return res;
