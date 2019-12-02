@@ -112,6 +112,15 @@ BOOST_AUTO_TEST_CASE(test_basic) {
     const bool ok{C2 == C};
     BOOST_TEST(ok, "matrix matrix product ok");
   }
+  {
+    trng::matrix<int, 2> A{1, 3,  //
+                           2, 4};
+    trng::matrix<int, 2> A_5{1069, 2337,  //
+                             1558, 3406};
+    auto A_5_2 = trng::power(A, 5);
+    const bool ok{A_5_2 == A_5};
+    BOOST_TEST(ok, "matrix matrix power ok");
+  }
 }
 BOOST_AUTO_TEST_SUITE_END()
 

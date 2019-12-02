@@ -40,6 +40,7 @@
 #include <ciso646>
 #include <initializer_list>
 #include <trng/utility.hpp>
+#include <trng/int_math.hpp>
 
 namespace trng {
 
@@ -174,6 +175,7 @@ namespace trng {
     return vector<T, n>(f);
   }
 
+
   template<typename T, std::size_t n>
   matrix<T, n> operator*(const matrix<T, n> &a, const matrix<T, n> &b) {
     using size_type = typename matrix<T, n>::size_type;
@@ -184,6 +186,30 @@ namespace trng {
       return sum;
     };
     return matrix<T, n>(f);
+  }
+
+
+  template<typename T, std::size_t n>
+  matrix<T, n> power(const matrix<T, n> &a, int m) {
+    using size_type = typename matrix<T, n>::size_type;
+
+    if (m < 0)
+#if !(defined __CUDA_ARCH__)
+      if (m < 0)
+        utility::throw_this(std::invalid_argument("invalid argument in trng::power"));
+#endif
+
+    const int num_powers{int_math::log2_floor(m)};
+    auto unit = [&](size_type i, size_type j) -> T { return i == j ? 1 : 0; };
+    matrix<T, n> res(unit);
+    matrix<T, n> powers(a);
+    for (int i{0}; i <= num_powers; ++i) {
+      if ((m & 1) == 1)
+        res = res * powers;
+      m >>= 1;
+      powers = powers * powers;
+    }
+    return res;
   }
 
 
