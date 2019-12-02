@@ -137,6 +137,8 @@ namespace trng {
     void jump2(unsigned int);
     TRNG_CUDA_ENABLE
     void jump(unsigned long long);
+    TRNG_CUDA_ENABLE
+    void discard(unsigned long long);
 
     // Other useful methods
     static const char *name();
@@ -326,6 +328,9 @@ namespace trng {
       }
     }
   }
+
+  TRNG_CUDA_ENABLE
+  inline void mrg5s::discard(unsigned long long n) { return jump(n); }
 
   TRNG_CUDA_ENABLE
   void mrg5s::backward() {
