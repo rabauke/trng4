@@ -229,6 +229,22 @@ BOOST_AUTO_TEST_SUITE_END()
 
 //-----------------------------------------------------------------------------------------
 
+BOOST_AUTO_TEST_SUITE(test_suite_discard)
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_discard, R, engines) {
+  // two engines with equal state
+  R r1, r2;
+  const unsigned long long throw_away{2ull * 3 * 5 * 7 * 11 * 13 * 17 * 19};
+  r1.discard(throw_away);
+  for (unsigned long long i{0}; i < throw_away; ++i)
+    r2();
+  std::stringstream message;
+  message << "engines have equal state after discard(" << throw_away << ")";
+  BOOST_TEST(r1 == r2, message.str().c_str());
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+//-----------------------------------------------------------------------------------------
+
 BOOST_AUTO_TEST_SUITE(test_suite_jump2)
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_jump2, R, parallel_engines) {
   // two engines with equal state
