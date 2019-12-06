@@ -52,8 +52,10 @@ namespace trng {
     using size_type = typename std::vector<T>::size_type;
     using reference = typename std::vector<T>::reference;
     using const_reference = typename std::vector<T>::const_reference;
+    using iterator = typename std::vector<T>::iterator;
+    using const_iterator = typename std::vector<T>::const_iterator;
 
-    vector() : data{n} {}
+    vector() : data(n) {}
 
     template<typename F>
     explicit vector(F f) {
@@ -65,7 +67,7 @@ namespace trng {
     }
 
     template<typename... Ts>
-    vector(Ts... t) : data{t...} {
+    explicit vector(Ts... t) : data{t...} {
       static_assert(sizeof...(Ts) == n, "wrong number of arguments");
       static_assert(trng::utility::is_same<T, Ts...>::value,
                     "wrong type in constructor argument");
@@ -73,7 +75,11 @@ namespace trng {
 
     reference operator()(size_type i) { return data[i]; }
     const_reference operator()(size_type i) const { return data[i]; }
-    constexpr size_type size() { return n; }
+    constexpr size_type size() const { return n; }
+    iterator begin() { return data.begin(); }
+    const_iterator begin() const { return data.begin(); }
+    iterator end() { return data.end(); }
+    const_iterator end() const { return data.end(); }
     bool operator==(const vector &other) const { return data == other.data; }
     bool operator!=(const vector &other) const { return data != other.data; }
   };
@@ -88,7 +94,7 @@ namespace trng {
     using reference = typename std::vector<T>::reference;
     using const_reference = typename std::vector<T>::const_reference;
 
-    matrix() : data{n * n} {}
+    matrix() : data(n * n) {}
 
     template<typename F>
     explicit matrix(F f) {
@@ -101,7 +107,7 @@ namespace trng {
     }
 
     template<typename... Ts>
-    matrix(Ts... t) : data{t...} {
+    explicit matrix(Ts... t) : data{t...} {
       static_assert(sizeof...(Ts) == n * n, "wrong number of arguments");
       static_assert(trng::utility::is_same<T, Ts...>::value,
                     "wrong type in constructor argument");
@@ -109,7 +115,7 @@ namespace trng {
 
     reference operator()(size_type i, size_type j) { return data[j + i * n]; }
     const_reference operator()(size_type i, size_type j) const { return data[j + i * n]; }
-    constexpr size_type size() { return n; }
+    constexpr size_type size() const { return n; }
     bool operator==(const matrix &other) const { return data == other.data; }
     bool operator!=(const matrix &other) const { return data != other.data; }
   };
@@ -179,34 +185,45 @@ namespace trng {
   template<typename T, std::size_t n>
   matrix<T, n> operator*(const matrix<T, n> &a, const matrix<T, n> &b) {
     using size_type = typename matrix<T, n>::size_type;
-    auto f = [&](size_type i, size_type j) -> T {
-      T sum{};
-      for (size_type k{0}; k < n; ++k)
-        sum = sum + a(i, k) * b(k, j);
-      return sum;
-    };
-    return matrix<T, n>(f);
+    matrix<T, n> res;
+    const size_type step{32};
+    for (size_type j0{0}; j0 < n; j0 += step) {
+      for (size_type i{0}; i < n; ++i)
+        for (size_type j{j0}, j_end{utility::min(n, j0 + step)}; j < j_end; ++j)
+          res(i, j) = 0;
+      for (size_type k0{0}; k0 < n; k0 += step) {
+        for (size_type i{0}; i < n; ++i)
+          for (size_type j{j0}, j_end{utility::min(n, j0 + step)}; j < j_end; ++j) {
+            T sum{0};
+            for (size_type k{k0}, k_end{utility::min(n, k0 + step)}; k < k_end; ++k)
+              sum = sum + a(i, k) * b(k, j);
+            res(i, j) = res(i, j) + sum;
+          }
+      }
+    }
+    return res;
   }
 
 
   template<typename T, std::size_t n>
   matrix<T, n> power(const matrix<T, n> &a, unsigned long long m) {
-    using size_type = typename matrix<T, n>::size_type;
+    using matrix_type = matrix<T, n>;
+    using size_type = typename matrix_type::size_type;
 
-    if (m < 0)
 #if !(defined __CUDA_ARCH__)
-      if (m < 0)
-        utility::throw_this(std::invalid_argument("invalid argument in trng::power"));
+    if (m < 0)
+      utility::throw_this(std::invalid_argument("invalid argument in trng::power"));
 #endif
 
-    const unsigned long long num_powers{int_math::log2_floor(m)};
     auto unit = [&](size_type i, size_type j) -> T { return i == j ? 1 : 0; };
-    matrix<T, n> res(unit);
-    matrix<T, n> powers(a);
-    for (unsigned long long i{0}; i <= num_powers; ++i) {
+    matrix_type res(unit);
+    matrix_type powers(a);
+    while (m > 0) {
       if ((m & 1ull) == 1ull)
         res = res * powers;
       m >>= 1u;
+      if (m == 0)
+        break;
       powers = powers * powers;
     }
     return res;

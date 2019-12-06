@@ -150,6 +150,31 @@ namespace trng {
     }
 
     void discard(unsigned long long n) {
+      using matrix_type = matrix<result_type, D>;
+      using vector_type = vector<result_type, D>;
+      using size_type = typename matrix_type::size_type;
+      const unsigned long long n_pivot{0x1000000};
+      constexpr auto mask = int_math::mask(D);
+      if (n > n_pivot) {
+        const unsigned long long n_partial{n - n_pivot};
+        matrix_type M;
+        for (size_type i{0}; i < M.size() - 1; ++i)
+          M(i, i + 1) = 1;
+        M(M.size() - 1, M.size() - D) = 1;
+        M(M.size() - 1, M.size() - C) = 1;
+        M(M.size() - 1, M.size() - B) = 1;
+        M(M.size() - 1, M.size() - A) = 1;
+        M = power(M, n_partial);
+        vector_type V;
+        for (size_type i{0}; i < V.size(); ++i)
+          V(V.size() - 1 - i) = S.r[(S.index - i) & mask];
+        V = M * V;
+        S.index += n_partial;
+        S.index &= mask;
+        for (size_type i{0}; i < V.size(); ++i)
+          S.r[(S.index - i) & mask] = V(V.size() - 1 - i);
+        n -= n_partial;
+      }
       for (unsigned long long i{0}; i < n; ++i)
         step();
     }
@@ -211,7 +236,7 @@ namespace trng {
     status_type S;
 
     void step() {
-      S.index++;
+      ++S.index;
       S.index &= int_math::mask(D);
       S.r[S.index] =
           S.r[(S.index - A) & int_math::mask(D)] + S.r[(S.index - B) & int_math::mask(D)] +
