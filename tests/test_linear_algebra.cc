@@ -144,6 +144,22 @@ BOOST_AUTO_TEST_CASE(test_mult) {
   BOOST_TEST((one * zero == zero), "multiplication 1 * 0");
   BOOST_TEST((one * one == one), "multiplication 1 * 1");
 }
+
+BOOST_AUTO_TEST_CASE(test_matrix_power) {
+  const trng::GF2 zero(false);
+  const trng::GF2 one(true);
+  trng::matrix<trng::GF2, 4> A{one,  one, zero, one,   //
+                               one,  one, one,  zero,  //
+                               one,  one, zero, zero,  //
+                               zero, one, zero, one};
+  trng::matrix<trng::GF2, 4> A_8{one,  one, zero, one,   //
+                                 one,  one, one,  zero,  //
+                                 one,  one, zero, zero,  //
+                                 zero, one, zero, one};
+  auto A_8_2 = trng::power(A, 8);
+  const bool ok{A_8_2 == A_8};
+  BOOST_TEST(ok, "matrix matrix power in GF2 ok");
+}
 BOOST_AUTO_TEST_SUITE_END()
 
 //-----------------------------------------------------------------------------------------

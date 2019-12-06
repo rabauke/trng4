@@ -190,7 +190,7 @@ namespace trng {
     for (size_type j0{0}; j0 < n; j0 += step) {
       for (size_type i{0}; i < n; ++i)
         for (size_type j{j0}, j_end{utility::min(n, j0 + step)}; j < j_end; ++j)
-          res(i, j) = 0;
+          res(i, j) = T{0};
       for (size_type k0{0}; k0 < n; k0 += step) {
         for (size_type i{0}; i < n; ++i)
           for (size_type j{j0}, j_end{utility::min(n, j0 + step)}; j < j_end; ++j) {
@@ -215,7 +215,7 @@ namespace trng {
       utility::throw_this(std::invalid_argument("invalid argument in trng::power"));
 #endif
 
-    auto unit = [&](size_type i, size_type j) -> T { return i == j ? 1 : 0; };
+    auto unit = [&](size_type i, size_type j) -> T { return i == j ? T{1} : T{0}; };
     matrix_type res(unit);
     matrix_type powers(a);
     while (m > 0) {
@@ -241,8 +241,9 @@ namespace trng {
 
   public:
     explicit GF2(bool v = false) : value(v ? 1 : 0) {}
+    explicit GF2(int v) : value(v != 0 ? 1 : 0) {}
 
-    explicit operator value_type() { return value; }
+    explicit operator bool() { return value; }
 
     friend bool operator==(const GF2 a, const GF2 b) { return a.value == b.value; }
     friend bool operator!=(const GF2 a, const GF2 b) { return a.value != b.value; }
@@ -266,12 +267,14 @@ namespace trng {
     }
 
     template<typename T>
-    friend std::enable_if<std::is_integral<T>::value, T> operator*(const GF2 a, const T b) {
+    friend typename std::enable_if<std::is_integral<T>::value, T>::type operator*(const GF2 a,
+                                                                                  const T b) {
       return a.value ? b : T{};
     }
 
     template<typename T>
-    friend std::enable_if<std::is_integral<T>::value, T> operator*(const T a, const GF2 b) {
+    friend typename std::enable_if<std::is_integral<T>::value, T>::type operator*(const T a,
+                                                                                  const GF2 b) {
       return b.value ? a : T{};
     }
   };
@@ -280,7 +283,7 @@ namespace trng {
   template<typename CharT, typename Traits>
   std::basic_ostream<CharT, Traits> &operator<<(std::basic_ostream<CharT, Traits> &os,
                                                 GF2 value) {
-    return os << static_cast<GF2::value_type>(value);
+    return os << static_cast<bool>(value);
   }
 
 
