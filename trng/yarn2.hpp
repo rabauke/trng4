@@ -153,7 +153,7 @@ namespace trng {
   // Inline and template methods
 
   TRNG_CUDA_ENABLE
-  void yarn2::step() {
+  inline void yarn2::step() {
     const uint64_t t{static_cast<uint64_t>(P.a[0]) * static_cast<uint64_t>(S.r[0]) +
                      static_cast<uint64_t>(P.a[1]) * static_cast<uint64_t>(S.r[1])};
     S.r[1] = S.r[0];
@@ -161,7 +161,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  yarn2::result_type yarn2::operator()() {
+  inline yarn2::result_type yarn2::operator()() {
     step();
 #if defined __CUDA_ARCH__
     if (S.r[0] == 0)
@@ -181,13 +181,13 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  long yarn2::operator()(long x) {
+  inline long yarn2::operator()(long x) {
     return static_cast<long>(utility::uniformco<double, yarn2>(*this) * x);
   }
 
   // Parallel random number generator concept
   TRNG_CUDA_ENABLE
-  void yarn2::split(unsigned int s, unsigned int n) {
+  inline void yarn2::split(unsigned int s, unsigned int n) {
 #if !(defined __CUDA_ARCH__)
     if (s < 1 or n >= s)
       utility::throw_this(std::invalid_argument("invalid argument for trng::yarn2::split"));
@@ -219,7 +219,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  void yarn2::jump2(unsigned int s) {
+  inline void yarn2::jump2(unsigned int s) {
     int32_t b[4], c[4], d[2], r[2];
     const parameter_type P_backup{P};
     b[0] = P.a[0];
@@ -245,7 +245,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  void yarn2::jump(unsigned long long s) {
+  inline void yarn2::jump(unsigned long long s) {
     if (s < 16) {
       for (unsigned int i{0}; i < s; ++i)
         step();
@@ -261,7 +261,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  void yarn2::discard(unsigned long long n) { return jump(n); }
+  inline void yarn2::discard(unsigned long long n) { jump(n); }
 
   TRNG_CUDA_ENABLE
   void yarn2::backward() {

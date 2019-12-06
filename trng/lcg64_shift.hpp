@@ -355,7 +355,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  inline void lcg64_shift::discard(unsigned long long n) { return jump(n); }
+  inline void lcg64_shift::discard(unsigned long long n) { jump(n); }
 
   TRNG_CUDA_ENABLE
   inline void lcg64_shift::backward() {

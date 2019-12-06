@@ -157,7 +157,7 @@ namespace trng {
   // Inline and template methods
 
   TRNG_CUDA_ENABLE
-  void mrg4::step() {
+  inline void mrg4::step() {
     const uint64_t t{static_cast<uint64_t>(P.a[0]) * static_cast<uint64_t>(S.r[0]) +
                      static_cast<uint64_t>(P.a[1]) * static_cast<uint64_t>(S.r[1]) +
                      static_cast<uint64_t>(P.a[2]) * static_cast<uint64_t>(S.r[2]) +
@@ -169,19 +169,19 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  mrg4::result_type mrg4::operator()() {
+  inline mrg4::result_type mrg4::operator()() {
     step();
     return S.r[0];
   }
 
   TRNG_CUDA_ENABLE
-  long mrg4::operator()(long x) {
+  inline long mrg4::operator()(long x) {
     return static_cast<long>(utility::uniformco<double, mrg4>(*this) * x);
   }
 
   // Parallel random number generator concept
   TRNG_CUDA_ENABLE
-  void mrg4::split(unsigned int s, unsigned int n) {
+  inline void mrg4::split(unsigned int s, unsigned int n) {
 #if !(defined __CUDA_ARCH__)
     if (s < 1 or n >= s)
       utility::throw_this(std::invalid_argument("invalid argument for trng::mrg4::split"));
@@ -239,7 +239,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  void mrg4::jump2(unsigned int s) {
+  inline void mrg4::jump2(unsigned int s) {
     int32_t b[16], c[16], d[4], r[4];
     const parameter_type P_backup{P};
     b[0] = P.a[0];
@@ -281,7 +281,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  void mrg4::jump(unsigned long long s) {
+  inline void mrg4::jump(unsigned long long s) {
     if (s < 16) {
       for (unsigned int i{0}; i < s; ++i)
         step();
@@ -297,10 +297,10 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  void mrg4::discard(unsigned long long n) { return jump(n); }
+  inline void mrg4::discard(unsigned long long n) { jump(n); }
 
   TRNG_CUDA_ENABLE
-  void mrg4::backward() {
+  inline void mrg4::backward() {
     result_type t;
     if (P.a[3] != 0) {
       t = S.r[0];

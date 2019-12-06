@@ -192,7 +192,7 @@ namespace trng {
 
   // Parallel random number generator concept
   TRNG_CUDA_ENABLE
-  void yarn3::split(unsigned int s, unsigned int n) {
+  inline void yarn3::split(unsigned int s, unsigned int n) {
 #if !(defined __CUDA_ARCH__)
     if (s < 1 or n >= s)
       utility::throw_this(std::invalid_argument("invalid argument for trng::yarn3::split"));
@@ -236,7 +236,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  void yarn3::jump2(unsigned int s) {
+  inline void yarn3::jump2(unsigned int s) {
     int32_t b[9], c[9], d[3], r[3];
     const parameter_type P_backup{P};
     b[0] = P.a[0];
@@ -269,7 +269,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  void yarn3::jump(unsigned long long s) {
+  inline void yarn3::jump(unsigned long long s) {
     if (s < 16) {
       for (unsigned int i{0}; i < s; ++i)
         step();
@@ -285,10 +285,10 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  void yarn3::discard(unsigned long long n) { return jump(n); }
+  inline void yarn3::discard(unsigned long long n) { jump(n); }
 
   TRNG_CUDA_ENABLE
-  void yarn3::backward() {
+  inline void yarn3::backward() {
     result_type t;
     if (P.a[2] != 0) {
       t = S.r[0];

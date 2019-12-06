@@ -269,7 +269,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  inline void mrg3::discard(unsigned long long n) { return jump(n); }
+  inline void mrg3::discard(unsigned long long n) { jump(n); }
 
   TRNG_CUDA_ENABLE
   inline void mrg3::backward() {

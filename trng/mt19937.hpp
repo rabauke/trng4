@@ -217,7 +217,7 @@ namespace trng {
 
   // Inline and template methods
 
-  mt19937::result_type mt19937::operator()() {
+  inline mt19937::result_type mt19937::operator()() {
     const result_type mag01[2]{0u, 0x9908b0dfu};
     if (S.mti >= N) {  // generate N words at one time
       int i{0};
@@ -241,12 +241,12 @@ namespace trng {
     return x;
   }
 
-  void mt19937::discard(unsigned long long n) {
+  inline void mt19937::discard(unsigned long long n) {
     for (unsigned long long i{0}; i < n; ++i)
       this->operator()();
   }
 
-  long mt19937::operator()(long x) {
+  inline long mt19937::operator()(long x) {
     return static_cast<long>(utility::uniformco<double, mt19937>(*this) * x);
   }
 

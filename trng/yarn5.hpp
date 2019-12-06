@@ -343,7 +343,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  inline void yarn5::discard(unsigned long long n) { return jump(n); }
+  inline void yarn5::discard(unsigned long long n) { jump(n); }
 
   TRNG_CUDA_ENABLE
   inline void yarn5::backward() {
