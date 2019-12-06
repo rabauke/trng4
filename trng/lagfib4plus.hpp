@@ -150,29 +150,30 @@ namespace trng {
     }
 
     void discard(unsigned long long n) {
-      using matrix_type = matrix<result_type, D>;
-      using vector_type = vector<result_type, D>;
+      const unsigned int matrix_size = D;
+      using matrix_type = matrix<result_type, matrix_size>;
+      using vector_type = vector<result_type, matrix_size>;
       using size_type = typename matrix_type::size_type;
-      const unsigned long long n_pivot{0x1000000};
+      const unsigned long long n_pivot{int_math::log2_ceil(n) * D * D * D};
       constexpr auto mask = int_math::mask(D);
       if (n > n_pivot) {
-        const unsigned long long n_partial{n - n_pivot};
+        const unsigned long long n_partial{n - matrix_size};
         matrix_type M;
-        for (size_type i{0}; i < M.size() - 1; ++i)
+        for (size_type i{0}; i < matrix_size - 1; ++i)
           M(i, i + 1) = 1;
-        M(M.size() - 1, M.size() - D) = 1;
-        M(M.size() - 1, M.size() - C) = 1;
-        M(M.size() - 1, M.size() - B) = 1;
-        M(M.size() - 1, M.size() - A) = 1;
+        M(matrix_size - 1, matrix_size - D) = 1;
+        M(matrix_size - 1, matrix_size - C) = 1;
+        M(matrix_size - 1, matrix_size - B) = 1;
+        M(matrix_size - 1, matrix_size - A) = 1;
         M = power(M, n_partial);
         vector_type V;
-        for (size_type i{0}; i < V.size(); ++i)
-          V(V.size() - 1 - i) = S.r[(S.index - i) & mask];
+        for (size_type i{0}; i < matrix_size; ++i)
+          V(matrix_size - 1 - i) = S.r[(S.index - i) & mask];
         V = M * V;
         S.index += n_partial;
         S.index &= mask;
-        for (size_type i{0}; i < V.size(); ++i)
-          S.r[(S.index - i) & mask] = V(V.size() - 1 - i);
+        for (size_type i{0}; i < matrix_size; ++i)
+          S.r[(S.index - i) & mask] = V(matrix_size - 1 - i);
         n -= n_partial;
       }
       for (unsigned long long i{0}; i < n; ++i)

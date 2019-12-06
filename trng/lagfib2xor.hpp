@@ -38,6 +38,7 @@
 #include <trng/utility.hpp>
 #include <trng/minstd.hpp>
 #include <trng/int_types.hpp>
+#include <trng/linear_algebra.hpp>
 #include <climits>
 #include <stdexcept>
 #include <ostream>
@@ -149,6 +150,36 @@ namespace trng {
     }
 
     void discard(unsigned long long n) {
+      const unsigned int matrix_size = B;
+      using matrix_type = matrix<GF2, matrix_size>;
+      using vector_type = vector<result_type, matrix_size>;
+      using size_type = typename matrix_type::size_type;
+      const unsigned long long n_pivot{int_math::log2_ceil(n) * B * B * B};
+      constexpr auto mask = int_math::mask(B);
+      if (n > n_pivot) {
+        const unsigned long long n_partial{n - matrix_size};
+        matrix_type M;
+        for (size_type i{0}; i < matrix_size - 1; ++i)
+          M(i, i + 1) = GF2(true);
+        M(matrix_size - 1, matrix_size - B) = GF2(true);
+        M(matrix_size - 1, matrix_size - A) = GF2(true);
+        M = power(M, n_partial);
+        vector_type V;
+        for (size_type i{0}; i < matrix_size; ++i)
+          V(matrix_size - 1 - i) = S.r[(S.index - i) & mask];
+        vector_type W;
+        for (size_type i{0}; i < matrix_size; ++i) {
+          result_type sum{};
+          for (size_type k{0}; k < matrix_size; ++k)
+            sum ^= M(i, k) * V(k);
+          W(i) = sum;
+        }
+        S.index += n_partial;
+        S.index &= mask;
+        for (size_type i{0}; i < matrix_size; ++i)
+          S.r[(S.index - i) & mask] = W(matrix_size - 1 - i);
+        n -= n_partial;
+      }
       for (unsigned long long i{0}; i < n; ++i)
         step();
     }
@@ -206,7 +237,7 @@ namespace trng {
     status_type S;
 
     void step() {
-      S.index++;
+      ++S.index;
       S.index &= int_math::mask(B);
       S.r[S.index] =
           S.r[(S.index - A) & int_math::mask(B)] ^ S.r[(S.index - B) & int_math::mask(B)];
