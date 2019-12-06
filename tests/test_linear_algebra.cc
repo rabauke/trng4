@@ -126,4 +126,26 @@ BOOST_AUTO_TEST_SUITE_END()
 
 //-----------------------------------------------------------------------------------------
 
+BOOST_AUTO_TEST_SUITE(test_suite_GF2)
+BOOST_AUTO_TEST_CASE(test_add) {
+  const trng::GF2 zero(false);
+  const trng::GF2 one(true);
+  BOOST_TEST(zero + zero == zero, "addition 0 + 0");
+  BOOST_TEST(zero + one == one, "addition 0 + 1");
+  BOOST_TEST(one + zero == one, "addition 1 + 0");
+  BOOST_TEST(one + one == zero, "addition 1 + 1");
+}
+
+BOOST_AUTO_TEST_CASE(test_mult) {
+  const trng::GF2 zero(false);
+  const trng::GF2 one(true);
+  BOOST_TEST((zero * zero == zero), "multiplication 0 * 0");
+  BOOST_TEST((zero * one == zero), "multiplication 0 * 1");
+  BOOST_TEST((one * zero == zero), "multiplication 1 * 0");
+  BOOST_TEST((one * one == one), "multiplication 1 * 1");
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+//-----------------------------------------------------------------------------------------
+
 BOOST_AUTO_TEST_SUITE_END()

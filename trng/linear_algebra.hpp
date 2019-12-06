@@ -35,10 +35,10 @@
 #define TRNG_LINEAR_ALGEBRA_HPP
 
 #include <vector>
-#include <array>
 #include <cstddef>
 #include <ciso646>
-#include <initializer_list>
+#include <iostream>
+#include <type_traits>
 #include <trng/utility.hpp>
 #include <trng/int_math.hpp>
 
@@ -227,6 +227,60 @@ namespace trng {
       powers = powers * powers;
     }
     return res;
+  }
+
+
+  class GF2 {
+  public:
+    using value_type = std::uint8_t;
+
+  private:
+    std::uint8_t value{0};
+
+    explicit GF2(value_type v) : value{v} {}
+
+  public:
+    explicit GF2(bool v = false) : value(v ? 1 : 0) {}
+
+    explicit operator value_type() { return value; }
+
+    friend bool operator==(const GF2 a, const GF2 b) { return a.value == b.value; }
+    friend bool operator!=(const GF2 a, const GF2 b) { return a.value != b.value; }
+
+    GF2 &operator+=(const GF2 other) {
+      value ^= other.value;
+      return *this;
+    }
+
+    GF2 &operator*=(const GF2 other) {
+      value &= other.value;
+      return *this;
+    }
+
+    friend GF2 operator+(const GF2 a, const GF2 b) {
+      return GF2{static_cast<value_type>(a.value ^ b.value)};
+    }
+
+    friend GF2 operator*(const GF2 a, const GF2 b) {
+      return GF2{static_cast<value_type>(a.value & b.value)};
+    }
+
+    template<typename T>
+    friend std::enable_if<std::is_integral<T>::value, T> operator*(const GF2 a, const T b) {
+      return a.value ? b : T{};
+    }
+
+    template<typename T>
+    friend std::enable_if<std::is_integral<T>::value, T> operator*(const T a, const GF2 b) {
+      return b.value ? a : T{};
+    }
+  };
+
+
+  template<typename CharT, typename Traits>
+  std::basic_ostream<CharT, Traits> &operator<<(std::basic_ostream<CharT, Traits> &os,
+                                                GF2 value) {
+    return os << static_cast<GF2::value_type>(value);
   }
 
 
