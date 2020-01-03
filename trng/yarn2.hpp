@@ -264,7 +264,7 @@ namespace trng {
   inline void yarn2::discard(unsigned long long n) { jump(n); }
 
   TRNG_CUDA_ENABLE
-  void yarn2::backward() {
+  inline void yarn2::backward() {
     result_type t;
     if (P.a[1] != 0) {
       t = S.r[0];

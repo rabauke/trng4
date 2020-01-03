@@ -165,7 +165,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  yarn3s::result_type yarn3s::operator()() {
+  inline yarn3s::result_type yarn3s::operator()() {
     step();
 #if defined __CUDA_ARCH__
     if (S.r[0] == 0)

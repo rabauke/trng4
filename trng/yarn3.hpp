@@ -156,7 +156,7 @@ namespace trng {
   // Inline and template methods
 
   TRNG_CUDA_ENABLE
-  void yarn3::step() {
+  inline void yarn3::step() {
     const uint64_t t{static_cast<uint64_t>(P.a[0]) * static_cast<uint64_t>(S.r[0]) +
                      static_cast<uint64_t>(P.a[1]) * static_cast<uint64_t>(S.r[1]) +
                      static_cast<uint64_t>(P.a[2]) * static_cast<uint64_t>(S.r[2])};
@@ -166,7 +166,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  yarn3::result_type yarn3::operator()() {
+  inline yarn3::result_type yarn3::operator()() {
     step();
 #if defined __CUDA_ARCH__
     if (S.r[0] == 0)
@@ -186,7 +186,7 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  long yarn3::operator()(long x) {
+  inline long yarn3::operator()(long x) {
     return static_cast<long>(utility::uniformco<double, yarn3>(*this) * x);
   }
 
