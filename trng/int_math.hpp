@@ -147,8 +147,8 @@ namespace trng {
     //------------------------------------------------------------------
 
     template<int n>
-    TRNG_CUDA_ENABLE void matrix_mult(const int32_t a[n * n], const int32_t b[n * n],
-                                      int32_t c[n * n], int32_t m) {
+    TRNG_CUDA_ENABLE void matrix_mult(const int32_t (&a)[n * n], const int32_t (&b)[n * n],
+                                      int32_t (&c)[n * n], int32_t m) {
       for (int i{0}; i < n; ++i)
         for (int j{0}; j < n; ++j) {
           int64_t t{0};
@@ -164,8 +164,8 @@ namespace trng {
     //------------------------------------------------------------------
 
     template<int n>
-    TRNG_CUDA_ENABLE void matrix_vec_mult(const int32_t a[n * n], const int32_t b[n],
-                                          int32_t c[n], int32_t m) {
+    TRNG_CUDA_ENABLE void matrix_vec_mult(const int32_t (&a)[n * n], const int32_t (&b)[n],
+                                          int32_t (&c)[n], int32_t m) {
       for (int j{0}; j < n; ++j) {
         int64_t t{0};
         for (int k{0}; k < n; ++k) {

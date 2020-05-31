@@ -210,11 +210,6 @@ namespace trng {
     using matrix_type = matrix<T, n>;
     using size_type = typename matrix_type::size_type;
 
-#if !(defined __CUDA_ARCH__)
-    if (m < 0)
-      utility::throw_this(std::invalid_argument("invalid argument in trng::power"));
-#endif
-
     auto unit = [&](size_type i, size_type j) -> T { return i == j ? T{1} : T{0}; };
     matrix_type res(unit);
     matrix_type powers(a);

@@ -240,8 +240,7 @@ namespace trng {
 
   TRNG_CUDA_ENABLE
   inline void mrg4::jump2(unsigned int s) {
-    int32_t b[16], c[16], d[4], r[4];
-    const parameter_type P_backup{P};
+    result_type b[16], c[16]{};
     b[0] = P.a[0];
     b[1] = P.a[1];
     b[2] = P.a[2];
@@ -265,10 +264,8 @@ namespace trng {
         break;
       int_math::matrix_mult<4>(c, c, b, modulus);
     }
-    r[0] = S.r[0];
-    r[1] = S.r[1];
-    r[2] = S.r[2];
-    r[3] = S.r[3];
+    const result_type r[4]{S.r[0], S.r[1], S.r[2], S.r[3]};
+    result_type d[4];
     if ((s & 1u) == 0)
       int_math::matrix_vec_mult<4>(b, r, d, modulus);
     else
@@ -277,7 +274,6 @@ namespace trng {
     S.r[1] = d[1];
     S.r[2] = d[2];
     S.r[3] = d[3];
-    P = P_backup;
   }
 
   TRNG_CUDA_ENABLE
