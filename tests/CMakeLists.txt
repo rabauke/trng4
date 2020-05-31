@@ -8,6 +8,5 @@ if (Boost_FOUND)
     link_directories(${PROJECT_BINARY_DIR}/trng)
 
     add_executable(test_all test_all.cc test_engines.cc test_distributions.cc test_math.cc type_names.cc test_linear_algebra.cc)
-    target_link_libraries(test_all ${Boost_LIBRARIES})
-    target_link_libraries(test_all PUBLIC Boost::boost)
+    target_link_libraries(test_all PUBLIC Boost::unit_test_framework)
 endif ()
