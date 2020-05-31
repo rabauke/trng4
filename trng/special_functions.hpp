@@ -548,20 +548,24 @@ namespace trng {
 
       template<typename T>
       struct inv_Phi_traits {
-        static constexpr T a[6]{-3.969683028665376e+01l, 2.209460984245205e+02l,
-                                -2.759285104469687e+02l, 1.383577518672690e+02l,
-                                -3.066479806614716e+01l, 2.506628277459239e+00l};
-        static constexpr T b[5]{-5.447609879822406e+01l, 1.615858368580409e+02l,
-                                -1.556989798598866e+02l, 6.680131188771972e+01l,
-                                -1.328068155288572e+01l};
-        static constexpr T c[6]{-7.784894002430293e-03l, -3.223964580411365e-01l,
-                                -2.400758277161838e+00l, -2.549732539343734e+00l,
-                                4.374664141464968e+00l,  2.938163982698783e+00l};
-        static constexpr T d[4]{7.784695709041462e-03l, 3.224671290700398e-01l,
-                                2.445134137142996e+00l, 3.754408661907416e+00l};
-        static constexpr T x_low = 0.02425l;
-        static constexpr T x_high = 1.0l - 0.02425l;
-        static constexpr T one_half = 0.5l;
+        static constexpr T a[6]{
+            static_cast<T>(-3.969683028665376e+01l), static_cast<T>(2.209460984245205e+02l),
+            static_cast<T>(-2.759285104469687e+02l), static_cast<T>(1.383577518672690e+02l),
+            static_cast<T>(-3.066479806614716e+01l), static_cast<T>(2.506628277459239e+00l)};
+        static constexpr T b[5]{
+            static_cast<T>(-5.447609879822406e+01l), static_cast<T>(1.615858368580409e+02l),
+            static_cast<T>(-1.556989798598866e+02l), static_cast<T>(6.680131188771972e+01l),
+            static_cast<T>(-1.328068155288572e+01l)};
+        static constexpr T c[6]{
+            static_cast<T>(-7.784894002430293e-03l), static_cast<T>(-3.223964580411365e-01l),
+            static_cast<T>(-2.400758277161838e+00l), static_cast<T>(-2.549732539343734e+00l),
+            static_cast<T>(4.374664141464968e+00l),  static_cast<T>(2.938163982698783e+00l)};
+        static constexpr T d[4]{
+            static_cast<T>(7.784695709041462e-03l), static_cast<T>(3.224671290700398e-01l),
+            static_cast<T>(2.445134137142996e+00l), static_cast<T>(3.754408661907416e+00l)};
+        static constexpr T x_low = static_cast<T>(0.02425l);
+        static constexpr T x_high = static_cast<T>(1.0l - 0.02425l);
+        static constexpr T one_half = static_cast<T>(0.5l);
       };
 
       template<typename T>
