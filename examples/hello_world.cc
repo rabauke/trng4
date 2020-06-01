@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2019, Heiko Bauke
+// Copyright (c) 2000-2020, Heiko Bauke
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
