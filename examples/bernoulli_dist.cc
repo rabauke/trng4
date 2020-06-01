@@ -46,10 +46,10 @@ int main() {
   trng::lcg64 r;
   // draw some random numbers
   std::vector<int> count(2, 0);
-  const int samples = 100000;
+  const int samples{100000};
   for (int i = 0; i < samples; ++i) {
-    int x = biased_coin(r);  // draw a random number
-    ++count[x];              // count
+    const int x{biased_coin(r)};  // draw a random number
+    ++count[x];                   // count
   }
   // print results
   std::cout << "value\t\tprobability\tcount\t\tempirical probability\n"

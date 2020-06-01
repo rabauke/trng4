@@ -32,6 +32,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <vector>
 #include <trng/yarn2.hpp>
 #include <trng/uniform01_dist.hpp>
 
@@ -41,18 +42,18 @@ __global__ void parallel_pi(long samples, trng::yarn2 *rx, trng::yarn2 *ry, long
   trng::uniform01_dist<float> u;  // random number distribution
   in[rank] = 0;                   // local number of points in circle
   for (long i = rank * samples / size; i < (rank + 1) * samples / size; ++i) {
-    float x = u(rx[rank]), y = u(ry[rank]);  // choose random x- and y-coordinates
-    if (x * x + y * y <= 1)                  // is point in circle?
-      ++in[rank];                            // increase thread-local counter
+    const float x = u(rx[rank]), y = u(ry[rank]);  // choose random x- and y-coordinates
+    if (x * x + y * y <= 1)                        // is point in circle?
+      ++in[rank];                                  // increase thread-local counter
   }
 }
 
 int main(int argc, char *argv[]) {
-  const long samples = 1000000l;            // total number of points in square
-  const int size = 128;                     // number of threads
-  trng::yarn2 *rx = new trng::yarn2[size];  // random number engines
-  trng::yarn2 *ry = new trng::yarn2[size];  // random number engines
-  for (int rank = 0; rank < size; ++rank) {
+  const long samples{1000000l};            // total number of points in square
+  const int size{128};                     // number of threads
+  trng::yarn2 *rx{new trng::yarn2[size]};  // random number engines
+  trng::yarn2 *ry{new trng::yarn2[size]};  // random number engines
+  for (int rank{0}; rank < size; ++rank) {
     rx[rank].split(2, 0);        // choose sub-stream no. 0 out of 2 streams
     ry[rank].split(2, 1);        // choose sub-stream no. 1 out of 2 streams
     rx[rank].split(size, rank);  // choose sub-stream no. rank out of size streams
@@ -70,10 +71,12 @@ int main(int argc, char *argv[]) {
   // start parallel Monte Carlo
   parallel_pi<<<1, size>>>(samples, rx_device, ry_device, in_device);
   // gather results
-  long *in = new long[size];
-  cudaMemcpy(in, in_device, size * sizeof(*in), cudaMemcpyDeviceToHost);
-  long sum = 0;
-  for (int rank = 0; rank < size; ++rank)
+  std::vector<long> in(size);
+  cudaMemcpy(in.data(), in_device, size * sizeof(*in), cudaMemcpyDeviceToHost);
+  cudaFree(rx_device);
+  cudaFree(ry_device);
+  long sum{0};
+  for (int rank{0}; rank < size; ++rank)
     sum += in[rank];
   // print result
   std::cout << "pi = " << 4.0 * sum / samples << std::endl;

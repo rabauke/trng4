@@ -121,7 +121,6 @@ void lattice::resize(int newL) {
 
 inline void lattice::flipp(koord r) {
   s[pos(r.x) + pos(r.y) * L] *= -1;
-  ;
 }
 
 void lattice::fill(int w) {
@@ -138,17 +137,17 @@ void lattice::set(koord r, int w) {
 }
 
 double lattice::energy() const {
-  double e = 0.0;
-  for (int i = 0; i < L; ++i)
-    for (int j = 0; j < L; ++j)
+  double e{0.0};
+  for (int i{0}; i < L; ++i)
+    for (int j{0}; j < L; ++j)
       e -= s[i + j * L] * (s[pos(i + 1) + j * L] + s[i + pos(j + 1) * L]);
   return e / L2;
 }
 
 double lattice::magnet() const {
-  double m = 0.0;
-  for (int i = 0; i < L; ++i)
-    for (int j = 0; j < L; ++j)
+  double m{0.0};
+  for (int i{0}; i < L; ++i)
+    for (int j{0}; j < L; ++j)
       if (s[i + j * L] < 0)
         --m;
       else
@@ -157,8 +156,8 @@ double lattice::magnet() const {
 }
 
 void lattice::print() const {
-  for (int i = 0; i < L; ++i) {
-    for (int j = 0; j < L; ++j)
+  for (int i{0}; i < L; ++i) {
+    for (int j{0}; j < L; ++j)
       if (s[i + j * L] < 0)
         std::cout << '.';
       else
@@ -177,14 +176,13 @@ void wolffstep(RNG_type &R, lattice &s, double T) {
   std::queue<koord> buffer;
   const double padd = 1.0 - std::exp(-2.0 / T);
 
-  int oldspin;
   trng::uniform_int_dist U(0, s.size());
   trng::bernoulli_dist<bool> B(padd, true, false);
   koord r;
 
   r.x = U(R);
   r.y = U(R);
-  oldspin = s.get(r);
+  const int oldspin{s.get(r)};
   s.flipp(r);
   buffer.push(r);
   while (!buffer.empty()) {
@@ -227,11 +225,11 @@ void output(std::vector<double> &Ea, std::vector<double> &ca, int simulations, d
   ca[simulations] = 0.0;
   Ea[simulations + 1] = 0.0;
   ca[simulations + 1] = 0.0;
-  for (int j = 0; j < simulations; ++j) {
+  for (int j{0}; j < simulations; ++j) {
     Ea[simulations] += Ea[j] / simulations;
     ca[simulations] += ca[j] / simulations;
   }
-  for (int j = 0; j < simulations; ++j) {
+  for (int j{0}; j < simulations; ++j) {
     Ea[simulations + 1] += (Ea[j] - Ea[simulations]) * (Ea[j] - Ea[simulations]);
     ca[simulations + 1] += (ca[j] - ca[simulations]) * (ca[j] - ca[simulations]);
   }
@@ -242,7 +240,7 @@ void output(std::vector<double> &Ea, std::vector<double> &ca, int simulations, d
   ca[simulations + 1] = std::sqrt(ca[simulations + 1]);
   // Student_t(0.99, simulations-1l);
   std::cout << "\n\t E\t\t c\n";
-  for (int j = 0; j < simulations; ++j)
+  for (int j{0}; j < simulations; ++j)
     std::cout << '\t' << std::setprecision(8) << Ea[j] << '\t' << std::setprecision(8) << ca[j]
               << '\n';
   std::cout << "\t--------------\t--------------" << '\n'
@@ -329,13 +327,13 @@ void wolff_main(RNG_type &R, long runs, long split, long L) {
   }
 
   // const double
-  const int simulations = 10;
+  const int simulations{10};
   std::vector<double> Ea(simulations + 2);
   std::vector<double> ca(simulations + 2);
 
   std::cout.setf(std::ios::fixed);
   std::cout.setf(std::ios::showpoint);
-  double T = 2.0 / std::log1p(std::sqrt(2.0));
+  const double T{2.0 / std::log1p(std::sqrt(2.0))};
   lattice s(L);
   s.fill(-1);
   std::cout << "Generator : " << R.name() << '\n'
@@ -345,15 +343,15 @@ void wolff_main(RNG_type &R, long runs, long split, long L) {
             << "Lattice = " << L << "x" << L << '\n'
             << "Samples = " << runs << '\n';
 
-  for (int i = 0; i < 2 * runs; ++i)
+  for (int i{0}; i < 2 * runs; ++i)
     wolffstep(R, s, T);
   timer t;
-  for (int j = 0; j < simulations; ++j) {
-    double E = 0.0;
-    double E2 = 0.0;
-    for (int i = 0; i < runs; ++i) {
+  for (int j{0}; j < simulations; ++j) {
+    double E{0.0};
+    double E2{0.0};
+    for (int i{0}; i < runs; ++i) {
       wolffstep(R, s, T);
-      double q = s.energy();
+      const double q{s.energy()};
       E += q;
       E2 += q * q;
     }
@@ -368,12 +366,12 @@ void wolff_main(RNG_type &R, long runs, long split, long L) {
 }
 
 int main(int argc, char *argv[]) {
-  long runs = 0, split = 0, L = 0;
+  long runs{0}, split{0}, L{0};
   std::string generator;
-  int argi = 1;
+  int argi{1};
   if (argc == 1) {
     std::cerr << "Tina's Random Number Generator Library\n\n"
-              << "(P) & (C) by Heiko Bauke, Magdeburg 2001-2019\n\n"
+              << "(P) & (C) by Heiko Bauke, Magdeburg 2001-2020\n\n"
               << "two-domensional Ising model (Wolff algorithm)\n"
               << "---------------------------------------------\n\n"
               << "synopsis:\n"

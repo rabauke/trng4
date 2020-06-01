@@ -37,14 +37,14 @@
 #include <trng/uniform01_dist.hpp>
 
 int main() {
-  const long samples = 1000000l;  // total number of points in square
-  long in = 0l;                   // no points in circle
+  const long samples{1000000l};  // total number of points in square
+  long in{0l};                   // no points in circle
   // distribute workload over all processes and make a global reduction
 #pragma omp parallel reduction(+ : in) default(none)
   {
-    trng::yarn2 rx, ry;                // random number engines for x- and y-coordinates
-    int size = omp_get_num_threads();  // get total number of processes
-    int rank = omp_get_thread_num();   // get rank of current process
+    trng::yarn2 rx, ry;                     // random number engines for x- and y-coordinates
+    const int size{omp_get_num_threads()};  // get total number of processes
+    const int rank{omp_get_thread_num()};   // get rank of current process
     // split PRN sequences by leapfrog method
     rx.split(2, 0);            // choose sub-stream no. 0 out of 2 streams
     ry.split(2, 1);            // choose sub-stream no. 1 out of 2 streams
@@ -52,10 +52,10 @@ int main() {
     ry.split(size, rank);      // choose sub-stream no. rank out of size streams
     trng::uniform01_dist<> u;  // random number distribution
     // throw random points into square
-    for (long i = rank; i < samples; i += size) {
-      double x = u(rx), y = u(ry);  // choose random x- and y-coordinates
-      if (x * x + y * y <= 1.0)     // is point in circle?
-        ++in;                       // increase thread-local counter
+    for (long i{rank}; i < samples; i += size) {
+      const double x{u(rx)}, y{u(ry)};  // choose random x- and y-coordinates
+      if (x * x + y * y <= 1.0)         // is point in circle?
+        ++in;                           // increase thread-local counter
     }
   }
   // print result

@@ -36,15 +36,15 @@
 #include <trng/uniform01_dist.hpp>
 
 int main() {
-  const long samples = 1000000l;  // total number of points in square
-  long in = 0l;                   // no points in circle
-  trng::yarn2 r;                  // random number engine
-  trng::uniform01_dist<> u;       // random number distribution
+  const long samples{1000000l};  // total number of points in square
+  long in{0l};                   // no points in circle
+  trng::yarn2 r;                 // random number engine
+  trng::uniform01_dist<> u;      // random number distribution
   // throw random points into square
-  for (long i = 0; i < samples; ++i) {
-    double x = u(r), y = u(r);  // choose random x- and y-coordinates
-    if (x * x + y * y <= 1.0)   // is point in circle?
-      ++in;                     // increase counter
+  for (long i{0}; i < samples; ++i) {
+    const double x{u(r)}, y{u(r)};  // choose random x- and y-coordinates
+    if (x * x + y * y <= 1.0)       // is point in circle?
+      ++in;                         // increase counter
   }
   std::cout << "pi = " << 4.0 * in / samples << std::endl;
   return EXIT_SUCCESS;

@@ -47,22 +47,22 @@ public:
   void operator()(const tbb::blocked_range<long> &range) {
     trng::yarn2 r_local(r);           // local copy of random number engine
     r_local.jump(2 * range.begin());  // jump ahead
-    for (long i = range.begin(); i != range.end(); ++i) {
-      double x = u(r_local), y = u(r_local);  // choose random x- and y-coordinates
-      if (x * x + y * y <= 1.0)               // is point in circle?
-        ++in;                                 // increase thread-local counter
+    for (long i{range.begin()}; i != range.end(); ++i) {
+      const double x{u(r_local)}, y{u(r_local)};  // choose random x- and y-coordinates
+      if (x * x + y * y <= 1.0)                   // is point in circle?
+        ++in;                                     // increase thread-local counter
     }
   }
   // join threds and counters
   void join(const parallel_pi &other) { in += other.in; }
   long in_circle() const { return in; }
-  explicit parallel_pi(const trng::yarn2 &r) : r(r), in(0) {}
-  explicit parallel_pi(const parallel_pi &other, tbb::split) : r(other.r), in(0) {}
+  explicit parallel_pi(const trng::yarn2 &r) : r{r}, in{0} {}
+  explicit parallel_pi(const parallel_pi &other, tbb::split) : r{other.r}, in{0} {}
 };
 
 int main() {
   tbb::task_scheduler_init init;  // initiallize TBB task scheduler
-  const long samples = 1000000l;  // total number of points in square
+  const long samples{1000000l};   // total number of points in square
   trng::yarn2 r;                  // random number engine
   parallel_pi pi(r);              // functor for parallel reduce
   // parallel MC computation of pi

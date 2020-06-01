@@ -37,24 +37,24 @@
 #include <trng/discrete_dist.hpp>
 
 int main() {
-  const int n = 6;
+  const int n{6};
   // stores relative probabilities
-  double p[6] = {1, 3.25, 5, 6.5, 7, 2};
+  const double p[n]{1., 3.25, 5., 6.5, 7., 2.};
   // discrete distribution object
-  trng::discrete_dist dist(p, p + n);
+  trng::discrete_dist dist(std::begin(p), std::end(p));
   // random number generator
   trng::lcg64 r;
   // draw some random numbers
-  int count[n] = {0, 0, 0, 0, 0, 0};
-  const int samples = 10000;
-  for (int i = 0; i < samples; ++i) {
-    int x = dist(r);  // draw a random number
-    ++count[x];       // count
+  int count[n]{0, 0, 0, 0, 0, 0};
+  const int samples{10000};
+  for (int i{0}; i < samples; ++i) {
+    const int x{dist(r)};  // draw a random number
+    ++count[x];            // count
   }
   // print results
   std::cout << "value\t\tprobability\tcount\t\tempirical probability\n"
             << "=====\t\t===========\t=====\t\t=====================\n";
-  for (int i = 0; i < n; ++i) {
+  for (int i{0}; i < n; ++i) {
     std::cout << std::setprecision(3) << i << "\t\t" << dist.pdf(i) << "\t\t" << count[i]
               << "\t\t" << static_cast<double>(count[i]) / samples << '\n';
   }

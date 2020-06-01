@@ -92,10 +92,10 @@ public:
 
 template<typename R>
 typename R::result_type time_plain(R &r) {
-  typename R::result_type s(0);
+  typename R::result_type s{0};
   timer T;
   long max(1l << 24);
-  for (long i(0); i < max; ++i)
+  for (long i{0}; i < max; ++i)
     s += r();
   std::string res(to_string(1e-6 * max / T.time()));
   while (res.length() < 10)
@@ -106,10 +106,10 @@ typename R::result_type time_plain(R &r) {
 
 template<typename R>
 double time_cc(R &r) {
-  double s(0);
+  double s{0};
   timer T;
   long max(1l << 24);
-  for (long i(0); i < max; ++i)
+  for (long i{0}; i < max; ++i)
     s += trng::utility::uniformcc<double>(r);
   std::string res(to_string(1e-6 * max / T.time()));
   while (res.length() < 10)
@@ -120,10 +120,10 @@ double time_cc(R &r) {
 
 template<typename R>
 double time_oc(R &r) {
-  double s(0);
+  double s{0};
   timer T;
   long max(1l << 24);
-  for (long i(0); i < max; ++i)
+  for (long i{0}; i < max; ++i)
     s += trng::utility::uniformoc<double>(r);
   std::string res(to_string(1e-6 * max / T.time()));
   while (res.length() < 10)
@@ -134,10 +134,10 @@ double time_oc(R &r) {
 
 template<typename R>
 double time_co(R &r) {
-  double s(0);
+  double s{0};
   timer T;
   long max(1l << 24);
-  for (long i(0); i < max; ++i)
+  for (long i{0}; i < max; ++i)
     s += trng::utility::uniformco<double>(r);
   std::string res(to_string(1e-6 * max / T.time()));
   while (res.length() < 10)
@@ -148,10 +148,10 @@ double time_co(R &r) {
 
 template<typename R>
 double time_oo(R &r) {
-  double s(0);
+  double s{0};
   timer T;
   long max(1l << 24);
-  for (long i(0); i < max; ++i)
+  for (long i{0}; i < max; ++i)
     s += trng::utility::uniformoo<double>(r);
   std::string res(to_string(1e-6 * max / T.time()));
   while (res.length() < 10)
@@ -162,10 +162,10 @@ double time_oo(R &r) {
 
 template<typename R, typename FLOAT>
 FLOAT time_canonical(R &r) {
-  FLOAT s(0);
+  FLOAT s{0};
   timer T;
   long max(1l << 24);
-  for (long i(0); i < max; ++i)
+  for (long i{0}; i < max; ++i)
     s += trng::generate_canonical<FLOAT>(r);
   std::string res(to_string(1e-6 * max / T.time()));
   while (res.length() < 10)
