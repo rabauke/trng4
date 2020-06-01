@@ -54,7 +54,7 @@ namespace trng {
       template<typename type>
       static constexpr typename std::enable_if<std::is_arithmetic<type>::value, type>::type
       init_head() {
-        return type(1);
+        return type(0);
       }
       template<typename type>
       static constexpr typename std::enable_if<not std::is_arithmetic<type>::value, type>::type
@@ -64,7 +64,7 @@ namespace trng {
       template<typename type>
       static constexpr typename std::enable_if<std::is_arithmetic<type>::value, type>::type
       init_tail() {
-        return type(0);
+        return type(1);
       }
       template<typename type>
       static constexpr typename std::enable_if<not std::is_arithmetic<type>::value, type>::type
