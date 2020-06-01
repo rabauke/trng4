@@ -127,9 +127,15 @@ namespace trng {
     }
     // property methods
     TRNG_CUDA_ENABLE
-    T min() const { return P.head() < P.tail() ? P.head() : P.tail(); }
+    T min() const {
+      static_assert(std::is_arithmetic<T>::value, "result_type must be an arithmetic type");
+      return P.head() < P.tail() ? P.head() : P.tail();
+    }
     TRNG_CUDA_ENABLE
-    T max() const { return P.head() > P.tail() ? P.head() : P.tail(); }
+    T max() const {
+      static_assert(std::is_arithmetic<T>::value, "result_type must be an arithmetic type");
+      return P.head() > P.tail() ? P.head() : P.tail();
+    }
     TRNG_CUDA_ENABLE
     param_type param() const { return P; }
     TRNG_CUDA_ENABLE
@@ -158,6 +164,7 @@ namespace trng {
     // cumulative density function
     TRNG_CUDA_ENABLE
     double cdf(const T &x) const {
+      static_assert(std::is_arithmetic<T>::value, "result_type must be an arithmetic type");
       if (P.head() < P.tail()) {
         if (x < P.head())
           return 0.0;
