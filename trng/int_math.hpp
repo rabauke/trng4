@@ -74,7 +74,7 @@ namespace trng {
     //------------------------------------------------------------------
 
     template<int n>
-    TRNG_CUDA_ENABLE void gauss(int32_t a[n * n], int32_t b[n], int32_t m) {
+    TRNG_CUDA_ENABLE void gauss(int32_t (&a)[n * n], int32_t (&b)[n], int32_t m) {
       // initialize indices
       int rank{0};
       int32_t p[n];
@@ -85,11 +85,11 @@ namespace trng {
         // search for a pivot element
         if (a[n * p[i] + i] == 0) {
           // swap rows
-          int j = i + 1;
+          int j{i + 1};
           while (j < n and a[n * p[j] + i] == 0)
             j++;
           if (j < n) {
-            int32_t t = p[i];
+            const int32_t t{p[i]};
             p[i] = p[j];
             p[j] = t;
           }
@@ -98,7 +98,7 @@ namespace trng {
         if (a[n * p[i] + i] == 0)
           break;
         ++rank;
-        int32_t t = modulo_invers(a[n * p[i] + i], m);
+        int32_t t{modulo_invers(a[n * p[i] + i], m)};
         for (int j{i}; j < n; ++j)
           a[n * p[i] + j] = static_cast<int32_t>(
               (static_cast<int64_t>(a[n * p[i] + j]) * static_cast<int64_t>(t)) % m);
