@@ -36,6 +36,8 @@
 #include <tuple>
 #include <ciso646>
 
+#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
+#define BOOST_MPL_LIMIT_LIST_SIZE 30
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
@@ -60,6 +62,7 @@
 #include <trng/lagfib4plus.hpp>
 #include <trng/mt19937.hpp>
 #include <trng/mt19937_64.hpp>
+#include <trng/xoshiro256plus.hpp>
 
 #include "type_names.hpp"
 
@@ -71,7 +74,8 @@ using engines =
                      trng::yarn5s,                                        //
                      trng::lagfib2xor_521_64, trng::lagfib4xor_521_32,    //
                      trng::lagfib2plus_521_32, trng::lagfib4plus_521_64,  //
-                     trng::mt19937, trng::mt19937_64>;
+                     trng::mt19937, trng::mt19937_64,                     //
+                     trng::xoshiro256plus>;
 
 using parallel_engines =
     boost::mpl::list<trng::lcg64, trng::lcg64_shift,  //

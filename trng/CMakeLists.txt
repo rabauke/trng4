@@ -58,6 +58,7 @@ set(HEADER_FILES
         uniformxx.hpp
         utility.hpp
         weibull_dist.hpp
+        xoshiro256plus.hpp
         yarn2.hpp
         yarn3.hpp
         yarn3s.hpp
@@ -79,6 +80,7 @@ set(SOURCE_FILES
         mrg5s.cc
         mt19937_64.cc
         mt19937.cc
+        xoshiro256plus.cc
         yarn2.cc
         yarn3.cc
         yarn3s.cc
