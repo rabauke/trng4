@@ -79,16 +79,17 @@ std::string to_string(const T &x) {
 class timer {
 private:
   const double _resolution;
-  std::chrono::time_point<std::chrono::system_clock> _t;
+  std::chrono::time_point<std::chrono::high_resolution_clock> _t;
 
 public:
-  void reset() { _t = std::chrono::system_clock::now(); }
+  void reset() { _t = std::chrono::high_resolution_clock::now(); }
   double time() const {
-    auto now = std::chrono::system_clock::now();
+    const auto now = std::chrono::high_resolution_clock::now();
     return std::chrono::duration_cast<std::chrono::microseconds>(now - _t).count() * 1e-6;
   }
   double resolution() const { return _resolution; }
-  timer() : _resolution([]() { return 1e-6; }()), _t(std::chrono::system_clock::now()) {}
+  timer()
+      : _resolution([]() { return 1e-6; }()), _t(std::chrono::high_resolution_clock::now()) {}
 };
 
 template<typename R>
@@ -177,24 +178,33 @@ FLOAT time_canonical(R &r) {
 
 template<typename R>
 void time_main(R &r, std::string name) {
+  std::stringstream s;  // write data to stream to prevent that code gets optimized away
   while (name.length() < 32)
     name += ' ';
   std::cout << name;
-  time_plain(r);
-  time_cc(r);
-  time_co(r);
-  time_oc(r);
-  time_oo(r);
-  time_canonical<R, double>(r);
+  const auto res_plain = time_plain(r);
+  s << res_plain;
+  const auto res_cc = time_cc(r);
+  s << res_cc;
+  const auto res_co = time_co(r);
+  s << res_co;
+  const auto res_oc = time_oc(r);
+  s << res_oc;
+  const auto res_oo = time_oo(r);
+  s << res_oo;
+  const auto res_canonical = time_canonical<R, double>(r);
+  s << res_canonical;
   std::cout << std::endl;
 }
 
 template<typename R>
 void time_boost(R &r, std::string name) {
+  std::stringstream s;  // write data to stream to prevent that code gets optimized away
   while (name.length() < 32)
     name += ' ';
   std::cout << name;
-  time_plain(r);
+  const auto res_plain = time_plain(r);
+  s << res_plain;
   std::cout << std::endl;
 }
 
