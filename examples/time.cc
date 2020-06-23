@@ -58,6 +58,7 @@
 #include <trng/lagfib2plus.hpp>
 #include <trng/lagfib4xor.hpp>
 #include <trng/lagfib4plus.hpp>
+#include <trng/xoshiro256plus.hpp>
 
 #if defined TRNG_HAVE_BOOST
 #include <boost/random/linear_congruential.hpp>
@@ -284,6 +285,10 @@ int main() {
     {
       trng::lagfib4plus_19937_64 r;
       time_main(r, "trng::lagfib4plus_19937_64");
+    }
+    {
+      trng::xoshiro256plus r;
+      time_main(r, "trng::xoshiro256plus");
     }
     {
       std::minstd_rand0 r;
