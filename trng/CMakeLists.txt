@@ -91,7 +91,7 @@ set(SOURCE_FILES
 
 add_library(trng4_static STATIC ${HEADER_FILES} ${SOURCE_FILES})
 set_target_properties(trng4_static PROPERTIES OUTPUT_NAME trng4 CLEAN_DIRECT_OUTPUT 1)
-target_include_directories(trng4_static PRIVATE ..)
+target_include_directories(trng4_static PUBLIC ..)
 
 if (NOT WIN32)
     add_library(trng4_shared SHARED ${HEADER_FILES} ${SOURCE_FILES})
@@ -99,7 +99,7 @@ if (NOT WIN32)
     set_target_properties(trng4_shared PROPERTIES VERSION ${PROJECT_VERSION})
     set_target_properties(trng4_shared PROPERTIES SOVERSION 22)
     set_target_properties(trng4_shared PROPERTIES PUBLIC_HEADER "${HEADER_FILES}")
-    target_include_directories(trng4_shared PRIVATE ..)
+    target_include_directories(trng4_shared PUBLIC ..)
 endif ()
 
 if (WIN32)
