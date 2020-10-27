@@ -150,7 +150,7 @@ bool continous_dist_test_integrate_pdf(const dist &d) {
 
 
 template<typename dist>
-bool continous_dist_test_icdf(const dist &d) {
+boost::test_tools::predicate_result continous_dist_test_icdf(const dist &d) {
   using result_type = typename dist::result_type;
   const int bins{1024 * 1024};
   const result_type dp{result_type(1) / result_type(bins)};
@@ -158,8 +158,12 @@ bool continous_dist_test_icdf(const dist &d) {
     const result_type p{i * dp};
     const result_type x{d.icdf(p)};
     const result_type y{d.cdf(x)};
-    if (std::abs(y - p) > 256 * std::numeric_limits<result_type>::epsilon())
-      return false;
+    if (std::abs(y - p) > 256 * std::numeric_limits<result_type>::epsilon()) {
+      boost::test_tools::predicate_result res(false);
+      res.message() << "cdf(icdf(p)) != p  for  p = " << p << " with cdf(icdf(p)) = " << y
+                    << " and |cdf(icdf(p)) - p| = " << std::abs(y - p);
+      return res;
+    }
   }
   return true;
 }
