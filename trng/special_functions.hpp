@@ -595,44 +595,45 @@ namespace trng {
           return -numeric_limits<T>::infinity();
         if (x == 1)
           return numeric_limits<T>::infinity();
-        T t, q;
         if (x < traits::x_low) {
           // rational approximation for lower region
-          q = sqrt(-2 * ln(x));
-          t = (((((traits::c[0] * q + traits::c[1]) * q + traits::c[2]) * q + traits::c[3]) *
-                    q +
-                traits::c[4]) *
-                   q +
-               traits::c[5]) /
-              ((((traits::d[0] * q + traits::d[1]) * q + traits::d[2]) * q + traits::d[3]) * q +
-               1);
+          const T q{sqrt(-2 * ln(x))};
+          return (((((traits::c[0] * q + traits::c[1]) * q + traits::c[2]) * q + traits::c[3]) *
+                       q +
+                   traits::c[4]) *
+                      q +
+                  traits::c[5]) /
+                 ((((traits::d[0] * q + traits::d[1]) * q + traits::d[2]) * q + traits::d[3]) *
+                      q +
+                  1);
         } else if (x < traits::x_high) {
           // rational approximation for central region
-          q = x - traits::one_half;
-          T r = q * q;
-          t = (((((traits::a[0] * r + traits::a[1]) * r + traits::a[2]) * r + traits::a[3]) *
-                    r +
-                traits::a[4]) *
-                   r +
-               traits::a[5]) *
-              q /
-              (((((traits::b[0] * r + traits::b[1]) * r + traits::b[2]) * r + traits::b[3]) *
-                    r +
-                traits::b[4]) *
-                   r +
-               1);
+          const T q{x - traits::one_half};
+          const T r{q * q};
+          return (((((traits::a[0] * r + traits::a[1]) * r + traits::a[2]) * r + traits::a[3]) *
+                       r +
+                   traits::a[4]) *
+                      r +
+                  traits::a[5]) *
+                 q /
+                 (((((traits::b[0] * r + traits::b[1]) * r + traits::b[2]) * r + traits::b[3]) *
+                       r +
+                   traits::b[4]) *
+                      r +
+                  1);
         } else {
           // rational approximation for upper region
-          q = sqrt(-2 * ln1p(-x));
-          t = -(((((traits::c[0] * q + traits::c[1]) * q + traits::c[2]) * q + traits::c[3]) *
-                     q +
-                 traits::c[4]) *
-                    q +
-                traits::c[5]) /
-              ((((traits::d[0] * q + traits::d[1]) * q + traits::d[2]) * q + traits::d[3]) * q +
-               1);
+          const T q{sqrt(-2 * ln1p(-x))};
+          return -(((((traits::c[0] * q + traits::c[1]) * q + traits::c[2]) * q +
+                     traits::c[3]) *
+                        q +
+                    traits::c[4]) *
+                       q +
+                   traits::c[5]) /
+                 ((((traits::d[0] * q + traits::d[1]) * q + traits::d[2]) * q + traits::d[3]) *
+                      q +
+                  1);
         }
-        return t;
       }
 
       template<typename T>
