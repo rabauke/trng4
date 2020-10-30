@@ -528,6 +528,7 @@ namespace trng {
       return 0.5 + 0.5 * erf(x);
     }
 
+#if !(defined __CUDA_ARCH__)
     inline long double Phi(long double x) {
       x *= constants<long double>::one_over_sqrt_2;
       if (x < -0.6744897501960817l * constants<long double>::one_over_sqrt_2)
@@ -536,6 +537,7 @@ namespace trng {
         return 1.0l - 0.5l * erfc(x);
       return 0.5l + 0.5l * erf(x);
     }
+#endif
 
     // --- inverse of normal distribution function  --------------------
 
