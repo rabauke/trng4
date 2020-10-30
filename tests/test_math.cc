@@ -49,8 +49,10 @@ using floats = boost::mpl::list<float, double, long double>;
 
 template<typename T>
 std::tuple<T, T> bounds(T y) {
-  const T eps{32 * std::numeric_limits<T>::epsilon()};
-  const T min{32 * std::numeric_limits<T>::min()};
+  const T tol{std::numeric_limits<T>::digits *
+              std::log2(static_cast<T>(std::numeric_limits<T>::radix))};
+  const T eps{tol * std::numeric_limits<T>::epsilon()};
+  const T min{tol * std::numeric_limits<T>::min()};
   T y_min{(1 - eps) * y};
   T y_max{(1 + eps) * y};
   if (y_min > y_max)
@@ -68,7 +70,7 @@ boost::test_tools::predicate_result check_function(const T x, const T y, const T
   const std::string &name{type_name<T>::name};
   const T err{std::abs(y - y_ref)};
   const T rel_err{err / std::abs(y_ref)};
-  auto y_min_max = bounds(y_ref);
+  const std::tuple<T, T> y_min_max{bounds(y_ref)};
   const T y_min{std::get<0>(y_min_max)};
   const T y_max{std::get<1>(y_min_max)};
   if (not(y_min <= y and y <= y_max)) {
