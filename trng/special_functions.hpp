@@ -531,7 +531,7 @@ namespace trng {
     inline long double Phi(long double x) {
       x *= constants<long double>::one_over_sqrt_2;
       if (x < -0.6744897501960817l * constants<long double>::one_over_sqrt_2)
-        return 0.5 * erfc(-x);
+        return 0.5l * erfc(-x);
       if (x > +0.6744897501960817l * constants<long double>::one_over_sqrt_2)
         return 1.0l - 0.5l * erfc(x);
       return 0.5l + 0.5l * erf(x);
@@ -597,7 +597,7 @@ namespace trng {
           return numeric_limits<T>::infinity();
         T t, q;
         if (x < traits::x_low) {
-          // Rational approximation for lower region
+          // rational approximation for lower region
           q = sqrt(-2 * ln(x));
           t = (((((traits::c[0] * q + traits::c[1]) * q + traits::c[2]) * q + traits::c[3]) *
                     q +
@@ -607,7 +607,7 @@ namespace trng {
               ((((traits::d[0] * q + traits::d[1]) * q + traits::d[2]) * q + traits::d[3]) * q +
                1);
         } else if (x < traits::x_high) {
-          // Rational approximation for central region
+          // rational approximation for central region
           q = x - traits::one_half;
           T r = q * q;
           t = (((((traits::a[0] * r + traits::a[1]) * r + traits::a[2]) * r + traits::a[3]) *
@@ -622,7 +622,7 @@ namespace trng {
                    r +
                1);
         } else {
-          // Rational approximation for upper region
+          // rational approximation for upper region
           q = sqrt(-2 * ln1p(-x));
           t = -(((((traits::c[0] * q + traits::c[1]) * q + traits::c[2]) * q + traits::c[3]) *
                      q +
@@ -639,10 +639,24 @@ namespace trng {
       TRNG_CUDA_ENABLE T inv_Phi(T x) {
         using traits = inv_Phi_traits<T>;
         T y{inv_Phi_approx(x)};
-        if (isfinite(y)) {  // refinement by Halley rational method
+        // refinement by Halley rational method
+        if (isfinite(y)) {
           const T e{(Phi(y) - x)};
           const T u{e * constants<T>::sqrt_2pi * exp(y * y * traits::one_half)};
           y -= u / (1 + y * u * traits::one_half);
+        }
+        // T is a floating point number type with more than 80 bits, a 2nd iteration is
+        // required to reach full machine precision
+#if __cplusplus >= 201703L
+        if constexpr (sizeof(T) > 10) {
+#else
+        if (sizeof(T) > 10) {
+#endif
+          if (isfinite(y)) {
+            const T e{(Phi(y) - x)};
+            const T u{e * constants<T>::sqrt_2pi * exp(y * y * traits::one_half)};
+            y -= u / (1 + y * u * traits::one_half);
+          }
         }
         return y;
       }
@@ -650,26 +664,54 @@ namespace trng {
       template<typename T>
       TRNG_CUDA_ENABLE T inv_erf(T x) {
         T y{inv_Phi_approx((x + 1) / 2) * constants<T>::one_over_sqrt_2};
-        if (isfinite(y)) {  // refinement by Halley rational method
+        // refinement by Halley rational method
+        if (isfinite(y)) {
           const T e{erf(y) - x};
           const T u{e * (constants<T>::sqrt_pi_over_2) * exp(y * y)};
           y -= u / (1 + y * u);
+        }
+        // T is a floating point number type with more than 80 bits, a 2nd iteration is
+        // required to reach full machine precision
+#if __cplusplus >= 201703L
+        if constexpr (sizeof(T) > 10) {
+#else
+        if (sizeof(T) > 10) {
+#endif
+          if (isfinite(y)) {
+            const T e{erf(y) - x};
+            const T u{e * (constants<T>::sqrt_pi_over_2) * exp(y * y)};
+            y -= u / (1 + y * u);
+          }
         }
         return y;
       }
 
       template<typename T>
       TRNG_CUDA_ENABLE T inv_erfc(T x) {
-        // step size in the Halley step is proportiaonal to erfc, use symmetry to increase
+        // step size in the Halley step is proportional to erfc, use symmetry to increase
         // numerical accuracy
         const bool flag{x > 1};
         if (flag)
           x = -(x - 1) + 1;
         T y{-inv_Phi_approx(x / 2) * constants<T>::one_over_sqrt_2};
-        if (isfinite(y)) {  // refinement by Halley rational method
+        // refinement by Halley rational method
+        if (isfinite(y)) {
           const T e{erfc(y) - x};
           const T u{-e * (constants<T>::sqrt_pi_over_2) * exp(y * y)};
           y -= u / (1 + y * u);
+        }
+        // T is a floating point number type with more than 80 bits, a 2nd iteration is
+        // required to reach full machine precision
+#if __cplusplus >= 201703L
+        if constexpr (sizeof(T) > 10) {
+#else
+        if (sizeof(T) > 10) {
+#endif
+          if (isfinite(y)) {
+            const T e{erfc(y) - x};
+            const T u{-e * (constants<T>::sqrt_pi_over_2) * exp(y * y)};
+            y -= u / (1 + y * u);
+          }
         }
         return flag ? -y : y;
       }
