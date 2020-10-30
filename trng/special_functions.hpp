@@ -130,7 +130,7 @@ namespace trng {
       // by series expansion, see "Numerical Recipes" by W. H. Press et al., 3rd edition
       template<typename T, bool by_Gamma_a>
       TRNG_CUDA_ENABLE T GammaP_ser(T a, T x) {
-        const int itmax{32};
+        const int itmax{64};
         const T eps{4 * numeric_limits<T>::epsilon()};
         if (x < eps)
           return T{0};
@@ -163,7 +163,7 @@ namespace trng {
       // by continued fraction, see "Numerical Recipes" by W. H. Press et al., 3rd edition
       template<typename T, bool by_Gamma_a>
       TRNG_CUDA_ENABLE T GammaQ_cf(T a, T x) {
-        const T itmax{32};
+        const T itmax{64};
         const T eps{4 * numeric_limits<T>::epsilon()};
         const T min{4 * numeric_limits<T>::min()};
         // set up for evaluating continued fraction by modified Lentz's method
@@ -310,7 +310,7 @@ namespace trng {
           x = p < t ? pow(p / t, 1 / a) : 1 - ln1p(-(p - t) / (1 - t));
         }
         // refinement by Halley's method
-        for (int i{0}; i < 16; ++i) {
+        for (int i{0}; i < 32; ++i) {
           if (x <= 0) {
             x = 0;
             break;
