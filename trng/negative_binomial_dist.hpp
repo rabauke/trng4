@@ -43,6 +43,8 @@
 #include <istream>
 #include <iomanip>
 #include <vector>
+#include <algorithm>
+#include <numeric>
 #include <ciso646>
 
 namespace trng {
@@ -58,14 +60,31 @@ namespace trng {
       double r_{0};
       std::vector<double> P_;
 
+      // probability density function
+      double pdf(int x) const {
+        if (x < 0)
+          return 0;
+        std::vector<double> terms{math::ln_Gamma(r_ + x), -math::ln_Gamma(r_),
+                                  -math::ln_Gamma(static_cast<double>(x + 1)),
+                                  +math::ln(p_) * r_, math::ln1p(-p_) * x};
+        std::sort(terms.begin(), terms.end(),
+                  [](double a, double b) { return math::abs(a) < math::abs(b); });
+        return math::exp(std::accumulate(terms.begin(), terms.end(), 0.0));
+      }
+
+      // cumulative density function
+      double cdf(int x) const {
+        if (x < 0)
+          return 0;
+        return math::Beta_I(p_, r_, static_cast<double>(x + 1));
+      }
+
       void calc_probabilities() {
         P_ = std::vector<double>();
         int x{0};
         double p{0.0};
         while (p < 1.0 - 1.0 / 4096.0) {
-          p += math::exp(math::ln_Gamma(r_ + x) - math::ln_Gamma(static_cast<double>(x + 1)) -
-                         math::ln_Gamma(r_)) *
-               math::pow(p_, r_) * math::pow(1 - p_, x);
+          p = cdf(x);
           P_.push_back(p);
           ++x;
         }
@@ -126,22 +145,9 @@ namespace trng {
     double r() const { return P.r(); }
     void r(double r_new) { P.r(r_new); }
     // probability density function
-    double pdf(int x) const {
-      return x < 0 ? 0.0
-                   : math::exp(math::ln_Gamma(P.r() + x) -
-                               math::ln_Gamma(static_cast<double>(x + 1)) -
-                               math::ln_Gamma(P.r())) *
-                         math::pow(P.p(), P.r()) * math::pow(1 - P.p(), x);
-    }
+    double pdf(int x) const { return P.pdf(x); }
     // cumulative density function
-    double cdf(int x) const {
-      double res{0};
-      while (x >= 0) {
-        res += pdf(x);
-        --x;
-      }
-      return res;
-    }
+    double cdf(int x) const { return P.cdf(x); }
   };
 
   // -------------------------------------------------------------------
