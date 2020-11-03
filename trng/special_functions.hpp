@@ -69,20 +69,33 @@ namespace trng {
 
     // --- Beta function -----------------------------------------------
 
-    TRNG_CUDA_ENABLE
-    inline float Beta(float x, float y) {
-      return exp(ln_Gamma(x) + ln_Gamma(y) - ln_Gamma(x + y));
-    }
+    namespace detail {
+
+      template<typename T>
+      T Beta(T x, T y) {
+        static const T ln_max{ln(std::numeric_limits<T>::max())};
+        if (x <= 0 or y <= 0) {
+#if !(defined __CUDA_ARCH__)
+          errno = EDOM;
+#endif
+          return std::numeric_limits<T>::signaling_NaN();
+        }
+        const T z{x + y};
+        if (z * ln(z) - z > ln_max)
+          // less accurate but avoids overflow
+          return exp(ln_Gamma(x) + ln_Gamma(y) - ln_Gamma(z));
+        return Gamma(x) / Gamma(z) * Gamma(y);
+      }
+    }  // namespace detail
 
     TRNG_CUDA_ENABLE
-    inline double Beta(double x, double y) {
-      return exp(ln_Gamma(x) + ln_Gamma(y) - ln_Gamma(x + y));
-    }
+    inline float Beta(float x, float y) { return detail::Beta(x, y); }
+
+    TRNG_CUDA_ENABLE
+    inline double Beta(double x, double y) { return detail::Beta(x, y); }
 
 #if !(defined __CUDA_ARCH__)
-    inline long double Beta(long double x, long double y) {
-      return exp(ln_Gamma(x) + ln_Gamma(y) - ln_Gamma(x + y));
-    }
+    inline long double Beta(long double x, long double y) { return detail::Beta(x, y); }
 #endif
 
     // --- ln of binomial coefficient ----------------------------------
