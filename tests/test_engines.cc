@@ -177,6 +177,20 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_status_io, R, engines) {
   BOOST_TEST(std::get<0>(v) == std::get<1>(v),
              "engines yield same values after restore from stream");
 }
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_status_wio, R, engines) {
+  // two engines with equal state
+  R r1, r2;
+  advance_engine(r1, 271828l);  // advance engine r1
+  std::wstringstream str;
+  str << r1;
+  str >> r2;
+  BOOST_TEST(r1 == r2, "engine state restored from stream successfully");
+  // when state has been restored correctly, r1 and r2 must yield the same values
+  auto v = generate_list(r1, r2, 32);
+  BOOST_TEST(std::get<0>(v) == std::get<1>(v),
+             "engines yield same values after restore from stream");
+}
 BOOST_AUTO_TEST_SUITE_END()
 
 //-----------------------------------------------------------------------------------------
