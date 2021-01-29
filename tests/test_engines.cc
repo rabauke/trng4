@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_restore, R, engines) {
   r1 = r3;  // restore ra
   BOOST_TEST(r1 == r2, "engine state restored successfully");
   // when state has been restored correctly, r1 and r2 must yield the same values
-  auto v = generate_list(r1, r2, 32);
+  const auto v{generate_list(r1, r2, 32)};
   BOOST_TEST(std::get<0>(v) == std::get<1>(v), "engines yield same values after restore");
 }
 BOOST_AUTO_TEST_SUITE_END()
@@ -167,29 +167,69 @@ BOOST_AUTO_TEST_SUITE(test_suite_status_io)
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_status_io, R, engines) {
   // two engines with equal state
   R r1, r2;
-  advance_engine(r1, 271828l);  // advance engine r1
-  std::stringstream str;
-  str << r1;
-  str >> r2;
-  BOOST_TEST(r1 == r2, "engine state restored from stream successfully");
-  // when state has been restored correctly, r1 and r2 must yield the same values
-  auto v = generate_list(r1, r2, 32);
-  BOOST_TEST(std::get<0>(v) == std::get<1>(v),
-             "engines yield same values after restore from stream");
+  {
+    advance_engine(r1, 271828l);  // advance engine r1
+    std::stringstream str;
+    str << r1;
+    str >> r2;
+    BOOST_TEST(r1 == r2, "engine state restored from stream successfully");
+    // when state has been restored correctly, r1 and r2 must yield the same values
+    const auto v{generate_list(r1, r2, 32)};
+    BOOST_TEST(std::get<0>(v) == std::get<1>(v),
+               "engines yield same values after restore from stream");
+  }
+  {
+    // an empty stream cannot yield a valid engine
+    std::stringstream str;
+    str >> r1;
+    BOOST_TEST(not str.good(), "stream is not good");
+    BOOST_TEST(r1 == r2, "engine not changed");
+  }
+  {
+    // a stream holding a trimmed status string cannot yield a valid engine
+    std::ostringstream strout;
+    strout << r1;
+    const std::string s{strout.str().substr(0, 4)};
+    std::stringstream str;
+    str << s;
+    str >> r1;
+    BOOST_TEST(not str.good(), "stream is not good");
+    BOOST_TEST(r1 == r2, "engine not changed");
+  }
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_status_wio, R, engines) {
   // two engines with equal state
   R r1, r2;
-  advance_engine(r1, 271828l);  // advance engine r1
-  std::wstringstream str;
-  str << r1;
-  str >> r2;
-  BOOST_TEST(r1 == r2, "engine state restored from stream successfully");
-  // when state has been restored correctly, r1 and r2 must yield the same values
-  auto v = generate_list(r1, r2, 32);
-  BOOST_TEST(std::get<0>(v) == std::get<1>(v),
-             "engines yield same values after restore from stream");
+  {
+    advance_engine(r1, 271828l);  // advance engine r1
+    std::wstringstream str;
+    str << r1;
+    str >> r2;
+    BOOST_TEST(r1 == r2, "engine state restored from stream successfully");
+    // when state has been restored correctly, r1 and r2 must yield the same values
+    const auto v{generate_list(r1, r2, 32)};
+    BOOST_TEST(std::get<0>(v) == std::get<1>(v),
+               "engines yield same values after restore from stream");
+  }
+  {
+    // an empty stream cannot yield a valid engine
+    std::wstringstream str;
+    str >> r1;
+    BOOST_TEST(not str.good(), "stream is not good");
+    BOOST_TEST(r1 == r2, "engine not changed");
+  }
+  {
+    // a stream holding a trimmed status string cannot yield a valid engine
+    std::wostringstream strout;
+    strout << r1;
+    const std::wstring s{strout.str().substr(0, 4)};
+    std::wstringstream str;
+    str << s;
+    str >> r1;
+    BOOST_TEST(not str.good(), "stream is not good");
+    BOOST_TEST(r1 == r2, "engine not changed");
+  }
 }
 BOOST_AUTO_TEST_SUITE_END()
 
