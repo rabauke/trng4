@@ -208,7 +208,6 @@ namespace trng {
     long operator()(long);
 
   private:
-  public:
     status_type S;
     static const char *const name_str;
 
