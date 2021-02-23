@@ -34,7 +34,6 @@
 #include <iostream>
 #include <trng/yarn2.hpp>
 #include <trng/uniform01_dist.hpp>
-#include <tbb/task_scheduler_init.h>
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_reduce.h>
 
@@ -61,7 +60,6 @@ public:
 };
 
 int main() {
-  tbb::task_scheduler_init init;  // initiallize TBB task scheduler
   const long samples{1000000l};   // total number of points in square
   trng::yarn2 r;                  // random number engine
   parallel_pi pi(r);              // functor for parallel reduce
