@@ -108,8 +108,8 @@ namespace trng {
     // random numbers
     template<typename R>
     int operator()(R &r) {
-      return P.x_min +
-             utility::discrete(utility::uniformoo<double>(r), P.P_.begin(), P.P_.end());
+      return P.x_min + static_cast<int>(utility::discrete(utility::uniformoo<double>(r),
+                                                          P.P_.begin(), P.P_.end()));
     }
     template<typename R>
     int operator()(R &r, const param_type &P) {

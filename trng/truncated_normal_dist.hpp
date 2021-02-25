@@ -191,7 +191,7 @@ namespace trng {
       x -= P.mu();
       x /= P.sigma();
       return math::constants<result_type>::one_over_sqrt_2pi / P.sigma() *
-             math::exp(-0.5 * x * x) / (P.Phi_b - P.Phi_a);
+             math::exp(-x * x / 2) / (P.Phi_b - P.Phi_a);
     }
     // cumulative density function
     TRNG_CUDA_ENABLE

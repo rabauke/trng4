@@ -148,8 +148,8 @@ namespace trng {
     TRNG_CUDA_ENABLE
     result_type pdf(result_type x) const {
       if (x < P.a() or x >= P.b())
-        return 0.0;
-      return 1.0 / P.d();
+        return 0;
+      return 1 / P.d();
     }
     // cumulative density function
     TRNG_CUDA_ENABLE

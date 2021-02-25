@@ -168,7 +168,7 @@ namespace trng {
         for (size_type i{0}; i < matrix_size; ++i)
           V(matrix_size - 1 - i) = S.r[(S.index - i) & mask];
         V = M * V;
-        S.index += n_partial;
+        S.index = static_cast<unsigned int>(S.index + n_partial);
         S.index &= mask;
         for (size_type i{0}; i < matrix_size; ++i)
           S.r[(S.index - i) & mask] = V(matrix_size - 1 - i);

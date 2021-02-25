@@ -135,9 +135,9 @@ template<typename dist>
 bool continous_dist_test_integrate_pdf(const dist &d) {
   using result_type = typename dist::result_type;
   // const int samples{1024 * 16 + 1};
-  const int samples(std::min(1024ll * 1024,
+  const int samples(static_cast<int>(std::min(1024ll * 1024,
                              static_cast<long long>(std::round(
-                                 1 / std::sqrt(std::numeric_limits<result_type>::epsilon())))));
+                         1 / std::sqrt(std::numeric_limits<result_type>::epsilon()))))));
   const result_type x_min{d.icdf(result_type(1) / result_type(100))};
   const result_type x_max{d.icdf(result_type(99) / result_type(100))};
   const result_type dx{(x_max - x_min) / samples};
@@ -391,21 +391,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_beta_dist, T, floats) {
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_chi_square_dist, T, floats) {
-  trng::chi_square_dist<T> d(T(38));
+  trng::chi_square_dist<T> d(38);
   BOOST_TEST(continous_dist_test_integrate_pdf(d));
   BOOST_TEST(continous_dist_test_icdf(d));
   BOOST_TEST(continous_dist_test_chi2_test(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_student_t_dist, T, floats) {
-  trng::student_t_dist<T> d(T(10));
+  trng::student_t_dist<T> d(10);
   BOOST_TEST(continous_dist_test_integrate_pdf(d));
   BOOST_TEST(continous_dist_test_icdf(d));
   BOOST_TEST(continous_dist_test_chi2_test(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_snedecor_f_dist, T, floats) {
-  trng::snedecor_f_dist<T> d(T(10), T(11));
+  trng::snedecor_f_dist<T> d(10, 11);
   BOOST_TEST(continous_dist_test_integrate_pdf(d));
   BOOST_TEST(continous_dist_test_icdf(d));
   BOOST_TEST(continous_dist_test_chi2_test(d));

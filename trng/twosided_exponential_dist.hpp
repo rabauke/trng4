@@ -110,7 +110,7 @@ namespace trng {
     // random numbers
     template<typename R>
     TRNG_CUDA_ENABLE result_type operator()(R &r) {
-      return icdf(utility::uniformoo<double>(r));
+      return icdf(utility::uniformoo<result_type>(r));
     }
     template<typename R>
     TRNG_CUDA_ENABLE result_type operator()(R &r, const param_type &P) {
