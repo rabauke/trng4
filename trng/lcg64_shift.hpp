@@ -326,7 +326,7 @@ namespace trng {
           std::invalid_argument("invalid argument for trng::lcg64_shift::split"));
 #endif
     if (s > 1) {
-      jump(n + 1);
+      jump(n + 1ull);
       P.b *= f(s, P.a);
       P.a = pow(P.a, s);
       backward();
