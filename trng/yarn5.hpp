@@ -363,7 +363,7 @@ namespace trng {
         t += modulus;
       t = static_cast<result_type>(
           (static_cast<int64_t>(t) *
-           static_cast<int64_t>(int_math::modulo_invers(P.a[4], modulus))) %
+           static_cast<int64_t>(int_math::modulo_inverse(P.a[4], modulus))) %
           modulus);
     } else if (P.a[3] != 0) {
       t = S.r[0];
@@ -381,7 +381,7 @@ namespace trng {
         t += modulus;
       t = static_cast<result_type>(
           (static_cast<int64_t>(t) *
-           static_cast<int64_t>(int_math::modulo_invers(P.a[3], modulus))) %
+           static_cast<int64_t>(int_math::modulo_inverse(P.a[3], modulus))) %
           modulus);
     } else if (P.a[2] != 0) {
       t = S.r[1];
@@ -395,7 +395,7 @@ namespace trng {
         t += modulus;
       t = static_cast<result_type>(
           (static_cast<int64_t>(t) *
-           static_cast<int64_t>(int_math::modulo_invers(P.a[2], modulus))) %
+           static_cast<int64_t>(int_math::modulo_inverse(P.a[2], modulus))) %
           modulus);
     } else if (P.a[1] != 0) {
       t = S.r[2];
@@ -405,13 +405,13 @@ namespace trng {
         t += modulus;
       t = static_cast<result_type>(
           (static_cast<int64_t>(t) *
-           static_cast<int64_t>(int_math::modulo_invers(P.a[1], modulus))) %
+           static_cast<int64_t>(int_math::modulo_inverse(P.a[1], modulus))) %
           modulus);
     } else if (P.a[0] != 0) {
       t = S.r[3];
       t = static_cast<result_type>(
           (static_cast<int64_t>(t) *
-           static_cast<int64_t>(int_math::modulo_invers(P.a[0], modulus))) %
+           static_cast<int64_t>(int_math::modulo_inverse(P.a[0], modulus))) %
           modulus);
     } else
       t = 0;

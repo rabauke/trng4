@@ -47,11 +47,11 @@ namespace trng {
   namespace int_math {
 
     TRNG_CUDA_ENABLE
-    inline int32_t modulo_invers(int32_t a, int32_t m) {
+    inline int32_t modulo_inverse(int32_t a, int32_t m) {
 #if !(defined __CUDA_ARCH__)
       if (a <= 0 or m <= 1)
         utility::throw_this(
-            std::invalid_argument("invalid argument in trng::int_math::modulo_invers"));
+            std::invalid_argument("invalid argument in trng::int_math::modulo_inverse"));
 #endif
       int32_t flast{0}, f{1}, m1{m};
       while (a > 1) {
@@ -65,8 +65,7 @@ namespace trng {
       }
 #if !(defined __CUDA_ARCH__)
       if (a == 0)
-        utility::throw_this(
-            std::runtime_error("no inversive in trng::int_math::modulo_invers"));
+        utility::throw_this(std::runtime_error("no inverse in trng::int_math::modulo_inverse"));
 #endif
       return f >= 0 ? f : f + m;
     }
@@ -98,7 +97,7 @@ namespace trng {
         if (a[n * p[i] + i] == 0)
           break;
         ++rank;
-        int32_t t{modulo_invers(a[n * p[i] + i], m)};
+        int32_t t{modulo_inverse(a[n * p[i] + i], m)};
         for (int j{i}; j < n; ++j)
           a[n * p[i] + j] = static_cast<int32_t>(
               (static_cast<int64_t>(a[n * p[i] + j]) * static_cast<int64_t>(t)) % m);
@@ -106,7 +105,7 @@ namespace trng {
             static_cast<int32_t>((static_cast<int64_t>(b[p[i]]) * static_cast<int64_t>(t)) % m);
         for (int j{i + 1}; j < n; ++j) {
           if (a[n * p[j] + i] != 0) {
-            t = modulo_invers(a[n * p[j] + i], m);
+            t = modulo_inverse(a[n * p[j] + i], m);
             for (int k{i}; k < n; ++k) {
               a[n * p[j] + k] = static_cast<int32_t>(
                   (static_cast<int64_t>(a[n * p[j] + k]) * static_cast<int64_t>(t)) % m);
