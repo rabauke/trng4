@@ -36,6 +36,8 @@
 
 #include <trng/cuda.hpp>
 #include <trng/int_types.hpp>
+#include <trng/limits.hpp>
+#include <trng/utility.hpp>
 #include <cmath>
 #include <cassert>
 #include <algorithm>
@@ -45,6 +47,71 @@
 namespace trng {
 
   namespace int_math {
+
+    template<typename T>
+    TRNG_CUDA_ENABLE constexpr T pow2(const T x) {
+      return T(1) << x;
+    }
+
+    template<typename T>
+    TRNG_CUDA_ENABLE constexpr T log2_floor(const T x) {
+      return x <= T(1) ? T(0) : T(1) + log2_floor(x / T(2));
+    }
+
+    template<typename T>
+    TRNG_CUDA_ENABLE constexpr T log2_ceil(const T x) {
+      return pow2(log2_floor(x)) < x ? log2_floor(x) + 1 : log2_floor(x);
+    }
+
+    // round upwards to next power of 2
+    template<typename T>
+    TRNG_CUDA_ENABLE constexpr T ceil2(const T x) {
+      return x <= T(1) ? x : T(2) * ceil2((x + T(1)) / T(2));
+    }
+
+    // sets all bits below the argument's most significant bit to one
+    template<typename T>
+    TRNG_CUDA_ENABLE constexpr T mask(const T x) {
+      return (x == trng::math::numeric_limits<T>::max() and
+              trng::math::numeric_limits<T>::radix == 2)
+                 ? x
+                 : ceil2(x + T(1)) - T(1);
+    }
+
+    // ---------------------------------------------------------------
+
+    template<int n>
+    TRNG_CUDA_ENABLE void matrix_vec_mult(const int32_t (&a)[n * n], const int32_t (&b)[n],
+                                          int32_t (&c)[n], int32_t m) {
+      for (int j{0}; j < n; ++j) {
+        int64_t t{0};
+        for (int k{0}; k < n; ++k) {
+          t += (static_cast<int64_t>(a[j * n + k]) * static_cast<int64_t>(b[k])) % m;
+          if (t >= m)
+            t -= m;
+        }
+        c[j] = static_cast<int32_t>(t);
+      }
+    }
+
+    //------------------------------------------------------------------
+
+    template<int n>
+    TRNG_CUDA_ENABLE void matrix_mult(const int32_t (&a)[n * n], const int32_t (&b)[n * n],
+                                      int32_t (&c)[n * n], int32_t m) {
+      for (int i{0}; i < n; ++i)
+        for (int j{0}; j < n; ++j) {
+          int64_t t{0};
+          for (int k{0}; k < n; ++k) {
+            t += (static_cast<int64_t>(a[j * n + k]) * static_cast<int64_t>(b[k * n + i])) % m;
+            if (t >= m)
+              t -= m;
+          }
+          c[j * n + i] = static_cast<int32_t>(t);
+        }
+    }
+
+    // ---------------------------------------------------------------
 
     TRNG_CUDA_ENABLE
     inline int32_t modulo_inverse(int32_t a, int32_t m) {
@@ -144,68 +211,6 @@ namespace trng {
     }
 
     //------------------------------------------------------------------
-
-    template<int n>
-    TRNG_CUDA_ENABLE void matrix_mult(const int32_t (&a)[n * n], const int32_t (&b)[n * n],
-                                      int32_t (&c)[n * n], int32_t m) {
-      for (int i{0}; i < n; ++i)
-        for (int j{0}; j < n; ++j) {
-          int64_t t{0};
-          for (int k{0}; k < n; ++k) {
-            t += (static_cast<int64_t>(a[j * n + k]) * static_cast<int64_t>(b[k * n + i])) % m;
-            if (t >= m)
-              t -= m;
-          }
-          c[j * n + i] = static_cast<int32_t>(t);
-        }
-    }
-
-    //------------------------------------------------------------------
-
-    template<int n>
-    TRNG_CUDA_ENABLE void matrix_vec_mult(const int32_t (&a)[n * n], const int32_t (&b)[n],
-                                          int32_t (&c)[n], int32_t m) {
-      for (int j{0}; j < n; ++j) {
-        int64_t t{0};
-        for (int k{0}; k < n; ++k) {
-          t += (static_cast<int64_t>(a[j * n + k]) * static_cast<int64_t>(b[k])) % m;
-          if (t >= m)
-            t -= m;
-        }
-        c[j] = static_cast<int32_t>(t);
-      }
-    }
-
-    // ---------------------------------------------------------------
-
-    template<typename T>
-    constexpr T pow2(const T x) {
-      return T(1) << x;
-    }
-
-    template<typename T>
-    constexpr T log2_floor(const T x) {
-      return x <= T(1) ? T(0) : T(1) + log2_floor(x / T(2));
-    }
-
-    template<typename T>
-    constexpr T log2_ceil(const T x) {
-      return pow2(log2_floor(x)) < x ? log2_floor(x) + 1 : log2_floor(x);
-    }
-
-    // round upwards to next power of 2
-    template<typename T>
-    constexpr T ceil2(const T x) {
-      return x <= T(1) ? x : T(2) * ceil2((x + T(1)) / T(2));
-    }
-
-    // sets all bits below the argument's most significant bit to one
-    template<typename T>
-    constexpr T mask(const T x) {
-      return ceil2(x + T(1)) - T(1);
-    }
-
-    // ---------------------------------------------------------------
 
     template<int32_t m, int32_t r>
     class modulo_helper;
