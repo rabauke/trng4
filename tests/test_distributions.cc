@@ -462,13 +462,13 @@ BOOST_AUTO_TEST_CASE(test_geometric_dist) {
 }
 
 BOOST_AUTO_TEST_CASE(test_poisson_dist) {
-  trng::poisson_dist d(0.3);
+  trng::poisson_dist d(2.125);
   BOOST_TEST(discrete_dist_test(d));
   BOOST_TEST(discrete_dist_test_chi2_test(d));
 }
 
 BOOST_AUTO_TEST_CASE(test_zero_truncated_poisson_dist) {
-  trng::zero_truncated_poisson_dist d(0.3);
+  trng::zero_truncated_poisson_dist d(2.125);
   BOOST_TEST(discrete_dist_test(d));
   BOOST_TEST(discrete_dist_test_chi2_test(d));
 }
