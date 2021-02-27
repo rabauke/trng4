@@ -90,8 +90,8 @@ namespace trng {
     // random numbers
     template<typename R>
     int operator()(R &r) {
-      double p(utility::uniformco<double>(r));
-      const std::size_t x(utility::discrete(p, P.P_.begin(), P.P_.end()));
+      double p{utility::uniformco<double>(r)};
+      const std::size_t x{utility::discrete(p, P.P_.begin(), P.P_.end())};
       int x_i{static_cast<int>(x)};
       if (x + 1 == P.P_.size()) {
         p -= cdf(x_i);
