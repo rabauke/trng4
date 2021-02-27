@@ -170,7 +170,7 @@ boost::test_tools::predicate_result continous_dist_test_icdf(const dist &d) {
 }
 
 
-// failure of the chi2 test does not nessiarily imply an error, may happen just by chance
+// failure of the chi2 test does not necessarily imply an error, may happen just by chance
 template<typename dist>
 bool continous_dist_test_chi2_test(dist &d) {
   using result_type = typename dist::result_type;
@@ -218,7 +218,7 @@ boost::test_tools::predicate_result discrete_dist_test(dist &d) {
 }
 
 
-// failure of the chi2 test does not nessiarily imply an error, may happen just by chance
+// failure of the chi2 test does not necessarily imply an error, may happen just by chance
 template<typename dist>
 bool discrete_dist_test_chi2_test(dist &d) {
   using result_type = typename dist::result_type;
