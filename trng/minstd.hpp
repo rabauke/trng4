@@ -162,7 +162,7 @@ namespace trng {
   // Inline and template methods
 
   inline void minstd::step() {
-    uint64_t t{S.r * 16807};
+    uint64_t t{S.r * static_cast<uint64_t>(16807)};
     t = (t & 0x7fffffffu) + (t >> 31u);
     if (t >= 2147483647u)
       t -= 2147483647u;

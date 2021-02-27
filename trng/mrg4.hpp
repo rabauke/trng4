@@ -187,7 +187,7 @@ namespace trng {
       utility::throw_this(std::invalid_argument("invalid argument for trng::mrg4::split"));
 #endif
     if (s > 1) {
-      jump(n + 1);
+      jump(n + 1ull);
       const int32_t q0{S.r[0]};
       jump(s);
       const int32_t q1{S.r[0]};

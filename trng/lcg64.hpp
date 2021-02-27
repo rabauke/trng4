@@ -319,7 +319,7 @@ namespace trng {
       utility::throw_this(std::invalid_argument("invalid argument for trng::lcg64::split"));
 #endif
     if (s > 1) {
-      jump(n + 1);
+      jump(n + 1ull);
       P.b *= f(s, P.a);
       P.a = pow(P.a, s);
       backward();

@@ -177,7 +177,7 @@ namespace trng {
       utility::throw_this(std::invalid_argument("invalid argument for trng::mrg2::split"));
 #endif
     if (s > 1) {
-      jump(n + 1);
+      jump(n + 1ull);
       const result_type q0{S.r[0]};
       jump(s);
       const result_type q1{S.r[0]};
