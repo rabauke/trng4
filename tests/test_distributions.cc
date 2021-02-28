@@ -133,11 +133,11 @@ double chi_percentil(const std::vector<double> &p, const std::vector<int> &count
 
 
 template<typename dist>
-bool continous_dist_test_integrate_pdf(const dist &d) {
+bool continuous_dist_test_integrate_pdf(const dist &d) {
   using result_type = typename dist::result_type;
   // const int samples{1024 * 16 + 1};
-  const int samples(static_cast<int>(std::min(1024ll * 1024,
-                             static_cast<long long>(std::round(
+  const int samples(static_cast<int>(std::min(
+      1024ll * 1024, static_cast<long long>(std::round(
                          1 / std::sqrt(std::numeric_limits<result_type>::epsilon()))))));
   const result_type x_min{d.icdf(result_type(1) / result_type(100))};
   const result_type x_max{d.icdf(result_type(99) / result_type(100))};
@@ -152,7 +152,7 @@ bool continous_dist_test_integrate_pdf(const dist &d) {
 
 
 template<typename dist>
-boost::test_tools::predicate_result continous_dist_test_icdf(const dist &d) {
+boost::test_tools::predicate_result continuous_dist_test_icdf(const dist &d) {
   using result_type = typename dist::result_type;
   const int bins{1024 * 1024};
   const result_type dp{result_type(1) / result_type(bins)};
@@ -173,7 +173,7 @@ boost::test_tools::predicate_result continous_dist_test_icdf(const dist &d) {
 
 // failure of the chi2 test does not necessarily imply an error, may happen just by chance
 template<typename dist>
-bool continous_dist_test_chi2_test(dist &d) {
+bool continuous_dist_test_chi2_test(dist &d) {
   using result_type = typename dist::result_type;
   const int bins{128};
   const result_type dp{result_type(1) / result_type(bins)};
@@ -193,6 +193,17 @@ bool continous_dist_test_chi2_test(dist &d) {
   const std::vector<double> p(bins, 1.0 / bins);
   const double c2_p{chi_percentil(p, count)};
   return 0.01 < c2_p and c2_p < 0.99;
+}
+
+
+template<typename dist>
+bool continuous_dist_test_streamable(dist &d) {
+  typename dist::param_type p_new;
+  std::stringstream str;
+  str << d.param();
+  str >> p_new;
+  dist d_new{p_new};
+  return d == d_new;
 }
 
 
@@ -264,159 +275,190 @@ bool discrete_dist_test_chi2_test(dist &d) {
   return 0.01 < c2_p and c2_p < 0.99;
 }
 
+
+template<typename dist>
+bool discrete_dist_test_streamable(dist &d) {
+  typename dist::param_type p_new;
+  std::stringstream str;
+  str << d.param();
+  str >> p_new;
+  dist d_new{p_new};
+  return d == d_new;
+}
+
 //-----------------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE(test_suite_distributions)
 
 //-----------------------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(test_suite_continous_distributions)
+BOOST_AUTO_TEST_SUITE(test_suite_continuous_distributions)
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_uniform_dist, T, floats) {
   trng::uniform_dist<T> d(T(2), T(5));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_uniform01_dist, T, floats) {
   trng::uniform01_dist<T> d;
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_exponential_dist, T, floats) {
   trng::exponential_dist<T> d(T(2));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_twosided_exponential_dist, T, floats) {
   trng::twosided_exponential_dist<T> d(T(2));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_normal_dist, T, floats) {
   trng::normal_dist<T> d(T(5), T(2));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_truncated_normal_dist, T, floats) {
   trng::truncated_normal_dist<T> d(T(5), T(2), T(2), T(6));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_maxwell_dist, T, floats) {
   trng::maxwell_dist<T> d(T(2));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_cauchy_dist, T, floats) {
   trng::cauchy_dist<T> d(T(5), T(2));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_logistic_dist, T, floats) {
   trng::logistic_dist<T> d(T(5), T(2));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_lognormal_dist, T, floats) {
   trng::lognormal_dist<T> d(T(1), T(1) / T(2));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_pareto_dist, T, floats) {
   trng::pareto_dist<T> d(T(5), T(2));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_powerlaw_dist, T, floats) {
   trng::powerlaw_dist<T> d(T(5), T(2));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_tent_dist, T, floats) {
   trng::tent_dist<T> d(T(5), T(2));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_weibull_dist, T, floats) {
   trng::weibull_dist<T> d(T(5), T(2));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_extreme_value_dist, T, floats) {
   trng::extreme_value_dist<T> d(T(5), T(2));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_gamma_dist, T, floats) {
   trng::gamma_dist<T> d(T(5), T(2));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_beta_dist, T, floats) {
   trng::beta_dist<T> d(T(3), T(2));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_chi_square_dist, T, floats) {
   trng::chi_square_dist<T> d(38);
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_student_t_dist, T, floats) {
   trng::student_t_dist<T> d(10);
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_snedecor_f_dist, T, floats) {
   trng::snedecor_f_dist<T> d(10, 11);
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_rayleigh_dist, T, floats) {
   trng::rayleigh_dist<T> d(T(10));
-  BOOST_TEST(continous_dist_test_integrate_pdf(d));
-  BOOST_TEST(continous_dist_test_icdf(d));
-  BOOST_TEST(continous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_integrate_pdf(d));
+  BOOST_TEST(continuous_dist_test_icdf(d));
+  BOOST_TEST(continuous_dist_test_chi2_test(d));
+  BOOST_TEST(continuous_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -429,48 +471,56 @@ BOOST_AUTO_TEST_CASE(test_bernoulli_dist) {
   trng::bernoulli_dist<int> d(0.4);
   BOOST_TEST(discrete_dist_test(d));
   BOOST_TEST(discrete_dist_test_chi2_test(d));
+  BOOST_TEST(discrete_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_int_dist) {
   trng::uniform_int_dist d(8, 100);
   BOOST_TEST(discrete_dist_test(d));
   BOOST_TEST(discrete_dist_test_chi2_test(d));
+  BOOST_TEST(discrete_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE(test_binomial_dist) {
   trng::binomial_dist d(0.4, 20);
   BOOST_TEST(discrete_dist_test(d));
   BOOST_TEST(discrete_dist_test_chi2_test(d));
+  BOOST_TEST(discrete_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE(test_negative_binomial_dist) {
   trng::negative_binomial_dist d(0.4, 20);
   BOOST_TEST(discrete_dist_test(d));
   BOOST_TEST(discrete_dist_test_chi2_test(d));
+  BOOST_TEST(discrete_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE(test_hypergeometric_dist) {
   trng::hypergeometric_dist d(10, 5, 5);
   BOOST_TEST(discrete_dist_test(d));
   BOOST_TEST(discrete_dist_test_chi2_test(d));
+  BOOST_TEST(discrete_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE(test_geometric_dist) {
   trng::geometric_dist d(0.3);
   BOOST_TEST(discrete_dist_test(d));
   BOOST_TEST(discrete_dist_test_chi2_test(d));
+  BOOST_TEST(discrete_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE(test_poisson_dist) {
   trng::poisson_dist d(2.125);
   BOOST_TEST(discrete_dist_test(d));
   BOOST_TEST(discrete_dist_test_chi2_test(d));
+  BOOST_TEST(discrete_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE(test_zero_truncated_poisson_dist) {
   trng::zero_truncated_poisson_dist d(2.125);
   BOOST_TEST(discrete_dist_test(d));
   BOOST_TEST(discrete_dist_test_chi2_test(d));
+  BOOST_TEST(discrete_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_CASE(test_discrete_dist) {
@@ -478,6 +528,7 @@ BOOST_AUTO_TEST_CASE(test_discrete_dist) {
   trng::discrete_dist d(p.begin(), p.end());
   BOOST_TEST(discrete_dist_test(d));
   BOOST_TEST(discrete_dist_test_chi2_test(d));
+  BOOST_TEST(discrete_dist_test_streamable(d));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

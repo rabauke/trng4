@@ -73,6 +73,17 @@ namespace trng {
 
       friend class pareto_dist;
 
+      // EqualityComparable concept
+      friend TRNG_CUDA_ENABLE inline bool operator==(const param_type &P1,
+                                                     const param_type &P2) {
+        return P1.gamma_ == P2.gamma_ and P1.theta_ == P2.theta_;
+      }
+
+      friend TRNG_CUDA_ENABLE inline bool operator!=(const param_type &P1,
+                                                     const param_type &P2) {
+        return not(P1 == P2);
+      }
+
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
@@ -167,21 +178,6 @@ namespace trng {
       return (math::pow((1 - x), -1 / P.gamma()) - 1) * P.theta();
     }
   };
-
-  // -------------------------------------------------------------------
-
-  // EqualityComparable concept
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator==(const typename pareto_dist<float_t>::param_type &P1,
-                                          const typename pareto_dist<float_t>::param_type &P2) {
-    return P1.gamma() == P2.gamma() and P1.theta() == P2.theta();
-  }
-
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator!=(const typename pareto_dist<float_t>::param_type &P1,
-                                          const typename pareto_dist<float_t>::param_type &P2) {
-    return not(P1 == P2);
-  }
 
   // -------------------------------------------------------------------
 

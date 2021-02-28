@@ -73,6 +73,17 @@ namespace trng {
 
       friend class powerlaw_dist;
 
+      // EqualityComparable concept
+      friend TRNG_CUDA_ENABLE inline bool operator==(const param_type &p1,
+                                                     const param_type &p2) {
+        return p1.gamma_ == p2.gamma_ and p1.theta_ == p2.theta_;
+      }
+
+      friend TRNG_CUDA_ENABLE inline bool operator!=(const param_type &p1,
+                                                     const param_type &p2) {
+        return not(p1 == p2);
+      }
+
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
@@ -169,23 +180,6 @@ namespace trng {
       return P.theta() * math::pow(1 - x, -1 / P.gamma());
     }
   };
-
-  // -------------------------------------------------------------------
-
-  // EqualityComparable concept
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator==(
-      const typename powerlaw_dist<float_t>::param_type &p1,
-      const typename powerlaw_dist<float_t>::param_type &p2) {
-    return p1.gamma() == p2.gamma() and p1.theta() == p2.theta();
-  }
-
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator!=(
-      const typename powerlaw_dist<float_t>::param_type &p1,
-      const typename powerlaw_dist<float_t>::param_type &p2) {
-    return not(p1 == p2);
-  }
 
   // -------------------------------------------------------------------
 

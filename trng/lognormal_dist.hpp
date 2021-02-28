@@ -74,6 +74,17 @@ namespace trng {
 
       friend class lognormal_dist;
 
+      // EqualityComparable concept
+      friend TRNG_CUDA_ENABLE inline bool operator==(const param_type &P1,
+                                                     const param_type &P2) {
+        return P1.mu() == P2.mu() and P1.sigma() == P2.sigma();
+      }
+
+      friend TRNG_CUDA_ENABLE inline bool operator!=(const param_type &P1,
+                                                     const param_type &P2) {
+        return not(P1 == P2);
+      }
+
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
@@ -153,7 +164,8 @@ namespace trng {
     result_type cdf(result_type x) const {
       if (x <= 0)
         return 0;
-      return math::erfc(math::constants<result_type>::one_over_sqrt_2 * (P.mu() - math::ln(x)) / P.sigma()) /
+      return math::erfc(math::constants<result_type>::one_over_sqrt_2 * (P.mu() - math::ln(x)) /
+                        P.sigma()) /
              2;
     }
     // inverse cumulative density function
@@ -172,23 +184,6 @@ namespace trng {
       return math::exp(math::inv_Phi(x) * P.sigma() + P.mu());
     }
   };
-
-  // -------------------------------------------------------------------
-
-  // EqualityComparable concept
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator==(
-      const typename lognormal_dist<float_t>::param_type &P1,
-      const typename lognormal_dist<float_t>::param_type &P2) {
-    return P1.mu() == P2.mu() and P1.sigma() == P2.sigma();
-  }
-
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator!=(
-      const typename lognormal_dist<float_t>::param_type &P1,
-      const typename lognormal_dist<float_t>::param_type &P2) {
-    return not(P1 == P2);
-  }
 
   // -------------------------------------------------------------------
 

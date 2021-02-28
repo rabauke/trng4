@@ -190,7 +190,7 @@ namespace trng {
     out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
     out << '(' << P.N_ << ' ';
     for (std::vector<double>::size_type i{P.offset_}; i < P.P_.size(); ++i) {
-      out << std::setprecision(17) << P.P_[i];
+      out << std::setprecision(math::numeric_limits<double>::digits10 + 1) << P.P_[i];
       if (i + 1 < P.P_.size())
         out << ' ';
     }

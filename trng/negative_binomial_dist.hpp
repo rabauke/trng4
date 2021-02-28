@@ -158,9 +158,10 @@ namespace trng {
                   const negative_binomial_dist::param_type &P2) {
     return P1.p() == P2.p() and P1.r() == P2.r();
   }
+
   bool operator!=(const negative_binomial_dist::param_type &P1,
                   const negative_binomial_dist::param_type &P2) {
-    return !(P1 == P2);
+    return not(P1 == P2);
   }
 
   // Streamable concept
@@ -169,7 +170,8 @@ namespace trng {
       std::basic_ostream<char_t, traits_t> &out, const negative_binomial_dist::param_type &P) {
     std::ios_base::fmtflags flags(out.flags());
     out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-    out << '(' << std::setprecision(17) << P.p() << ' ' << P.r() << ')';
+    out << '(' << std::setprecision(math::numeric_limits<double>::digits10 + 1) << P.p() << ' '
+        << P.r() << ')';
     out.flags(flags);
     return out;
   }
@@ -178,7 +180,7 @@ namespace trng {
   std::basic_istream<char_t, traits_t> &operator>>(std::basic_istream<char_t, traits_t> &in,
                                                    negative_binomial_dist::param_type &P) {
     double p;
-    int r;
+    double r;
     std::ios_base::fmtflags flags(in.flags());
     in.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
     in >> utility::delim('(') >> p >> utility::delim(' ') >> r >> utility::delim(')');

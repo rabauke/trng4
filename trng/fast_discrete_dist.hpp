@@ -172,7 +172,7 @@ namespace trng {
     out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
     out << '(' << P.N << ' ';
     for (std::vector<double>::size_type i = 0; i < P.P.size(); ++i) {
-      out << std::setprecision(17) << P.P[i];
+      out << std::setprecision(math::numeric_limits<double>::digits10 + 1) << P.P[i];
       if (i + 1 < P.P.size())
         out << ' ';
     }

@@ -57,6 +57,15 @@ namespace trng {
 
       friend class uniform01_dist<float_t>;
 
+      // Equality comparable concept
+      friend TRNG_CUDA_ENABLE inline bool operator==(const param_type &, const param_type &) {
+        return true;
+      }
+
+      friend TRNG_CUDA_ENABLE inline bool operator!=(const param_type &, const param_type &) {
+        return false;
+      }
+
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
@@ -138,23 +147,6 @@ namespace trng {
       return x;
     }
   };
-
-  // -------------------------------------------------------------------
-
-  // Equality comparable concept
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator==(
-      const typename uniform01_dist<float_t>::param_type &,
-      const typename uniform01_dist<float_t>::param_type &) {
-    return true;
-  }
-
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator!=(
-      const typename uniform01_dist<float_t>::param_type &,
-      const typename uniform01_dist<float_t>::param_type &) {
-    return false;
-  }
 
   // -------------------------------------------------------------------
 

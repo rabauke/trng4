@@ -72,6 +72,17 @@ namespace trng {
 
       friend class weibull_dist;
 
+      // EqualityComparable concept
+      friend TRNG_CUDA_ENABLE inline bool operator==(const param_type &P1,
+                                                     const param_type &P2) {
+        return P1.theta_ == P2.theta_ and P1.beta_ == P2.beta_;
+      }
+
+      friend TRNG_CUDA_ENABLE inline bool operator!=(const param_type &P1,
+                                                     const param_type &P2) {
+        return not(P1 == P2);
+      }
+
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
@@ -176,23 +187,6 @@ namespace trng {
       return P.theta() * math::pow(-math::ln1p(-x), 1 / P.beta());
     }
   };
-
-  // -------------------------------------------------------------------
-
-  // EqualityComparable concept
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator==(
-      const typename weibull_dist<float_t>::param_type &P1,
-      const typename weibull_dist<float_t>::param_type &P2) {
-    return P1.theta() == P2.theta() and P1.beta() == P2.beta();
-  }
-
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator!=(
-      const typename weibull_dist<float_t>::param_type &P1,
-      const typename weibull_dist<float_t>::param_type &P2) {
-    return not(P1 == P2);
-  }
 
   // -------------------------------------------------------------------
 

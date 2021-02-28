@@ -79,6 +79,17 @@ namespace trng {
 
       friend class uniform_dist<float_t>;
 
+      // EqualityComparable concept
+      friend TRNG_CUDA_ENABLE inline bool operator==(const param_type &P1,
+                                                     const param_type &P2) {
+        return P1.a_ == P2.a_ and P1.b_ == P2.b_ and P1.d_ == P2.d_;
+      }
+
+      friend TRNG_CUDA_ENABLE inline bool operator!=(const param_type &P1,
+                                                     const param_type &P2) {
+        return not(P1 == P2);
+      }
+
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
@@ -172,21 +183,6 @@ namespace trng {
       return x * P.d() + P.a();
     }
   };
-
-  // -------------------------------------------------------------------
-
-  // EqualityComparable concept
-  template<typename float_t>
-  TRNG_CUDA_ENABLE bool operator==(const typename uniform_dist<float_t>::param_type &P1,
-                                   const typename uniform_dist<float_t>::param_type &P2) {
-    return P1.a() == P2.a() and P1.b() == P2.b();
-  }
-
-  template<typename float_t>
-  TRNG_CUDA_ENABLE bool operator!=(const typename uniform_dist<float_t>::param_type &P1,
-                                   const typename uniform_dist<float_t>::param_type &P2) {
-    return not(P1 == P2);
-  }
 
   // -------------------------------------------------------------------
 

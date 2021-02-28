@@ -68,6 +68,17 @@ namespace trng {
 
       friend class rayleigh_dist;
 
+      // EqualityComparable concept
+      friend TRNG_CUDA_ENABLE inline bool operator==(const param_type &p1,
+                                                     const param_type &p2) {
+        return p1.nu_ == p2.nu_;
+      }
+
+      friend TRNG_CUDA_ENABLE inline bool operator!=(const param_type &p1,
+                                                     const param_type &p2) {
+        return not(p1 == p2);
+      }
+
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
@@ -156,23 +167,6 @@ namespace trng {
       return P.nu() * math::sqrt(-2 * math::ln(1 - x));
     }
   };
-
-  // -------------------------------------------------------------------
-
-  // EqualityComparable concept
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator==(
-      const typename rayleigh_dist<float_t>::param_type &p1,
-      const typename rayleigh_dist<float_t>::param_type &p2) {
-    return p1.nu() == p2.nu();
-  }
-
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator!=(
-      const typename rayleigh_dist<float_t>::param_type &p1,
-      const typename rayleigh_dist<float_t>::param_type &p2) {
-    return not(p1 == p2);
-  }
 
   // -------------------------------------------------------------------
 

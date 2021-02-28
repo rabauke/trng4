@@ -85,6 +85,17 @@ namespace trng {
 
       friend class beta_dist;
 
+      // EqualityComparable concept
+      friend TRNG_CUDA_ENABLE inline bool operator==(const param_type &P1,
+                                                     const param_type &P2) {
+        return P1.alpha_ == P2.alpha_;
+      }
+
+      friend TRNG_CUDA_ENABLE inline bool operator!=(const param_type &P1,
+                                                     const param_type &P2) {
+        return not(P1 == P2);
+      }
+
       // Streamable concept
       template<typename char_t, typename traits_t>
       friend std::basic_ostream<char_t, traits_t> &operator<<(
@@ -186,21 +197,6 @@ namespace trng {
       return math::inv_Beta_I(x, P.alpha(), P.beta(), P.norm());
     }
   };
-
-  // -------------------------------------------------------------------
-
-  // EqualityComparable concept
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator==(const typename beta_dist<float_t>::param_type &P1,
-                                          const typename beta_dist<float_t>::param_type &P2) {
-    return P1.alpha() == P2.alpha();
-  }
-
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator!=(const typename beta_dist<float_t>::param_type &P1,
-                                          const typename beta_dist<float_t>::param_type &P2) {
-    return not(P1 == P2);
-  }
 
   // -------------------------------------------------------------------
 

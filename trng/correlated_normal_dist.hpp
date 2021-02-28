@@ -117,7 +117,7 @@ namespace trng {
           std::basic_ostream<char_t, traits_t> &out, const param_type &P) {
         std::ios_base::fmtflags flags(out.flags());
         out.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
-        out << '(' << P.d_ << std::setprecision(17);
+        out << '(' << P.d_ << std::setprecision(math::numeric_limits<float_t>::digits10 + 1);
         for (unsigned int i{0}; i < P.d_ * P.d_; ++i)
           out << ' ' << P.H_[i];
         out << ')';
