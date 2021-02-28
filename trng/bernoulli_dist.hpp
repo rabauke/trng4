@@ -176,7 +176,7 @@ namespace trng {
       return P.head() > P.tail() ? P.head() : P.tail();
     }
     TRNG_CUDA_ENABLE
-    param_type param() const { return P; }
+    const param_type &param() const { return P; }
     TRNG_CUDA_ENABLE
     void param(const param_type &P_new) { P = P_new; }
     TRNG_CUDA_ENABLE

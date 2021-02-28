@@ -138,7 +138,7 @@ namespace trng {
     // property methods
     int min() const { return 0; }
     int max() const { return P.N - 1; }
-    param_type param() const { return P; }
+    const param_type &param() const { return P; }
     void param(const param_type &P_new) { P = P_new; }
     // probability density function
     double pdf(int x) const { return (x < 0 or x >= P.N) ? 0.0 : P.P[x]; }

@@ -111,7 +111,7 @@ namespace trng {
     // property methods
     int min() const { return 1; }
     int max() const { return math::numeric_limits<int>::max(); }
-    param_type param() const { return P; }
+    const param_type &param() const { return P; }
     void param(const param_type &P_new) { P = P_new; }
     double mu() const { return P.mu(); }
     void mu(double mu_new) { P.mu(mu_new); }

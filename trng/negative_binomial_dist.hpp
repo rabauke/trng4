@@ -139,7 +139,7 @@ namespace trng {
     // property methods
     int min() const { return 0; }
     int max() const { return math::numeric_limits<int>::max(); }
-    param_type param() const { return P; }
+    const param_type &param() const { return P; }
     void param(const param_type &P_new) { P = P_new; }
     double p() const { return P.p(); }
     void p(double p_new) { P.p(p_new); }

@@ -119,7 +119,7 @@ namespace trng {
     // property methods
     int min() const { return P.x_min; }
     int max() const { return P.x_max; }
-    param_type param() const { return P; }
+    const param_type &param() const { return P; }
     void param(const param_type &P_new) { P = P_new; }
     int n() const { return P.n(); }
     void n(int n_new) { P.n(n_new); }

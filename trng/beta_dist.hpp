@@ -152,7 +152,7 @@ namespace trng {
     TRNG_CUDA_ENABLE
     result_type max() const { return result_type(1); }
     TRNG_CUDA_ENABLE
-    param_type param() const { return P; }
+    const param_type &param() const { return P; }
     TRNG_CUDA_ENABLE
     void param(const param_type &P_new) { P = P_new; }
     TRNG_CUDA_ENABLE

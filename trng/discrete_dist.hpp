@@ -144,7 +144,7 @@ namespace trng {
     // property methods
     int min() const { return 0; }
     int max() const { return static_cast<int>(P.N_ - 1); }
-    param_type param() const { return P; }
+    const param_type &param() const { return P; }
     void param(const param_type &P_new) { P = P_new; }
     void param(int x, double p) {
       x += static_cast<int>(P.offset_);
