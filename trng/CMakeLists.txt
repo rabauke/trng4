@@ -22,6 +22,7 @@ set(HEADER_FILES
         lagfib4plus.hpp
         lagfib4xor.hpp
         lcg64.hpp
+        lcg64_count_shift.hpp
         lcg64_shift.hpp
         limits.hpp
         linear_algebra.hpp
@@ -71,6 +72,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
         lcg64.cc
         lcg64_shift.cc
+        lcg64_count_shift.cc
         minstd.cc
         mrg2.cc
         mrg3.cc

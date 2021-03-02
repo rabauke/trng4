@@ -44,6 +44,7 @@
 
 #include <trng/lcg64.hpp>
 #include <trng/lcg64_shift.hpp>
+#include <trng/lcg64_count_shift.hpp>
 #include <trng/mrg2.hpp>
 #include <trng/mrg3.hpp>
 #include <trng/mrg3s.hpp>
@@ -67,7 +68,7 @@
 #include "type_names.hpp"
 
 using engines =
-    boost::mpl::list<trng::lcg64, trng::lcg64_shift,  //
+    boost::mpl::list<trng::lcg64, trng::lcg64_shift, trng::lcg64_count_shift,  //
                      trng::mrg2, trng::mrg3, trng::mrg3s, trng::mrg4, trng::mrg5,
                      trng::mrg5s,  //
                      trng::yarn2, trng::yarn3, trng::yarn3s, trng::yarn4, trng::yarn5,
@@ -78,7 +79,7 @@ using engines =
                      trng::xoshiro256plus>;
 
 using parallel_engines =
-    boost::mpl::list<trng::lcg64, trng::lcg64_shift,  //
+    boost::mpl::list<trng::lcg64, trng::lcg64_shift, trng::lcg64_count_shift,  //
                      trng::mrg2, trng::mrg3, trng::mrg3s, trng::mrg4, trng::mrg5,
                      trng::mrg5s,  //
                      trng::yarn2, trng::yarn3, trng::yarn3s, trng::yarn4, trng::yarn5,
