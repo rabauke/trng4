@@ -371,7 +371,7 @@ int main(int argc, char *argv[]) {
   int argi{1};
   if (argc == 1) {
     std::cerr << "Tina's Random Number Generator Library\n\n"
-              << "(P) & (C) by Heiko Bauke, Magdeburg 2001-2020\n\n"
+              << "(P) & (C) by Heiko Bauke, 2000-2021\n\n"
               << "two-domensional Ising model (Wolff algorithm)\n"
               << "---------------------------------------------\n\n"
               << "synopsis:\n"
