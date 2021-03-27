@@ -138,12 +138,12 @@ namespace trng {
 
   // EqualityComparable concept
   TRNG_CUDA_ENABLE
-  bool operator==(const uniform_int_dist::param_type &P1,
+  inline bool operator==(const uniform_int_dist::param_type &P1,
                   const uniform_int_dist::param_type &P2) {
     return P1.a() == P2.a() and P1.b() == P2.b();
   }
   TRNG_CUDA_ENABLE
-  bool operator!=(const uniform_int_dist::param_type &P1,
+  inline bool operator!=(const uniform_int_dist::param_type &P1,
                   const uniform_int_dist::param_type &P2) {
     return not(P1 == P2);
   }
@@ -176,11 +176,11 @@ namespace trng {
 
   // EqualityComparable concept
   TRNG_CUDA_ENABLE
-  bool operator==(const uniform_int_dist &g1, const uniform_int_dist &g2) {
+  inline bool operator==(const uniform_int_dist &g1, const uniform_int_dist &g2) {
     return g1.param() == g2.param();
   }
   TRNG_CUDA_ENABLE
-  bool operator!=(const uniform_int_dist &g1, const uniform_int_dist &g2) {
+  inline bool operator!=(const uniform_int_dist &g1, const uniform_int_dist &g2) {
     return g1.param() != g2.param();
   }
 
