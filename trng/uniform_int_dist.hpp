@@ -139,12 +139,12 @@ namespace trng {
   // EqualityComparable concept
   TRNG_CUDA_ENABLE
   inline bool operator==(const uniform_int_dist::param_type &P1,
-                  const uniform_int_dist::param_type &P2) {
+                         const uniform_int_dist::param_type &P2) {
     return P1.a() == P2.a() and P1.b() == P2.b();
   }
   TRNG_CUDA_ENABLE
   inline bool operator!=(const uniform_int_dist::param_type &P1,
-                  const uniform_int_dist::param_type &P2) {
+                         const uniform_int_dist::param_type &P2) {
     return not(P1 == P2);
   }
 
