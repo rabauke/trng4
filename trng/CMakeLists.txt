@@ -93,7 +93,10 @@ set(SOURCE_FILES
 
 add_library(trng4_static STATIC ${HEADER_FILES} ${SOURCE_FILES})
 set_target_properties(trng4_static PROPERTIES OUTPUT_NAME trng4 CLEAN_DIRECT_OUTPUT 1)
-target_include_directories(trng4_static PUBLIC ..)
+target_include_directories(trng4_static PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+        $<INSTALL_INTERFACE:include>
+        )
 
 if (NOT WIN32)
     add_library(trng4_shared SHARED ${HEADER_FILES} ${SOURCE_FILES})
@@ -101,16 +104,21 @@ if (NOT WIN32)
     set_target_properties(trng4_shared PROPERTIES VERSION ${PROJECT_VERSION})
     set_target_properties(trng4_shared PROPERTIES SOVERSION 24)
     set_target_properties(trng4_shared PROPERTIES PUBLIC_HEADER "${HEADER_FILES}")
-    target_include_directories(trng4_shared PUBLIC ..)
+    target_include_directories(trng4_shared PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+            $<INSTALL_INTERFACE:include>
+            )
 endif ()
 
 if (WIN32)
     install(TARGETS trng4_static
+            EXPORT "${targets_export_name}"
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
             PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/trng)
 else ()
     install(TARGETS trng4_static trng4_shared
+            EXPORT "${targets_export_name}"
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
             PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/trng)

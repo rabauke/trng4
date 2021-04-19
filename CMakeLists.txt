@@ -22,9 +22,23 @@ if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_LIBCPP_DEBUG=1")
 endif ()
 
+# Configure package config files.
+set(pkg_config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+set(project_pkg_config "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake")
+set(version_pkg_config "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
+set(targets_export_name "${PROJECT_NAME}Targets")
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file("${version_pkg_config}" COMPATIBILITY SameMajorVersion)
+configure_package_config_file("cmake/Config.cmake.in" "${project_pkg_config}" INSTALL_DESTINATION "${pkg_config_install_dir}")
+
 add_subdirectory(trng)
 add_subdirectory(examples)
 add_subdirectory(tests)
+
+# Install package config files.
+install(FILES "${project_pkg_config}" "${version_pkg_config}"  DESTINATION "${pkg_config_install_dir}")
+install(EXPORT "${targets_export_name}"
+        DESTINATION "${pkg_config_install_dir}")
 
 find_program(RPMBUILD_FOUND rpmbuild)
 
