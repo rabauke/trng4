@@ -36,9 +36,8 @@ add_subdirectory(examples)
 add_subdirectory(tests)
 
 # Install package config files.
-install(FILES "${project_pkg_config}" "${version_pkg_config}"  DESTINATION "${pkg_config_install_dir}")
-install(EXPORT "${targets_export_name}"
-        DESTINATION "${pkg_config_install_dir}")
+install(FILES "${project_pkg_config}" "${version_pkg_config}" DESTINATION "${pkg_config_install_dir}")
+install(EXPORT "${targets_export_name}" DESTINATION "${pkg_config_install_dir}")
 
 find_program(RPMBUILD_FOUND rpmbuild)
 
