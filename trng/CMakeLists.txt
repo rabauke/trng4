@@ -99,6 +99,9 @@ target_include_directories(trng4 PUBLIC
         )
 
 if (BUILD_SHARED_LIBS)
+    if (WIN32)
+        message(FATAL_ERROR "Building a shared library on Windows is not supported.")
+    endif ()
     set_target_properties(trng4 PROPERTIES VERSION ${PROJECT_VERSION})
     set_target_properties(trng4 PROPERTIES SOVERSION 24)
     set_target_properties(trng4 PROPERTIES PUBLIC_HEADER "${HEADER_FILES}")
