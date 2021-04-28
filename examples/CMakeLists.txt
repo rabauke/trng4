@@ -6,7 +6,7 @@ find_package(OpenMP)
 find_package(TBB)
 
 include_directories(..)
-link_libraries(trng4_static)
+link_libraries(trng4)
 link_directories(${PROJECT_BINARY_DIR}/trng)
 
 add_executable(hello_world hello_world.cc)

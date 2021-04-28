@@ -91,38 +91,27 @@ set(SOURCE_FILES
         yarn5s.cc
         )
 
-add_library(trng4_static STATIC ${HEADER_FILES} ${SOURCE_FILES})
-set_target_properties(trng4_static PROPERTIES OUTPUT_NAME trng4 CLEAN_DIRECT_OUTPUT 1)
-target_include_directories(trng4_static PUBLIC
+add_library(trng4 ${HEADER_FILES} ${SOURCE_FILES})
+set_target_properties(trng4 PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+target_include_directories(trng4 PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
         $<INSTALL_INTERFACE:include>
         )
 
-if (NOT WIN32)
-    add_library(trng4_shared SHARED ${HEADER_FILES} ${SOURCE_FILES})
-    set_target_properties(trng4_shared PROPERTIES OUTPUT_NAME trng4 CLEAN_DIRECT_OUTPUT 1)
-    set_target_properties(trng4_shared PROPERTIES VERSION ${PROJECT_VERSION})
-    set_target_properties(trng4_shared PROPERTIES SOVERSION 24)
-    set_target_properties(trng4_shared PROPERTIES PUBLIC_HEADER "${HEADER_FILES}")
-    target_include_directories(trng4_shared PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
-            $<INSTALL_INTERFACE:include>
-            )
+if (BUILD_SHARED_LIBS)
+    if (WIN32)
+        message(FATAL_ERROR "Building a shared library on Windows is not supported.")
+    endif ()
+    set_target_properties(trng4 PROPERTIES VERSION ${PROJECT_VERSION})
+    set_target_properties(trng4 PROPERTIES SOVERSION 24)
+    set_target_properties(trng4 PROPERTIES PUBLIC_HEADER "${HEADER_FILES}")
 endif ()
 
-if (WIN32)
-    install(TARGETS trng4_static
-            EXPORT "${targets_export_name}"
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/trng)
-else ()
-    install(TARGETS trng4_static trng4_shared
-            EXPORT "${targets_export_name}"
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/trng)
-endif ()
+install(TARGETS trng4
+        EXPORT "${targets_export_name}"
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/trng)
 
 find_program(PVS_STUDIO pvs-studio)
 
@@ -131,7 +120,7 @@ if (PVS_STUDIO)
     include(../cmake/PVS-Studio/PVS-Studio.cmake)
 
     pvs_studio_add_target(TARGET ${PROJECT_NAME}.analyze # ALL
-            ANALYZE trng4_static
+            ANALYZE trng4
             OUTPUT FORMAT errorfile
             LOG ${PROJECT_NAME}.err)
 endif ()
