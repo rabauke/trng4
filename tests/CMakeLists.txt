@@ -6,5 +6,15 @@ if (Boost_FOUND)
 
     add_executable(test_all test_all.cc test_engines.cc test_distributions.cc test_math.cc test_int_math.cc type_names.cc test_linear_algebra.cc)
     target_link_libraries(test_all PUBLIC trng4 Boost::unit_test_framework)
+    if (WIN32 AND BUILD_SHARED_LIBS)
+        add_custom_command(TARGET test_all POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy
+                $<TARGET_RUNTIME_DLLS:test_all>
+                $<TARGET_FILE_DIR:test_all>
+                COMMAND_EXPAND_LISTS)
+    endif ()
+    if (CMAKE_CXX_COMPILER_ID MATCHES MSVC)
+        target_compile_options(test_all PUBLIC "/bigobj")
+    endif ()
     add_test(NAME run_test_all COMMAND test_all --log_level=test_suite)
 endif ()

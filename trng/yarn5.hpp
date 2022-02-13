@@ -34,6 +34,7 @@
 
 #define TRNG_YARN5_HPP
 
+#include <trng/trng_export.hpp>
 #include <trng/cuda.hpp>
 #include <trng/utility.hpp>
 #include <trng/int_types.hpp>
@@ -59,7 +60,7 @@ namespace trng {
     static constexpr result_type gen = 123567893;
     static constexpr result_type min_ = 0;
     static constexpr result_type max_ = modulus - 1;
-    static const int_math::power<yarn5::modulus, yarn5::gen> g;
+    static TRNG4_EXPORT const int_math::power<yarn5::modulus, yarn5::gen> g;
 
   public:
     static constexpr result_type min() { return min_; }
@@ -69,7 +70,7 @@ namespace trng {
     using parameter_type = mrg_parameter<result_type, 5, yarn5>;
     using status_type = mrg_status<result_type, 5, yarn5>;
 
-    static const parameter_type LEcuyer1;
+    static TRNG4_EXPORT const parameter_type LEcuyer1;
 
     // Random number engine concept
     explicit yarn5(const parameter_type &P = LEcuyer1);

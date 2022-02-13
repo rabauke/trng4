@@ -34,6 +34,7 @@
 
 #define TRNG_LCG64_HPP
 
+#include <trng/trng_export.hpp>
 #include <trng/cuda.hpp>
 #include <trng/limits.hpp>
 #include <trng/utility.hpp>
@@ -155,10 +156,10 @@ namespace trng {
       }
     };
 
-    static const parameter_type Default;
-    static const parameter_type LEcuyer1;
-    static const parameter_type LEcuyer2;
-    static const parameter_type LEcuyer3;
+    static TRNG4_EXPORT const parameter_type Default;
+    static TRNG4_EXPORT const parameter_type LEcuyer1;
+    static TRNG4_EXPORT const parameter_type LEcuyer2;
+    static TRNG4_EXPORT const parameter_type LEcuyer3;
 
     // Random number engine concept
     explicit lcg64(parameter_type = Default);

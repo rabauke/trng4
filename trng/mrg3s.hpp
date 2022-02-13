@@ -34,6 +34,7 @@
 
 #define TRNG_MRG3S_HPP
 
+#include <trng/trng_export.hpp>
 #include <trng/cuda.hpp>
 #include <trng/utility.hpp>
 #include <trng/int_types.hpp>
@@ -67,8 +68,8 @@ namespace trng {
     using parameter_type = mrg_parameter<result_type, 3, mrg3s>;
     using status_type = mrg_status<result_type, 3, mrg3s>;
 
-    static const parameter_type trng0;
-    static const parameter_type trng1;
+    static TRNG4_EXPORT const parameter_type trng0;
+    static TRNG4_EXPORT const parameter_type trng1;
 
     // Random number engine concept
     explicit mrg3s(parameter_type = trng0);

@@ -1,4 +1,7 @@
+include(GenerateExportHeader)
+
 set(HEADER_FILES
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/trng_export.hpp>
         bernoulli_dist.hpp
         beta_dist.hpp
         binomial_dist.hpp
@@ -91,21 +94,20 @@ set(SOURCE_FILES
         yarn5s.cc
         )
 
-add_library(trng4 ${HEADER_FILES} ${SOURCE_FILES})
+add_library(trng4 ${SOURCE_FILES})
+generate_export_header(trng4 EXPORT_FILE_NAME trng_export.hpp)
 set_target_properties(trng4 PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 target_include_directories(trng4 PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>
         $<INSTALL_INTERFACE:include>
         )
 
 if (BUILD_SHARED_LIBS)
-    if (WIN32)
-        message(FATAL_ERROR "Building a shared library on Windows is not supported.")
-    endif ()
     set_target_properties(trng4 PROPERTIES VERSION ${PROJECT_VERSION})
     set_target_properties(trng4 PROPERTIES SOVERSION 24)
-    set_target_properties(trng4 PROPERTIES PUBLIC_HEADER "${HEADER_FILES}")
 endif ()
+set_target_properties(trng4 PROPERTIES PUBLIC_HEADER "${HEADER_FILES}")
 
 install(TARGETS trng4
         EXPORT "${targets_export_name}"
