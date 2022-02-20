@@ -50,7 +50,7 @@ namespace trng {
   template<typename float_t = double>
   class rayleigh_dist {
   public:
-    using result_type = double;
+    using result_type = float_t;
 
     class param_type {
     private:
