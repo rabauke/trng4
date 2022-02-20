@@ -212,6 +212,10 @@ namespace trng {
 
     //------------------------------------------------------------------
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4127)
+#endif
     template<int32_t m, int32_t r>
     class modulo_helper;
 
@@ -304,6 +308,9 @@ namespace trng {
         return static_cast<int32_t>(x % m);
       }
     };
+#if _MSC_VER
+#pragma warning(pop)
+#endif
 
     template<int32_t m, int32_t r>
     TRNG_CUDA_ENABLE inline int32_t modulo(uint64_t x) {

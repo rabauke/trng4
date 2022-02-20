@@ -666,7 +666,14 @@ namespace trng {
 #if __cplusplus >= 201703L
         if constexpr (sizeof(T) > 10) {
 #else
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4127)
+#endif
         if (sizeof(T) > 10) {
+#if _MSC_VER
+#pragma warning(pop)
+#endif
 #endif
           if (isfinite(y)) {
             const T e{(Phi(y) - x)};
@@ -691,7 +698,14 @@ namespace trng {
 #if __cplusplus >= 201703L
         if constexpr (sizeof(T) > 10) {
 #else
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4127)
+#endif
         if (sizeof(T) > 10) {
+#if _MSC_VER
+#pragma warning(pop)
+#endif
 #endif
           if (isfinite(y)) {
             const T e{erf(y) - x};
@@ -721,7 +735,14 @@ namespace trng {
 #if __cplusplus >= 201703L
         if constexpr (sizeof(T) > 10) {
 #else
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4127)
+#endif
         if (sizeof(T) > 10) {
+#if _MSC_VER
+#pragma warning(pop)
+#endif
 #endif
           if (isfinite(y)) {
             const T e{erfc(y) - x};
