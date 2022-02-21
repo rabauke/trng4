@@ -165,7 +165,9 @@ namespace trng {
       if (x < 0)
         return 0.0;
       if (x < static_cast<int>(P.N_))
-        return std::accumulate(&P.P_[P.offset_], &P.P_[x + P.offset_ + 1], 0.0) / P.P_[0];
+        return std::accumulate(P.P_.begin() + P.offset_, P.P_.begin() + x + P.offset_ + 1,
+                               0.0) /
+               P.P_[0];
       return 1.0;
     }
   };
