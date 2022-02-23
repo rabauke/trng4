@@ -96,7 +96,6 @@ set(SOURCE_FILES
 
 add_library(trng4 ${SOURCE_FILES})
 generate_export_header(trng4 EXPORT_FILE_NAME trng_export.hpp)
-set_target_properties(trng4 PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 target_include_directories(trng4 PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>
