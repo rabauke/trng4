@@ -37,19 +37,19 @@
 #include <trng/lcg64.hpp>
 #include <trng/bernoulli_dist.hpp>
 
-typedef enum { head = 0, tail = 1 } coin;
+enum class coin { head = 0, tail = 1 };
 
 int main() {
   // discrete distribution object
-  trng::bernoulli_dist<coin> biased_coin(0.51, head, tail);
+  trng::bernoulli_dist<coin> biased_coin(0.51, coin::head, coin::tail);
   // random number generator
   trng::lcg64 r;
   // draw some random numbers
   std::vector<int> count(2, 0);
   const int samples{100000};
   for (int i = 0; i < samples; ++i) {
-    const int x{biased_coin(r)};  // draw a random number
-    ++count[x];                   // count
+    const coin x{biased_coin(r)};      // draw a random number
+    ++count[x == coin::head ? 0 : 1];  // count
   }
   // print results
   std::cout << "value\t\tprobability\tcount\t\tempirical probability\n"

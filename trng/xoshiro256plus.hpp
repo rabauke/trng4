@@ -70,7 +70,7 @@ namespace trng {
     public:
       status_type() = default;
       explicit status_type(result_type r0, result_type r1, result_type r2, result_type r3)
-          : r{r0, r1, r2, r3} {};
+          : r{r0, r1, r2, r3} {}
 
     private:
       struct eye {};

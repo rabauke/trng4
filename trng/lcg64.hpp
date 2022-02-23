@@ -84,7 +84,7 @@ namespace trng {
 
     public:
       parameter_type() = default;
-      explicit parameter_type(result_type a, result_type b) : a{a}, b{b} {};
+      explicit parameter_type(result_type a, result_type b) : a{a}, b{b} {}
 
       friend class lcg64;
 
@@ -123,7 +123,7 @@ namespace trng {
 
     public:
       status_type() = default;
-      explicit status_type(result_type r) : r{r} {};
+      explicit status_type(result_type r) : r{r} {}
 
       friend class lcg64;
 

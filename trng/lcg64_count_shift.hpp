@@ -89,7 +89,7 @@ namespace trng {
     public:
       parameter_type() = default;
       explicit parameter_type(result_type a, result_type b, result_type inc)
-          : a{a}, b{b}, inc{inc} {};
+          : a{a}, b{b}, inc{inc} {}
 
       friend class lcg64_count_shift;
 
@@ -128,7 +128,7 @@ namespace trng {
 
     public:
       status_type() = default;
-      explicit status_type(result_type r, result_type count) : r{r}, count{count} {};
+      explicit status_type(result_type r, result_type count) : r{r}, count{count} {}
 
       friend class lcg64_count_shift;
 

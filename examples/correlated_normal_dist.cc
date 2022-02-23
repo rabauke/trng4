@@ -37,7 +37,9 @@
 #include <trng/lcg64.hpp>
 #include <trng/correlated_normal_dist.hpp>
 
-double covariance(const std::vector<double> &v1, const std::vector<double> &v2) {
+double covariance(const std::vector<double>& v1, const std::vector<double>& v2);
+
+double covariance(const std::vector<double>& v1, const std::vector<double>& v2) {
   const std::vector<double>::size_type n{v1.size()};
   double m1{0.0}, m2{0.0}, c{0.0};
   for (std::vector<double>::size_type i{0}; i < n; ++i) {

@@ -65,7 +65,7 @@ namespace trng {
 
     public:
       status_type() = default;
-      explicit status_type(result_type r) : r{r} {};
+      explicit status_type(result_type r) : r{r} {}
 
       friend class minstd;
 

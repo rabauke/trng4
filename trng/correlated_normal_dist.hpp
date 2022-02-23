@@ -151,7 +151,7 @@ namespace trng {
 
   private:
     param_type P;
-    std::vector<result_type> normal;
+    std::vector<result_type> normal_;
 
   public:
     // constructor
@@ -159,14 +159,14 @@ namespace trng {
     explicit correlated_normal_dist(iter first, iter last) : P{first, last} {}
     explicit correlated_normal_dist(const param_type &P) : P{P} {}
     // reset internal state
-    void reset() { normal.clear(); }
+    void reset() { normal_.clear(); }
     // random numbers
     template<typename R>
     result_type operator()(R &r) {
-      normal.push_back(trng::math::inv_Phi(utility::uniformoo<result_type>(r)));
-      result_type y{P.H_times(normal)};
-      if (normal.size() == P.d())
-        normal.clear();
+      normal_.push_back(trng::math::inv_Phi(utility::uniformoo<result_type>(r)));
+      result_type y{P.H_times(normal_)};
+      if (normal_.size() == P.d())
+        normal_.clear();
       return y;
     }
     template<typename R>

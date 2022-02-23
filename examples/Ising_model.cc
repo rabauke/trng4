@@ -71,10 +71,12 @@ public:
   timer() : _resolution([]() { return 1e-6; }()), _t(std::chrono::system_clock::now()) {}
 };
 
-typedef struct {
-  int x;
-  int y;
-} koord;
+
+struct coord {
+  int x{0};
+  int y{0};
+};
+
 
 class lattice {
 private:
@@ -86,15 +88,16 @@ public:
   int size() const;
   void resize(int);
   void fill(int);
-  void flipp(koord);
-  int get(koord);
-  void set(koord, int);
+  void flipp(coord);
+  int get(coord);
+  void set(coord, int);
   double energy() const;
   double magnet() const;
   void print() const;
   explicit lattice(int);
   lattice() = default;
 };
+
 
 inline int lattice::pos(int x) const {
   while (x < 0)
@@ -104,9 +107,11 @@ inline int lattice::pos(int x) const {
   return x;
 }
 
+
 int lattice::size() const {
   return L;
 }
+
 
 void lattice::resize(int newL) {
   if (newL > 0) {
@@ -119,22 +124,27 @@ void lattice::resize(int newL) {
   }
 }
 
-inline void lattice::flipp(koord r) {
+
+inline void lattice::flipp(coord r) {
   s[pos(r.x) + pos(r.y) * L] *= -1;
 }
+
 
 void lattice::fill(int w) {
   for (int i = 0; i < L2; ++i)
     s[i] = w;
 }
 
-inline int lattice::get(koord r) {
+
+inline int lattice::get(coord r) {
   return s[pos(r.x) + pos(r.y) * L];
 }
 
-void lattice::set(koord r, int w) {
+
+void lattice::set(coord r, int w) {
   s[pos(r.x) + pos(r.y) * L] = w;
 }
+
 
 double lattice::energy() const {
   double e{0.0};
@@ -143,6 +153,7 @@ double lattice::energy() const {
       e -= s[i + j * L] * (s[pos(i + 1) + j * L] + s[i + pos(j + 1) * L]);
   return e / L2;
 }
+
 
 double lattice::magnet() const {
   double m{0.0};
@@ -154,6 +165,7 @@ double lattice::magnet() const {
         ++m;
   return std::abs(m) / L2;
 }
+
 
 void lattice::print() const {
   for (int i{0}; i < L; ++i) {
@@ -167,18 +179,20 @@ void lattice::print() const {
   std::cout << std::endl;
 }
 
+
 lattice::lattice(int newL) {
   lattice::resize(newL);
 }
 
+
 template<class RNG_type>
 void wolffstep(RNG_type &R, lattice &s, double T) {
-  std::queue<koord> buffer;
+  std::queue<coord> buffer;
   const double padd = 1.0 - std::exp(-2.0 / T);
 
   trng::uniform_int_dist U(0, s.size());
   trng::bernoulli_dist<bool> B(padd, true, false);
-  koord r;
+  coord r;
 
   r.x = U(R);
   r.y = U(R);
@@ -218,6 +232,10 @@ void wolffstep(RNG_type &R, lattice &s, double T) {
     --r.y;
   }
 }
+
+
+void output(std::vector<double> &Ea, std::vector<double> &ca, int simulations, double E_exact,
+            double c_exact);
 
 void output(std::vector<double> &Ea, std::vector<double> &ca, int simulations, double E_exact,
             double c_exact) {
