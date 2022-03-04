@@ -41,6 +41,11 @@
 
 #include <cuda.h>
 
+#elif defined __HIP__
+
+#define TRNG_CUDA 1
+#define TRNG_CUDA_ENABLE __device__ __host__
+
 #else
 
 #define TRNG_CUDA_ENABLE

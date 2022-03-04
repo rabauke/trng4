@@ -141,6 +141,7 @@ namespace trng {
 
     // Other useful methods
     static const char *name();
+    TRNG_CUDA_ENABLE
     long operator()(long);
 
   private:

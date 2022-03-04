@@ -38,7 +38,7 @@
 #include <cfloat>
 #include <trng/cuda.hpp>
 
-#if defined TRNG_CUDA
+#if defined TRNG_CUDA && !defined __HIPCC__
 #include <math_constants.h>
 #endif
 
