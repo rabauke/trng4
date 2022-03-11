@@ -99,7 +99,7 @@ generate_export_header(trng4 EXPORT_FILE_NAME trng_export.hpp)
 target_include_directories(trng4 PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>
-        $<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         )
 
 if (BUILD_SHARED_LIBS)
