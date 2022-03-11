@@ -102,10 +102,8 @@ target_include_directories(trng4 PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         )
 
-if (BUILD_SHARED_LIBS)
-    set_target_properties(trng4 PROPERTIES VERSION ${PROJECT_VERSION})
-    set_target_properties(trng4 PROPERTIES SOVERSION 24)
-endif ()
+set_target_properties(trng4 PROPERTIES VERSION ${PROJECT_VERSION})
+set_target_properties(trng4 PROPERTIES SOVERSION ${PROJECT_VERSION_MINOR})
 set_target_properties(trng4 PROPERTIES PUBLIC_HEADER "${HEADER_FILES}")
 
 install(TARGETS trng4
