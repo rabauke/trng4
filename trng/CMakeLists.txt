@@ -95,6 +95,9 @@ set(SOURCE_FILES
         )
 
 add_library(trng4 ${SOURCE_FILES})
+add_library(trng4::trng4 ALIAS trng4)
+set_target_properties(trng4 PROPERTIES EXPORT_NAME trng4)
+
 generate_export_header(trng4 EXPORT_FILE_NAME trng_export.hpp)
 target_include_directories(trng4 PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
@@ -113,11 +116,9 @@ install(TARGETS trng4
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/trng)
 
 find_program(PVS_STUDIO pvs-studio)
-
 if (PVS_STUDIO)
     list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../cmake/PVS-Studio)
     include(../cmake/PVS-Studio/PVS-Studio.cmake)
-
     pvs_studio_add_target(TARGET ${PROJECT_NAME}.analyze # ALL
             ANALYZE trng4
             OUTPUT FORMAT errorfile

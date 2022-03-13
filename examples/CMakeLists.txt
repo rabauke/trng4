@@ -6,7 +6,7 @@ find_package(OpenMP)
 find_package(TBB)
 
 include_directories(..)
-link_libraries(trng4)
+link_libraries(trng4::trng4)
 link_directories(${PROJECT_BINARY_DIR}/trng)
 
 function(add_executable_and_copy_dlls target)
