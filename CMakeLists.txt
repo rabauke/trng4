@@ -59,4 +59,4 @@ endif ()
 
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Heiko Bauke")
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://www.numbercrunch.de/trng/")
-INCLUDE(CPack)
+include(CPack)
