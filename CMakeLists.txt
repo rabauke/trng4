@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.21)
 project(trng4 VERSION 4.24 DESCRIPTION "pseudo random number generator library")
 
 include(GNUInstallDirs)
