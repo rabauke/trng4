@@ -37,6 +37,7 @@ include(CMakePackageConfigHelpers)
 write_basic_package_version_file("${version_pkg_config}" COMPATIBILITY SameMajorVersion)
 configure_package_config_file("cmake/Config.cmake.in" "${project_pkg_config}" INSTALL_DESTINATION "${pkg_config_install_dir}")
 
+add_subdirectory(external/Catch2)
 add_subdirectory(trng)
 add_subdirectory(examples)
 add_subdirectory(tests)
