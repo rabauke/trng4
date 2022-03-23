@@ -115,13 +115,3 @@ install(TARGETS trng4
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/trng)
-
-find_program(PVS_STUDIO pvs-studio)
-if (PVS_STUDIO)
-    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../cmake/PVS-Studio)
-    include(../cmake/PVS-Studio/PVS-Studio.cmake)
-    pvs_studio_add_target(TARGET ${PROJECT_NAME}.analyze # ALL
-            ANALYZE trng4
-            OUTPUT FORMAT errorfile
-            LOG ${PROJECT_NAME}.err)
-endif ()
