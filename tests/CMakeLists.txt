@@ -8,7 +8,7 @@ if (WIN32 AND BUILD_SHARED_LIBS)
             COMMAND_EXPAND_LISTS)
 endif ()
 
-set(CMAKE_MODULE_PATH ../external/Catch2/contrib ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/external/Catch2/contrib ${CMAKE_MODULE_PATH})
 include(CTest)
 include(Catch)
 
