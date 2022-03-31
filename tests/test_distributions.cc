@@ -82,7 +82,7 @@ typename std::iterator_traits<iter>::value_type simpson_int(iter first, iter las
   if (first == last)
     return value_type{0};
   value_type sum{0};
-  auto n = std::distance(first, last);
+  auto n{std::distance(first, last)};
   if (n % 2 == 0) {  // Pulcherima (3/8 rule) for even number of data points
     sum += (*first) * value_type(3) / value_type(8);
     ++first;
@@ -154,11 +154,13 @@ void continuous_dist_test_icdf(const dist &d) {
   using result_type = typename dist::result_type;
   const int bins{1024 * 1024};
   const result_type dp{result_type(1) / result_type(bins)};
+  const auto eps{256 * std::numeric_limits<result_type>::epsilon()};
   for (int i{1}; i < bins; ++i) {
     const result_type p{i * dp};
     const result_type x{d.icdf(p)};
     const result_type y{d.cdf(x)};
-    REQUIRE(std::abs(y - p) < 256 * std::numeric_limits<result_type>::epsilon());
+    if (not(std::abs(y - p) < eps))
+      REQUIRE(std::abs(y - p) < eps);
   }
 }
 
@@ -252,10 +254,10 @@ void discrete_dist_test_chi2_test(dist &d) {
   }
   // merge bins with very small count numbers
   while (p.size() > 2) {
-    auto min = std::min_element(count.begin(), count.end());
+    auto min{std::min_element(count.begin(), count.end())};
     if (*min > 8)
       break;
-    auto pos = min - count.begin();
+    auto pos{min - count.begin()};
     const double p_old{p[pos]};
     const int count_old{count[pos]};
     p.erase(p.begin() + pos);
