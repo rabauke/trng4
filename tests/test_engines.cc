@@ -308,16 +308,16 @@ TEMPLATE_TEST_CASE("parallel engines", "",                                   //
     GIVEN("two engines with equal state") {
       TestType r1, r2;
       const long i{GENERATE(range(2l, 21l))};
-      const long j{GENERATE(range(0l, 21l))};
-      if (j < i) {
-        WHEN("split one, advance other") {
-          for (long k{0l}; k < j; ++k)
-            r1();
-          r2.split(i, j);  // split into i streams, pick stream j
-          THEN("splited engine yield the same values as when values are skipped in the other") {
-            const auto v{generate_list(r1, r2, 32, i - 1, 0)};
-            REQUIRE(std::get<0>(v) == std::get<1>(v));
-          }
+      const long j{GENERATE_COPY(range(0l, i))};
+      WHEN("split one, advance other") {
+        for (long k{0l}; k < j; ++k)
+          r1();
+        r2.split(i, j);  // split into i streams, pick stream j
+        THEN(
+            "split engine yields the same values as when values are skipped in the other "
+            "engine") {
+          const auto v{generate_list(r1, r2, 32, i - 1, 0)};
+          REQUIRE(std::get<0>(v) == std::get<1>(v));
         }
       }
     }

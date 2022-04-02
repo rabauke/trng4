@@ -159,7 +159,7 @@ void continuous_dist_test_icdf(const dist &d) {
     const result_type p{i * dp};
     const result_type x{d.icdf(p)};
     const result_type y{d.cdf(x)};
-    if (not(std::abs(y - p) < eps))
+    if (not(std::abs(y - p) < eps) or i == 1)
       REQUIRE(std::abs(y - p) < eps);
   }
 }
