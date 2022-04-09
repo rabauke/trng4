@@ -259,9 +259,9 @@ TEMPLATE_TEST_CASE("engines", "",                                            //
   }
 
   SECTION("ranges") {
-    test_ranges_impl<TestType, float>();
-    test_ranges_impl<TestType, double>();
-    test_ranges_impl<TestType, long double>();
+    SECTION("float") { test_ranges_impl<TestType, float>(); }
+    SECTION("double") { test_ranges_impl<TestType, double>(); }
+    SECTION("long double") { test_ranges_impl<TestType, long double>(); }
   }
 
   SECTION("discard") {
