@@ -13,7 +13,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif ()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wmaybe-uninitialized")
     # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG")
 elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-shadow-field-in-constructor -Wno-float-equal -Wno-sign-conversion -Wno-implicit-float-conversion -Wno-implicit-int-float-conversion -Wno-global-constructors -Wno-exit-time-destructors")
