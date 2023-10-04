@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2021, Heiko Bauke
+// Copyright (c) 2000-2022, Heiko Bauke
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,135 +33,106 @@
 #include <cinttypes>
 #include <ciso646>
 
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-#include <boost/mpl/list.hpp>
+#include <catch2/catch.hpp>
 
 #include <trng/linear_algebra.hpp>
 
-
-//-----------------------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_SUITE(test_suite_linear_algebra)
-
-//-----------------------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_SUITE(test_suite_vector)
-BOOST_AUTO_TEST_CASE(test_basic) {
-  {
-    trng::vector<int, 6> v1{1, 2, 3, 4, 5, 6};
-    trng::vector<int, 6> v2{1, 2, 3, 4, 5, 255};
-    {
-      const bool ok = v1 == v1;
-      BOOST_TEST(ok, "vectors are equal");
-    }
-    {
-      const bool ok = v1 != v2;
-      BOOST_TEST(ok, "vectors do not equal");
-    }
+TEST_CASE("basic vector operations") {
+  SECTION("comparison operations") {
+    const trng::vector<int, 6> v1{1, 2, 3, 4, 5, 6};
+    const trng::vector<int, 6> v2{1, 2, 3, 4, 5, 6};
+    const trng::vector<int, 6> v3{1, 2, 3, 4, 5, 255};
+    REQUIRE(v1 == v2);
+    REQUIRE(v1 != v3);
   }
-  {
+  SECTION("vector sum") {
     auto init1 = [](size_t i) { return std::uint8_t(i); };
     auto init2 = [](size_t i) { return std::uint8_t(3 * i); };
-    trng::vector<std::uint8_t, 256> v_256_1(init1);
-    trng::vector<std::uint8_t, 256> v_256_2(init2);
-    trng::vector<std::uint8_t, 256> v_256_3(v_256_1 + v_256_2);
-    bool ok{true};
-    for (std::size_t i{0}; i < 256; ++i) {
-      ok = ok and (static_cast<std::uint8_t>(v_256_1(i) + v_256_2(i)) == v_256_3(i));
-    }
-    BOOST_TEST(ok, "sum vector ok");
+    const trng::vector<std::uint8_t, 256> v_256_1(init1);
+    const trng::vector<std::uint8_t, 256> v_256_2(init2);
+    const trng::vector<std::uint8_t, 256> v_256_3(v_256_1 + v_256_2);
+    for (std::size_t i{0}; i < 256; ++i)
+      REQUIRE(static_cast<std::uint8_t>(v_256_1(i) + v_256_2(i)) == v_256_3(i));
   }
-  {
+  SECTION("scalar vector product") {
     auto init = [](size_t i) { return std::uint8_t(i); };
-    trng::vector<std::uint8_t, 256> v_256_1(init);
-    trng::vector<std::uint8_t, 256> v_256_2(std::uint8_t(13) * v_256_1);
-    bool ok{true};
-    for (std::size_t i{0}; i < 256; ++i) {
-      ok = ok and (static_cast<std::uint8_t>(13 * v_256_1(i)) == v_256_2(i));
-    }
-    BOOST_TEST(ok, "product vector ok");
+    const trng::vector<std::uint8_t, 256> v_256_1(init);
+    const trng::vector<std::uint8_t, 256> v_256_2(std::uint8_t(13) * v_256_1);
+    for (std::size_t i{0}; i < 256; ++i)
+      REQUIRE(static_cast<std::uint8_t>(13 * v_256_1(i)) == v_256_2(i));
   }
-  {
+  SECTION("vector scalar product") {
     auto init = [](size_t i) { return std::uint8_t(i); };
-    trng::vector<std::uint8_t, 256> v_256_1(init);
-    trng::vector<std::uint8_t, 256> v_256_2(v_256_1 * std::uint8_t(13));
-    bool ok{true};
+    const trng::vector<std::uint8_t, 256> v_256_1(init);
+    const trng::vector<std::uint8_t, 256> v_256_2(v_256_1 * std::uint8_t(13));
     for (std::size_t i{0}; i < 256; ++i) {
-      ok = ok and (static_cast<std::uint8_t>(13 * v_256_1(i)) == v_256_2(i));
+      REQUIRE(static_cast<std::uint8_t>(13 * v_256_1(i)) == v_256_2(i));
     }
-    BOOST_TEST(ok, "product vector ok");
-  }
-  {
-    trng::matrix<int, 2> A{1, 3,  //
-                           2, 4};
-    trng::vector<int, 2> b{3, 7};
-    trng::vector<int, 2> c{24, 34};
-    auto c2 = A * b;
-    const bool ok{c2 == c};
-    BOOST_TEST(ok, "matrix vector product ok");
-  }
-  {
-    trng::matrix<int, 2> A{1, 3,  //
-                           2, 4};
-    trng::matrix<int, 2> B{1, 3,  //
-                           2, -4};
-    trng::matrix<int, 2> C{7, -9,  //
-                           10, -10};
-    auto C2 = A * B;
-    const bool ok{C2 == C};
-    BOOST_TEST(ok, "matrix matrix product ok");
-  }
-  {
-    trng::matrix<int, 2> A{1, 3,  //
-                           2, 4};
-    trng::matrix<int, 2> A_5{1069, 2337,  //
-                             1558, 3406};
-    auto A_5_2 = trng::power(A, 5);
-    const bool ok{A_5_2 == A_5};
-    BOOST_TEST(ok, "matrix matrix power ok");
   }
 }
-BOOST_AUTO_TEST_SUITE_END()
 
-//-----------------------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(test_suite_GF2)
-BOOST_AUTO_TEST_CASE(test_add) {
-  const trng::GF2 zero(false);
-  const trng::GF2 one(true);
-  BOOST_TEST(zero + zero == zero, "addition 0 + 0");
-  BOOST_TEST(zero + one == one, "addition 0 + 1");
-  BOOST_TEST(one + zero == one, "addition 1 + 0");
-  BOOST_TEST(one + one == zero, "addition 1 + 1");
+TEST_CASE("basic matrix operations") {
+  SECTION("matrix vector product") {
+    const trng::matrix<int, 2> A{1, 3,  //
+                                 2, 4};
+    const trng::vector<int, 2> b{3, 7};
+    const trng::vector<int, 2> c{24, 34};
+    const auto c2{A * b};
+    REQUIRE(c2 == c);
+  }
+  SECTION("matrix matrix product") {
+    const trng::matrix<int, 2> A{1, 3,  //
+                                 2, 4};
+    const trng::matrix<int, 2> B{1, 3,  //
+                                 2, -4};
+    const trng::matrix<int, 2> C{7, -9,  //
+                                 10, -10};
+    const auto C2{A * B};
+    REQUIRE(C2 == C);
+  }
+  SECTION("matrix power") {
+    const trng::matrix<int, 2> A{1, 3,  //
+                                 2, 4};
+    const trng::matrix<int, 2> A_5{1069, 2337,  //
+                                   1558, 3406};
+    const auto A_5_2{trng::power(A, 5)};
+    REQUIRE(A_5_2 == A_5);
+  }
 }
 
-BOOST_AUTO_TEST_CASE(test_mult) {
-  const trng::GF2 zero(false);
-  const trng::GF2 one(true);
-  BOOST_TEST((zero * zero == zero), "multiplication 0 * 0");
-  BOOST_TEST((zero * one == zero), "multiplication 0 * 1");
-  BOOST_TEST((one * zero == zero), "multiplication 1 * 0");
-  BOOST_TEST((one * one == one), "multiplication 1 * 1");
+
+TEST_CASE("GF(2)") {
+  SECTION("addition") {
+    const trng::GF2 zero(false);
+    const trng::GF2 one(true);
+    REQUIRE(zero + zero == zero);
+    REQUIRE(zero + one == one);
+    REQUIRE(one + zero == one);
+    REQUIRE(one + one == zero);
+  }
+
+  SECTION("multiplication") {
+    const trng::GF2 zero(false);
+    const trng::GF2 one(true);
+    REQUIRE(zero * zero == zero);
+    REQUIRE(zero * one == zero);
+    REQUIRE(one * zero == zero);
+    REQUIRE(one * one == one);
+  }
+
+  SECTION("matrix power") {
+    const trng::GF2 zero(false);
+    const trng::GF2 one(true);
+    const trng::matrix<trng::GF2, 4> A{one,  one, zero, one,   //
+                                       one,  one, one,  zero,  //
+                                       one,  one, zero, zero,  //
+                                       zero, one, zero, one};
+    const trng::matrix<trng::GF2, 4> A_8{one,  one, zero, one,   //
+                                         one,  one, one,  zero,  //
+                                         one,  one, zero, zero,  //
+                                         zero, one, zero, one};
+    auto A_8_2{trng::power(A, 8)};
+    REQUIRE(A_8_2 == A_8);
+  }
 }
-
-BOOST_AUTO_TEST_CASE(test_matrix_power) {
-  const trng::GF2 zero(false);
-  const trng::GF2 one(true);
-  trng::matrix<trng::GF2, 4> A{one,  one, zero, one,   //
-                               one,  one, one,  zero,  //
-                               one,  one, zero, zero,  //
-                               zero, one, zero, one};
-  trng::matrix<trng::GF2, 4> A_8{one,  one, zero, one,   //
-                                 one,  one, one,  zero,  //
-                                 one,  one, zero, zero,  //
-                                 zero, one, zero, one};
-  auto A_8_2 = trng::power(A, 8);
-  const bool ok{A_8_2 == A_8};
-  BOOST_TEST(ok, "matrix matrix power in GF2 ok");
-}
-BOOST_AUTO_TEST_SUITE_END()
-
-//-----------------------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_SUITE_END()

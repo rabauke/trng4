@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2021, Heiko Bauke
+// Copyright (c) 2000-2022, Heiko Bauke
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -389,7 +389,7 @@ int main(int argc, char *argv[]) {
   int argi{1};
   if (argc == 1) {
     std::cerr << "Tina's Random Number Generator Library\n\n"
-              << "(P) & (C) by Heiko Bauke, 2000-2021\n\n"
+              << "(P) & (C) by Heiko Bauke, 2000-2022\n\n"
               << "two-domensional Ising model (Wolff algorithm)\n"
               << "---------------------------------------------\n\n"
               << "synopsis:\n"

@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2021, Heiko Bauke
+// Copyright (c) 2000-2022, Heiko Bauke
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#define BOOST_TEST_MODULE test all
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
+#include <catch2/catch_reporter_sonarqube.hpp>
+#include <catch2/catch_reporter_teamcity.hpp>

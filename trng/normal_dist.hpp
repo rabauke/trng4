@@ -1,4 +1,4 @@
-// Copyright (c) 2000-2021, Heiko Bauke
+// Copyright (c) 2000-2022, Heiko Bauke
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -72,6 +72,19 @@ namespace trng {
       explicit param_type(result_type mu, result_type sigma) : mu_{mu}, sigma_{sigma} {}
 
       friend class normal_dist;
+
+      // EqualityComparable concept
+      friend TRNG_CUDA_ENABLE inline bool operator==(const param_type &P1,
+                                                     const param_type &P2) {
+        return P1.mu_ == P2.mu_ and P1.sigma_ == P2.sigma_;
+      }
+
+      friend TRNG_CUDA_ENABLE inline bool operator!=(const param_type &P1,
+                                                     const param_type &P2) {
+        return not(P1 == P2);
+      }
+
+      // -------------------------------------------------------------------
 
       // Streamable concept
       template<typename char_t, typename traits_t>
@@ -156,21 +169,6 @@ namespace trng {
     TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const { return math::inv_Phi(x) * P.sigma() + P.mu(); }
   };
-
-  // -------------------------------------------------------------------
-
-  // EqualityComparable concept
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator==(const typename normal_dist<float_t>::param_type &p1,
-                                          const typename normal_dist<float_t>::param_type &p2) {
-    return p1.mu() == p2.mu() and p1.sigma() == p2.sigma();
-  }
-
-  template<typename float_t>
-  TRNG_CUDA_ENABLE inline bool operator!=(const typename normal_dist<float_t>::param_type &p1,
-                                          const typename normal_dist<float_t>::param_type &p2) {
-    return not(p1 == p2);
-  }
 
   // -------------------------------------------------------------------
 
