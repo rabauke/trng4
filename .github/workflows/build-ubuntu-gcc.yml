@@ -1,0 +1,30 @@
+name: build-ubuntu-gcc
+run-name: Build TRNG4 with GCC on Ubuntu
+on: [push, workflow_dispatch]
+jobs:
+  compile-trng4:
+    strategy:
+      matrix:
+        build-type: [ Debug, Release ]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Install build dependencies
+        run: |
+          sudo apt install g++ cmake ninja-build libtbb-dev libopenmpi-dev
+          g++ --version
+      - name: Build TRNG4
+        run: |
+          mkdir build
+          cd build
+          cmake -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX="$HOME/trng4" -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} ..
+          cmake --build . -j
+          cmake --build . --target install
+      - name: Test TRNG4
+        run: |
+          cd build
+          ctest --output-on-failure
+      - run: echo "This job's status is ${{ job.status }}."
