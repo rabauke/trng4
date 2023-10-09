@@ -1,6 +1,6 @@
 name: build-ubuntu-gcc
 run-name: Build TRNG4 with GCC on Ubuntu
-on: [push, workflow_dispatch]
+on: [ push, workflow_dispatch ]
 jobs:
   compile-trng4:
     strategy:

@@ -1,26 +1,28 @@
-name: build-ubuntu-clang
-run-name: Build TRNG4 with Clang on Ubuntu
+name: build-windows-msvc
+run-name: Build TRNG4 with Microsoft Visual C++ on Windows
 on: [ push, workflow_dispatch ]
 jobs:
   compile-trng4:
     strategy:
       matrix:
         build-type: [ Debug, Release ]
-    runs-on: ubuntu-22.04
+    runs-on: windows-2022
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Install build dependencies
-        run: |
-          sudo apt install clang cmake ninja-build libtbb-dev libopenmpi-dev
-          clang --version
+        uses: seanmiddleditch/gha-setup-ninja@master
+      - name: Setup environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
       - name: Build TRNG4
         run: |
           mkdir build
           cd build
-          cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX="$HOME/trng4" -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} ..
+          cmake -G Ninja -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_INSTALL_PREFIX="$HOME/trng4" -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} ..
           cmake --build . -j
           cmake --build . --target install
       - name: Test TRNG4
