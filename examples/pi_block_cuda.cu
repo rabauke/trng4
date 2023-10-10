@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
   parallel_pi<<<1, size>>>(samples, in_device, r);
   // gather results
   std::vector<long> in(size);
-  cudaMemcpy(in.data(), in_device, size * sizeof(*in), cudaMemcpyDeviceToHost);
+  cudaMemcpy(in.data(), in_device, size * sizeof(*in_device), cudaMemcpyDeviceToHost);
   cudaFree(in_device);
   long sum{0};
   for (int rank{0}; rank < size; ++rank)

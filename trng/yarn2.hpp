@@ -63,7 +63,9 @@ namespace trng {
     static TRNG4_EXPORT const int_math::power<yarn2::modulus, yarn2::gen> g;
 
   public:
+    TRNG_CUDA_ENABLE
     static constexpr result_type min() { return min_; }
+    TRNG_CUDA_ENABLE
     static constexpr result_type max() { return max_; }
 
     // Parameter and status classes

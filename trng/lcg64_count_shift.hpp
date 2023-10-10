@@ -61,7 +61,9 @@ namespace trng {
     static constexpr result_type modulus = 2305843009213693951u;
 
   public:
+    TRNG_CUDA_ENABLE
     static constexpr result_type min() { return min_; }
+    TRNG_CUDA_ENABLE
     static constexpr result_type max() { return max_; }
 
   private:

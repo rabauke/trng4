@@ -52,7 +52,6 @@ namespace trng {
 
     class param_type {
     public:
-      TRNG_CUDA_ENABLE
       param_type() = default;
 
       friend class uniform01_dist<float_t>;
@@ -93,7 +92,6 @@ namespace trng {
 
   public:
     // constructor
-    TRNG_CUDA_ENABLE
     uniform01_dist() = default;
     TRNG_CUDA_ENABLE
     explicit uniform01_dist(const param_type &) {}

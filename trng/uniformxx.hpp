@@ -68,47 +68,6 @@ namespace trng {
 
     //------------------------------------------------------------------
 
-    template<typename F>
-    struct epsilon;
-
-    template<>
-    struct epsilon<float> {
-      TRNG_CUDA_ENABLE
-#if !(defined __CUDA_ARCH__)
-      static
-#endif
-          constexpr float
-          val() {
-        return FLT_EPSILON;
-      }
-    };
-
-    template<>
-    struct epsilon<double> {
-      TRNG_CUDA_ENABLE
-#if !(defined __CUDA_ARCH__)
-      static
-#endif
-          constexpr double
-          val() {
-        return DBL_EPSILON;
-      }
-    };
-
-    template<>
-    struct epsilon<long double> {
-      TRNG_CUDA_ENABLE
-#if !(defined __CUDA_ARCH__)
-      static
-#endif
-          constexpr long double
-          val() {
-        return LDBL_EPSILON;
-      }
-    };
-
-    //------------------------------------------------------------------
-
     // With basic optimizations enabled, modern C++ compilers can reduce
     // all the public routines herein down to small inline code sequences.
     // They should also collapse the size (sizeof(u01xx_traits<...>) to 1.
@@ -186,12 +145,7 @@ namespace trng {
       }
       TRNG_CUDA_ENABLE
       static ret_t eps() {
-#if defined __CUDA_ARCH__
-        epsilon<ret_t> EPS;
-        const ret_t native_eps(EPS.val());
-#else
-        const ret_t native_eps{epsilon<ret_t>::val()};
-#endif
+        const ret_t native_eps{math::numeric_limits<ret_t>::epsilon()};
         const ret_t domain_eps{ret_t(1) / domain_max};
         return native_eps >= domain_eps or requested_bits != 1 ? native_eps : domain_eps;
       }
