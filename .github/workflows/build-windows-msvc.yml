@@ -24,7 +24,14 @@ jobs:
           cd build
           cmake -G Ninja -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_INSTALL_PREFIX="$HOME/trng4" -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} ..
           cmake --build . -j
+      - name: Install TRNG4
+        run: |
+          cd build
           cmake --build . --target install
+      - name: Pack TRNG4
+        run: |
+          cd build
+          cmake --build . --target package
       - name: Test TRNG4
         run: |
           cd build
