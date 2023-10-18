@@ -159,7 +159,7 @@ namespace trng {
     TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const {
       if (x < 0 or x > 1) {
-#if !(defined __CUDA_ARCH__)
+#if !(TRNG_CUDA)
         errno = EDOM;
 #endif
         return math::numeric_limits<result_type>::quiet_NaN();

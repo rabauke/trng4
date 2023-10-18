@@ -30,26 +30,43 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#if !(defined TRNG_CUDA_HPP)
+#include <cstdlib>
+#include <iostream>
+#include <vector>
+#include <trng/yarn5s.hpp>
+#include <trng/uniform01_dist.hpp>
+#include <hip/hip_runtime.h>
 
-#define TRNG_CUDA_HPP
 
-#if defined __CUDACC__ && !(defined __HIPCC__)
+__global__ void parallel_pi(long samples, long *in, trng::yarn5s r) {
+  long rank = hipThreadIdx_x;
+  long size = hipBlockDim_x;
+  r.jump(2 * (rank * samples / size));  // jump ahead
+  trng::uniform01_dist<float> u;        // random number distribution
+  in[rank] = 0;                         // local number of points in circle
+  for (long i = rank * samples / size; i < (rank + 1) * samples / size; ++i) {
+    const float x = u(r), y = u(r);  // choose random x- and y-coordinates
+    if (x * x + y * y <= 1)          // is point in circle?
+      ++in[rank];                    // increase thread-local counter
+  }
+}
 
-#define TRNG_CUDA 1
-#define TRNG_CUDA_ENABLE __device__ __host__
-
-#include <cuda.h>
-
-#elif defined __HIPCC__
-
-#define TRNG_CUDA 1
-#define TRNG_CUDA_ENABLE __device__ __host__
-
-#else
-
-#define TRNG_CUDA_ENABLE
-
-#endif
-
-#endif
+int main(int argc, char *argv[]) {
+  const long samples{1000000l};  // total number of points in square
+  const int size{128};           // number of threads
+  long *in_device;
+  hipMalloc(&in_device, size * sizeof(*in_device));
+  trng::yarn5s r;
+  // start parallel Monte Carlo
+  parallel_pi<<<1, size>>>(samples, in_device, r);
+  // gather results
+  std::vector<long> in(size);
+  hipMemcpy(in.data(), in_device, size * sizeof(*in_device), hipMemcpyDeviceToHost);
+  hipFree(in_device);
+  long sum{0};
+  for (int rank{0}; rank < size; ++rank)
+    sum += in[rank];
+  // print result
+  std::cout << "pi = " << 4.0 * sum / samples << std::endl;
+  return EXIT_SUCCESS;
+}

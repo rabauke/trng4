@@ -170,7 +170,7 @@ namespace trng {
   TRNG_CUDA_ENABLE
   inline yarn3s::result_type yarn3s::operator()() {
     step();
-#if defined __CUDA_ARCH__
+#if defined TRNG_CUDA
     if (S.r[0] == 0)
       return 0;
     yarn3s::result_type n = S.r[0];
@@ -195,7 +195,7 @@ namespace trng {
   // Parallel random number generator concept
   TRNG_CUDA_ENABLE
   inline void yarn3s::split(unsigned int s, unsigned int n) {
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
     if (s < 1 or n >= s)
       utility::throw_this(std::invalid_argument("invalid argument for trng::yarn3s::split"));
 #endif

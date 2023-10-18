@@ -129,14 +129,12 @@ namespace trng {
       }
       TRNG_CUDA_ENABLE
       static ret_t variate(prng_t &r) {
-#if !(defined __CUDA_ARCH__)
         static_assert(prng_t::min() >= 0 and prng_t::max() > prng_t::min(),
                       "min max out of range");  // min and/or max out of spec?
         static_assert(prng_t::max() - prng_t::min() <= ~0ull,
                       "min max have exotic values/types");  // Bits, Holes incorrect otherwise
         static_assert(not math::numeric_limits<return_type>::is_integer, "not an integer");
         static_assert(calls_needed > 0 and calls_needed <= bits, "illegal number of calls");
-#endif
         const ret_t scale_per_step(ret_t(domain_max) + 1);
         ret_t ret{addin(r)};
         for (std::size_t i{1}; i < calls_needed; ++i)

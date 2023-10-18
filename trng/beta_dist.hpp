@@ -165,7 +165,7 @@ namespace trng {
       if (x < 0 or x > 1)
         return 0;
       if ((x == 0 and P.alpha() - 1 < 0) or (x == 1 and P.beta() - 1 < 0)) {
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
         errno = EDOM;
 #endif
         return math::numeric_limits<result_type>::quiet_NaN();
@@ -185,7 +185,7 @@ namespace trng {
     TRNG_CUDA_ENABLE
     result_type icdf(result_type x) const {
       if (x < 0 or x > 1) {
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
         errno = EDOM;
 #endif
         return math::numeric_limits<result_type>::quiet_NaN();

@@ -48,23 +48,35 @@ namespace trng {
   namespace math {
 
     TRNG_CUDA_ENABLE
-    inline float ln_Gamma(float x) { return ::std::lgamma(x); }
+    inline float ln_Gamma(float x) {
+      return ::std::lgamma(x);
+    }
 
     TRNG_CUDA_ENABLE
-    inline double ln_Gamma(double x) { return ::std::lgamma(x); }
+    inline double ln_Gamma(double x) {
+      return ::std::lgamma(x);
+    }
 
-#if !(defined __CUDA_ARCH__)
-    inline long double ln_Gamma(long double x) { return ::std::lgamma(x); }
+#if !(defined TRNG_CUDA)
+    inline long double ln_Gamma(long double x) {
+      return ::std::lgamma(x);
+    }
 #endif
 
     TRNG_CUDA_ENABLE
-    inline float Gamma(float x) { return ::std::tgamma(x); }
+    inline float Gamma(float x) {
+      return ::std::tgamma(x);
+    }
 
     TRNG_CUDA_ENABLE
-    inline double Gamma(double x) { return ::std::tgamma(x); }
+    inline double Gamma(double x) {
+      return ::std::tgamma(x);
+    }
 
-#if !(defined __CUDA_ARCH__)
-    inline long double Gamma(long double x) { return ::std::tgamma(x); }
+#if !(defined TRNG_CUDA)
+    inline long double Gamma(long double x) {
+      return ::std::tgamma(x);
+    }
 #endif
 
     // --- Beta function -----------------------------------------------
@@ -75,7 +87,7 @@ namespace trng {
       T Beta(T x, T y) {
         static const T ln_max{ln(std::numeric_limits<T>::max())};
         if (x <= 0 or y <= 0) {
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
           errno = EDOM;
 #endif
           return std::numeric_limits<T>::signaling_NaN();
@@ -89,13 +101,19 @@ namespace trng {
     }  // namespace detail
 
     TRNG_CUDA_ENABLE
-    inline float Beta(float x, float y) { return detail::Beta(x, y); }
+    inline float Beta(float x, float y) {
+      return detail::Beta(x, y);
+    }
 
     TRNG_CUDA_ENABLE
-    inline double Beta(double x, double y) { return detail::Beta(x, y); }
+    inline double Beta(double x, double y) {
+      return detail::Beta(x, y);
+    }
 
-#if !(defined __CUDA_ARCH__)
-    inline long double Beta(long double x, long double y) { return detail::Beta(x, y); }
+#if !(defined TRNG_CUDA)
+    inline long double Beta(long double x, long double y) {
+      return detail::Beta(x, y);
+    }
 #endif
 
     // --- ln of binomial coefficient ----------------------------------
@@ -110,7 +128,7 @@ namespace trng {
       return ln_Gamma(n + 1) - ln_Gamma(m + 1) - ln_Gamma(n - m + 1);
     }
 
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
     inline long double ln_binomial(long double n, long double m) {
       return ln_Gamma(n + 1) - ln_Gamma(m + 1) - ln_Gamma(n - m + 1);
     }
@@ -118,11 +136,15 @@ namespace trng {
 
     // --- Pochhammer function -----------------------------------------
 
-    inline float Pochhammer(float x, float a) { return exp(ln_Gamma(x + a) - ln_Gamma(x)); }
+    inline float Pochhammer(float x, float a) {
+      return exp(ln_Gamma(x + a) - ln_Gamma(x));
+    }
 
-    inline double Pochhammer(double x, double a) { return exp(ln_Gamma(x + a) - ln_Gamma(x)); }
+    inline double Pochhammer(double x, double a) {
+      return exp(ln_Gamma(x + a) - ln_Gamma(x));
+    }
 
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
     inline long double Pochhammer(long double x, long double a) {
       return exp(ln_Gamma(x + a) - ln_Gamma(x));
     }
@@ -249,12 +271,16 @@ namespace trng {
 
     // P(x, a)
     TRNG_CUDA_ENABLE
-    inline float GammaP(float a, float x) { return detail::GammaP<float, true>(a, x); }
+    inline float GammaP(float a, float x) {
+      return detail::GammaP<float, true>(a, x);
+    }
 
     TRNG_CUDA_ENABLE
-    inline double GammaP(double a, double x) { return detail::GammaP<double, true>(a, x); }
+    inline double GammaP(double a, double x) {
+      return detail::GammaP<double, true>(a, x);
+    }
 
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
     inline long double GammaP(long double a, long double x) {
       return detail::GammaP<long double, true>(a, x);
     }
@@ -262,12 +288,16 @@ namespace trng {
 
     // Q(x, a)
     TRNG_CUDA_ENABLE
-    inline float GammaQ(float a, float x) { return detail::GammaQ<float, true>(a, x); }
+    inline float GammaQ(float a, float x) {
+      return detail::GammaQ<float, true>(a, x);
+    }
 
     TRNG_CUDA_ENABLE
-    inline double GammaQ(double a, double x) { return detail::GammaQ<double, true>(a, x); }
+    inline double GammaQ(double a, double x) {
+      return detail::GammaQ<double, true>(a, x);
+    }
 
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
     inline long double GammaQ(long double a, long double x) {
       return detail::GammaQ<long double, true>(a, x);
     }
@@ -275,12 +305,16 @@ namespace trng {
 
     // gamma(x, a)
     TRNG_CUDA_ENABLE
-    inline float inc_gamma(float a, float x) { return detail::GammaP<float, false>(a, x); }
+    inline float inc_gamma(float a, float x) {
+      return detail::GammaP<float, false>(a, x);
+    }
 
     TRNG_CUDA_ENABLE
-    inline double inc_gamma(double a, double x) { return detail::GammaP<double, false>(a, x); }
+    inline double inc_gamma(double a, double x) {
+      return detail::GammaP<double, false>(a, x);
+    }
 
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
     inline long double inc_gamma(long double a, long double x) {
       return detail::GammaP<long double, false>(a, x);
     }
@@ -288,12 +322,16 @@ namespace trng {
 
     // Gamma(x, a)
     TRNG_CUDA_ENABLE
-    inline float inc_Gamma(float a, float x) { return detail::GammaQ<float, false>(a, x); }
+    inline float inc_Gamma(float a, float x) {
+      return detail::GammaQ<float, false>(a, x);
+    }
 
     TRNG_CUDA_ENABLE
-    inline double inc_Gamma(double a, double x) { return detail::GammaQ<double, false>(a, x); }
+    inline double inc_Gamma(double a, double x) {
+      return detail::GammaQ<double, false>(a, x);
+    }
 
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
     inline long double inc_Gamma(long double a, long double x) {
       return detail::GammaQ<long double, false>(a, x);
     }
@@ -348,14 +386,18 @@ namespace trng {
 
     // inverse of GammaP
     TRNG_CUDA_ENABLE
-    inline float inv_GammaP(float a, float p) { return detail::inv_GammaP(a, p); }
+    inline float inv_GammaP(float a, float p) {
+      return detail::inv_GammaP(a, p);
+    }
 
     // inverse of GammaP
     TRNG_CUDA_ENABLE
-    inline double inv_GammaP(double a, double p) { return detail::inv_GammaP(a, p); }
+    inline double inv_GammaP(double a, double p) {
+      return detail::inv_GammaP(a, p);
+    }
 
     // inverse of GammaP
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
     inline long double inv_GammaP(long double a, long double p) {
       return detail::inv_GammaP(a, p);
     }
@@ -370,7 +412,7 @@ namespace trng {
       template<typename T>
       TRNG_CUDA_ENABLE T Beta_I(T x, T p, T q, T norm) {
         if (p <= 0 or q <= 0 or x < 0 or x > 1) {
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
           errno = EDOM;
 #endif
           return numeric_limits<T>::quiet_NaN();
@@ -430,7 +472,7 @@ namespace trng {
       return detail::Beta_I(x, p, q, Beta(p, q));
     }
 
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
     inline long double Beta_I(long double x, long double p, long double q, long double norm) {
       return detail::Beta_I(x, p, q, norm);
     }
@@ -503,7 +545,7 @@ namespace trng {
       return detail::inv_Beta_I(x, p, q, Beta(p, q));
     }
 
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
     inline long double inv_Beta_I(long double x, long double p, long double q,
                                   long double norm) {
       return detail::inv_Beta_I(x, p, q, norm);
@@ -541,7 +583,7 @@ namespace trng {
       return 0.5 + 0.5 * erf(x);
     }
 
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
     inline long double Phi(long double x) {
       x *= constants<long double>::one_over_sqrt_2;
       if (x < -0.6744897501960817l * constants<long double>::one_over_sqrt_2)
@@ -601,7 +643,7 @@ namespace trng {
       TRNG_CUDA_ENABLE T inv_Phi_approx(T x) {
         using traits = inv_Phi_traits<T>;
         if (x < 0 or x > 1) {
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
           errno = EDOM;
 #endif
           return numeric_limits<T>::quiet_NaN();
@@ -756,37 +798,55 @@ namespace trng {
     }  // namespace detail
 
     TRNG_CUDA_ENABLE
-    inline float inv_Phi(float x) { return detail::inv_Phi<float>(x); }
+    inline float inv_Phi(float x) {
+      return detail::inv_Phi<float>(x);
+    }
 
     TRNG_CUDA_ENABLE
-    inline double inv_Phi(double x) { return detail::inv_Phi<double>(x); }
+    inline double inv_Phi(double x) {
+      return detail::inv_Phi<double>(x);
+    }
 
-#if !(defined __CUDA_ARCH__)
-    inline long double inv_Phi(long double x) { return detail::inv_Phi<long double>(x); }
+#if !(defined TRNG_CUDA)
+    inline long double inv_Phi(long double x) {
+      return detail::inv_Phi<long double>(x);
+    }
 #endif
 
     // --- inverse of error function  ----------------------------------
 
     TRNG_CUDA_ENABLE
-    inline float inv_erf(float x) { return detail::inv_erf(x); }
+    inline float inv_erf(float x) {
+      return detail::inv_erf(x);
+    }
 
     TRNG_CUDA_ENABLE
-    inline double inv_erf(double x) { return detail::inv_erf(x); }
+    inline double inv_erf(double x) {
+      return detail::inv_erf(x);
+    }
 
-#if !(defined __CUDA_ARCH__)
-    inline long double inv_erf(long double x) { return detail::inv_erf(x); }
+#if !(defined TRNG_CUDA)
+    inline long double inv_erf(long double x) {
+      return detail::inv_erf(x);
+    }
 #endif
 
     // --- inverse of complementary error function  --------------------
 
     TRNG_CUDA_ENABLE
-    inline float inv_erfc(float x) { return detail::inv_erfc(x); }
+    inline float inv_erfc(float x) {
+      return detail::inv_erfc(x);
+    }
 
     TRNG_CUDA_ENABLE
-    inline double inv_erfc(double x) { return detail::inv_erfc(x); }
+    inline double inv_erfc(double x) {
+      return detail::inv_erfc(x);
+    }
 
-#if !(defined __CUDA_ARCH__)
-    inline long double inv_erfc(long double x) { return detail::inv_erfc(x); }
+#if !(defined TRNG_CUDA)
+    inline long double inv_erfc(long double x) {
+      return detail::inv_erfc(x);
+    }
 #endif
 
   }  // namespace math

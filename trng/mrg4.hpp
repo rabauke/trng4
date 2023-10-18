@@ -185,7 +185,7 @@ namespace trng {
   // Parallel random number generator concept
   TRNG_CUDA_ENABLE
   inline void mrg4::split(unsigned int s, unsigned int n) {
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
     if (s < 1 or n >= s)
       utility::throw_this(std::invalid_argument("invalid argument for trng::mrg4::split"));
 #endif

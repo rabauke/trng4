@@ -115,7 +115,7 @@ namespace trng {
 
     TRNG_CUDA_ENABLE
     inline int32_t modulo_inverse(int32_t a, int32_t m) {
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
       if (a <= 0 or m <= 1)
         utility::throw_this(
             std::invalid_argument("invalid argument in trng::int_math::modulo_inverse"));
@@ -130,7 +130,7 @@ namespace trng {
         f = flast - q * f;
         flast = temp;
       }
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
       if (a == 0)
         utility::throw_this(std::runtime_error("no inverse in trng::int_math::modulo_inverse"));
 #endif
@@ -189,7 +189,7 @@ namespace trng {
         }
       }
       // test if a solution exists
-#if !(defined __CUDA_ARCH__)
+#if !(defined TRNG_CUDA)
       for (int i{rank}; i < n; ++i)
         if (b[p[i]] != 0)
           utility::throw_this(
