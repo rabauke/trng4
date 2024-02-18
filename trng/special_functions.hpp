@@ -47,6 +47,49 @@ namespace trng {
 
   namespace math {
 
+    // --- x - ln(1 + x) -----------------------------------------------
+
+    namespace detail {
+
+      template<typename T>
+      T mln1p(T x) {
+        if (std::abs(x) >= T(1) / T(32))
+          return x - ::std::log1p(x);
+        // use Taylor expansion for small arguments
+        T y{0};
+        T x_to_the_n{x * x};
+        T sign{1};
+        for (int n{2}; n < std::numeric_limits<T>::digits; ++n) {
+          const T delta{sign * x_to_the_n / n};
+          y += delta;
+          if (std::abs(delta) < 4 * std::numeric_limits<T>::epsilon() * y)
+            break;
+          x_to_the_n *= x;
+          sign = -sign;
+        }
+        return y;
+      }
+
+    }  // namespace detail
+
+    TRNG_CUDA_ENABLE
+    inline float mln1p(float x) {
+      return detail::mln1p(x);
+    }
+
+    TRNG_CUDA_ENABLE
+    inline double mln1p(double x) {
+      return detail::mln1p(x);
+    }
+
+#if !(defined TRNG_CUDA)
+    inline long double mln1p(long double x) {
+      return detail::mln1p(x);
+    }
+#endif
+
+    // --- logarithm of the Gamma function -----------------------------
+
     TRNG_CUDA_ENABLE
     inline float ln_Gamma(float x) {
       return ::std::lgamma(x);
@@ -62,6 +105,8 @@ namespace trng {
       return ::std::lgamma(x);
     }
 #endif
+
+    // --- Gamma function ----------------------------------------------
 
     TRNG_CUDA_ENABLE
     inline float Gamma(float x) {
