@@ -193,6 +193,9 @@ namespace trng {
       return ::std::modf(x, &dummy);
     }
 
+    using ::std::copysign;
+    using ::std::signbit;
+
     using ::std::isfinite;
     using ::std::isnan;
     using ::std::isnormal;
