@@ -586,10 +586,10 @@ namespace trng {
       template<typename T>
       TRNG_CUDA_ENABLE T inv_GammaP(T a, T p) {
         const T eps{sqrt(numeric_limits<T>::epsilon())};
-        T a1{a - 1};
-        T glna{ln_Gamma(a)};
-        T lna1{ln(a1)};
-        T afac{exp(a1 * (lna1 - 1) - glna)};
+        const T a1{a - 1};
+        const T glna{ln_Gamma(a)};
+        const T lna1{ln(a1)};
+        const T afac{exp(a1 * (lna1 - 1) - glna)};
         T x;
         // initial guess
         if (a > T{1}) {
@@ -603,7 +603,7 @@ namespace trng {
           x = p < t ? pow(p / t, 1 / a) : 1 - ln1p(-(p - t) / (1 - t));
         }
         // refinement by Halley's method
-        for (int i{0}; i < 32; ++i) {
+        for (int i{0}; i < numeric_limits<T>::digits; ++i) {
           if (x <= 0) {
             x = 0;
             break;
