@@ -37,6 +37,7 @@
 #include <numeric>
 #include <ciso646>
 #include <sstream>
+#include <algorithm>
 
 #include <catch2/catch.hpp>
 
@@ -133,7 +134,6 @@ double chi_percentil(const std::vector<double> &p, const std::vector<int> &count
 template<typename dist>
 void continuous_dist_test_integrate_pdf(const dist &d) {
   using result_type = typename dist::result_type;
-  // const int samples{1024 * 16 + 1};
   const int samples(static_cast<int>(std::min(
       1024ll * 1024, static_cast<long long>(std::round(
                          1 / std::sqrt(std::numeric_limits<result_type>::epsilon()))))));
@@ -152,14 +152,19 @@ void continuous_dist_test_integrate_pdf(const dist &d) {
 template<typename dist>
 void continuous_dist_test_icdf(const dist &d) {
   using result_type = typename dist::result_type;
-  const int bins{1024 * 1024};
-  const result_type dp{result_type(1) / result_type(bins)};
   const auto eps{256 * std::numeric_limits<result_type>::epsilon()};
-  for (int i{1}; i < bins; ++i) {
-    const result_type p{i * dp};
+  std::vector<result_type> p_values;
+  p_values.push_back(result_type(1) / result_type(2));
+  for (int i{2}; i < std::numeric_limits<result_type>::digits; ++i) {
+    p_values.push_back(result_type(0) + std::pow(p_values[0], i));
+    p_values.push_back(result_type(1) - std::pow(p_values[0], i));
+  }
+  std::sort(p_values.begin(), p_values.end());
+  for (const auto p : p_values) {
     const result_type x{d.icdf(p)};
     const result_type y{d.cdf(x)};
-    if (not(std::abs(y - p) < eps) or i == 1)
+    if (not(std::abs(y - p) <
+            eps))  // switch into REQUIRE macro in failure case only, for performance reasons
       REQUIRE(std::abs(y - p) < eps);
   }
 }
@@ -203,10 +208,18 @@ void continuous_dist_test_streamable(dist &d) {
 
 template<typename T>
 void continuous_dist_test(T &d) {
-  SECTION("integrate pdf") { continuous_dist_test_integrate_pdf(d); }
-  SECTION("icdf") { continuous_dist_test_icdf(d); }
-  SECTION("chi2 test") { continuous_dist_test_chi2_test(d); }
-  SECTION("streamable") { continuous_dist_test_streamable(d); }
+  SECTION("integrate pdf") {
+    continuous_dist_test_integrate_pdf(d);
+  }
+  SECTION("icdf") {
+    continuous_dist_test_icdf(d);
+  }
+  SECTION("chi2 test") {
+    continuous_dist_test_chi2_test(d);
+  }
+  SECTION("streamable") {
+    continuous_dist_test_streamable(d);
+  }
 }
 
 
@@ -285,9 +298,15 @@ void discrete_dist_test_streamable(dist &d) {
 
 template<typename T>
 void discrete_dist_test(T &d) {
-  SECTION("test pdf & cdf") { discrete_dist_test_pdf(d); }
-  SECTION("chi2_test") { discrete_dist_test_chi2_test(d); }
-  SECTION("streamable") { discrete_dist_test_streamable(d); }
+  SECTION("test pdf & cdf") {
+    discrete_dist_test_pdf(d);
+  }
+  SECTION("chi2_test") {
+    discrete_dist_test_chi2_test(d);
+  }
+  SECTION("streamable") {
+    discrete_dist_test_streamable(d);
+  }
 }
 
 

@@ -112,27 +112,7 @@ namespace trng {
     // inverse cumulative density function
     TRNG_CUDA_ENABLE
     result_type icdf_(result_type x) const {
-      if (x <= math::numeric_limits<result_type>::epsilon())
-        return 0;
-      const result_type kappa{P.nu() / result_type(2)};
-      const result_type theta{2};
-      if (kappa == 1)  // special case of exponential distribution
-        return -math::ln(1 - x) * theta;
-      const result_type ln_Gamma_kappa{math::ln_Gamma(kappa)};
-      result_type y{kappa}, y_old;
-      if (kappa < 1 and x < result_type(1) / result_type(2))
-        y = x * x;
-      int num_iterations{0};
-      do {
-        ++num_iterations;
-        y_old = y;
-        const result_type f0{math::GammaP(kappa, y) - x};
-        const result_type f1{math::pow(y, kappa - 1) * math::exp(-y - ln_Gamma_kappa)};
-        const result_type f2{f1 * (kappa - 1 - y) / y};
-        y -= f0 / f1 * (1 + f0 * f2 / (2 * f1 * f1));
-      } while (num_iterations < 16 and
-               math::abs((y - y_old) / y) > 16 * math::numeric_limits<result_type>::epsilon());
-      return y * theta;
+      return math::inv_GammaP(P.nu() / result_type(2), x) * 2;
     }
 
   public:
