@@ -282,6 +282,8 @@ namespace trng {
 
       template<typename T>
       class GammaPQ_asympt_coefficients {
+        static constexpr T abs(T x) { return x < 0 ? -x : x; }
+
       public:
         // clang-format off
         static constexpr T d[]{
@@ -441,17 +443,9 @@ namespace trng {
 #else
         if (by_Gamma_a) {
 #endif
-#if __cplusplus >= 201703L
-          if constexpr (numeric_limits<T>::digits10 > 20) {
-#else
-          if (numeric_limits<T>::digits10 > 20) {
-#endif
-            if (a > 28 and x > T(3) / T(10) * a and x < T(235) / T(100) * a)
-              return GammaQ_asympt(a, x);
-          } else {
-            if (a > 12 and x > T(3) / T(10) * a and x < T(235) / T(100) * a)
-              return GammaQ_asympt(a, x);
-          }
+          if (a > numeric_limits<T>::digits10 and x > T(3) / T(10) * a and
+              x < T(235) / T(100) * a)
+            return GammaQ_asympt(a, x);
           if (x < a + 1)
             return T{1} - GammaP_ser<T, true>(a, x);
           return GammaQ_cf<T, true>(a, x);
