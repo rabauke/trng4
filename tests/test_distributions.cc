@@ -154,10 +154,10 @@ void continuous_dist_test_icdf(const dist &d) {
   using result_type = typename dist::result_type;
   const auto eps{256 * std::numeric_limits<result_type>::epsilon()};
   std::vector<result_type> p_values;
-  p_values.push_back(result_type(1) / result_type(2));
+  p_values.push_back(result_type{1} / result_type{2});
   for (int i{2}; i < std::numeric_limits<result_type>::digits; ++i) {
-    p_values.push_back(result_type(0) + std::pow(p_values[0], i));
-    p_values.push_back(result_type(1) - std::pow(p_values[0], i));
+    p_values.push_back(result_type{0} + std::pow(p_values[0], result_type(i)));
+    p_values.push_back(result_type{1} - std::pow(p_values[0], result_type(i)));
   }
   std::sort(p_values.begin(), p_values.end());
   for (const auto p : p_values) {
