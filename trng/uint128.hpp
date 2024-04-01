@@ -54,29 +54,29 @@ namespace trng {
       return result;
     }
 #else
-    uint64_t m_lo{0};
-    uint64_t m_hi{0};
+    std::uint64_t m_lo{0};
+    std::uint64_t m_hi{0};
 
-    static uint128 create(uint64_t hi, uint64_t lo) { return uint128{hi, lo}; }
+    static uint128 create(std::uint64_t hi, std::uint64_t lo) { return uint128{hi, lo}; }
 #endif
 
   public:
     uint128() = default;
 
 #if defined __SIZEOF_INT128__
-    explicit uint128(uint64_t lo) { value = lo; }
+    explicit uint128(std::uint64_t lo) { value = lo; }
 #else
-    explicit uint128(uint64_t lo) : m_lo{lo} {}
+    explicit uint128(std::uint64_t lo) : m_lo{lo} {}
 #endif
 
 #if defined __SIZEOF_INT128__
-    explicit uint128(uint64_t hi, uint64_t lo) {
+    explicit uint128(std::uint64_t hi, std::uint64_t lo) {
       value = hi;
       value <<= 64;
       value |= lo;
     }
 #else
-    explicit uint128(uint64_t hi, uint64_t lo) : m_lo{lo}, m_hi{hi} {}
+    explicit uint128(std::uint64_t hi, std::uint64_t lo) : m_lo{lo}, m_hi{hi} {}
 #endif
 
     std::uint64_t lo() const {
@@ -234,19 +234,19 @@ namespace trng {
       *this += m1;
       const uint128 m2{(lo0 * other_lo1) >> 32, (lo0 * other_lo1) << 32};
       *this += m2;
-      const u_int64_t m3{hi0 * other_lo0};
+      const std::uint64_t m3{hi0 * other_lo0};
       this->m_hi += m3;
-      const u_int64_t m4{lo0 * other_hi0};
+      const std::uint64_t m4{lo0 * other_hi0};
       this->m_hi += m4;
-      const u_int64_t m5{lo1 * other_lo1};
+      const std::uint64_t m5{lo1 * other_lo1};
       this->m_hi += m5;
-      const u_int64_t m6{(hi1 * other_lo0) << 32};
+      const std::uint64_t m6{(hi1 * other_lo0) << 32};
       this->m_hi += m6;
-      const u_int64_t m7{(lo0 * other_hi1) << 32};
+      const std::uint64_t m7{(lo0 * other_hi1) << 32};
       this->m_hi += m7;
-      const u_int64_t m8{(hi0 * other_lo1) << 32};
+      const std::uint64_t m8{(hi0 * other_lo1) << 32};
       this->m_hi += m8;
-      const u_int64_t m9{(lo1 * other_hi0) << 32};
+      const std::uint64_t m9{(lo1 * other_hi0) << 32};
       this->m_hi += m9;
       return *this;
 #endif
