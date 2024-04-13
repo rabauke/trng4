@@ -41,6 +41,7 @@
 #include <trng/lcg64.hpp>
 #include <trng/lcg64_shift.hpp>
 #include <trng/lcg64_count_shift.hpp>
+#include <trng/count128_lcg_shift.hpp>
 #include <trng/mrg2.hpp>
 #include <trng/mrg3.hpp>
 #include <trng/mrg3s.hpp>
@@ -147,6 +148,7 @@ void test_ranges_impl() {
 
 TEMPLATE_TEST_CASE("engines", "",                                            //
                    trng::lcg64, trng::lcg64_shift, trng::lcg64_count_shift,  //
+                   trng::count128_lcg_shift,                                 //
                    trng::mrg2, trng::mrg3, trng::mrg3s, trng::mrg4, trng::mrg5,
                    trng::mrg5s,  //
                    trng::yarn2, trng::yarn3, trng::yarn3s, trng::yarn4, trng::yarn5,
@@ -284,6 +286,7 @@ TEMPLATE_TEST_CASE("engines", "",                                            //
 
 TEMPLATE_TEST_CASE("parallel engines", "",                                   //
                    trng::lcg64, trng::lcg64_shift, trng::lcg64_count_shift,  //
+                   trng::count128_lcg_shift,                                 //
                    trng::mrg2, trng::mrg3, trng::mrg3s, trng::mrg4, trng::mrg5,
                    trng::mrg5s,  //
                    trng::yarn2, trng::yarn3, trng::yarn3s, trng::yarn4, trng::yarn5,
