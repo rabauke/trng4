@@ -395,7 +395,7 @@ TEST_CASE("uint128 bitwise shift operators") {
     trng::uint128 a{a_b_y.a};
     int b{a_b_y.b};
     trng::uint128 c{a_b_y.y};
-    REQUIRE(a << b == c);
+    REQUIRE((a << b) == c);
     a <<= b;
     REQUIRE(a == c);
   }
@@ -421,7 +421,7 @@ TEST_CASE("uint128 bitwise shift operators") {
     trng::uint128 a{a_b_y.a};
     int b{a_b_y.b};
     trng::uint128 c{a_b_y.y};
-    REQUIRE(a >> b == c);
+    REQUIRE((a >> b) == c);
     a >>= b;
     REQUIRE(a == c);
   }
