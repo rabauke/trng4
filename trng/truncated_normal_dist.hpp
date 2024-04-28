@@ -60,11 +60,11 @@ namespace trng {
 
       TRNG_CUDA_ENABLE
       void update_Phi() {
-        if (a_ != -math::numeric_limits<result_type>::infinity())
+        if (a_ > -math::numeric_limits<result_type>::infinity())
           Phi_a = math::Phi((a_ - mu_) / sigma_);
         else
           Phi_a = result_type(0);
-        if (b_ != math::numeric_limits<result_type>::infinity())
+        if (b_ < math::numeric_limits<result_type>::infinity())
           Phi_b = math::Phi((b_ - mu_) / sigma_);
         else
           Phi_b = result_type(1);
