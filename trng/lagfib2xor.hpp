@@ -237,10 +237,10 @@ namespace trng {
     status_type S;
 
     void step() {
+      constexpr auto mask_B{int_math::mask(static_cast<decltype(S.index)>(B))};
       ++S.index;
-      S.index &= int_math::mask(B);
-      S.r[S.index] =
-          S.r[(S.index - A) & int_math::mask(B)] ^ S.r[(S.index - B) & int_math::mask(B)];
+      S.index &= mask_B;
+      S.r[S.index] = S.r[(S.index - A) & mask_B] ^ S.r[(S.index - B) & mask_B];
     }
   };
 
