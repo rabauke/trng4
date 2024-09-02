@@ -60,7 +60,11 @@ struct pair {
 };
 
 
+#if defined __SIZEOF_INT128__
 TEMPLATE_TEST_CASE("uint128 cast", "", trng::portable_impl::uint128, trng::optimized_impl::uint128) {
+#else
+TEMPLATE_TEST_CASE("uint128 cast", "", trng::portable_impl::uint128) {
+#endif
   SECTION("to uint64") {
     using data_type = unary_op_tuple<TestType, std::uint64_t>;
     // clang-format off
@@ -121,7 +125,11 @@ TEMPLATE_TEST_CASE("uint128 cast", "", trng::portable_impl::uint128, trng::optim
 }
 
 
+#if defined __SIZEOF_INT128__
 TEMPLATE_TEST_CASE("uint128 math", "", trng::portable_impl::uint128, trng::optimized_impl::uint128) {
+#else
+TEMPLATE_TEST_CASE("uint128 math", "", trng::portable_impl::uint128) {
+#endif
   SECTION("arithmetic operators") {
     SECTION("unary plus") {
       using data_type = unary_op_tuple<TestType, TestType>;
@@ -300,7 +308,11 @@ TEMPLATE_TEST_CASE("uint128 math", "", trng::portable_impl::uint128, trng::optim
 }
 
 
+#if defined __SIZEOF_INT128__
 TEMPLATE_TEST_CASE("uint128 comparison operators", "", trng::portable_impl::uint128, trng::optimized_impl::uint128) {
+#else
+TEMPLATE_TEST_CASE("uint128 comparison operators", "", trng::portable_impl::uint128) {
+#endif
   SECTION("less than") {
     using data_type = pair<TestType, TestType>;
     // clang-format off
@@ -368,7 +380,11 @@ TEMPLATE_TEST_CASE("uint128 comparison operators", "", trng::portable_impl::uint
 }
 
 
+#if defined __SIZEOF_INT128__
 TEMPLATE_TEST_CASE("uint128 bitwise shift operators", "", trng::portable_impl::uint128, trng::optimized_impl::uint128) {
+#else
+TEMPLATE_TEST_CASE("uint128 bitwise shift operators", "", trng::portable_impl::uint128) {
+#endif
   SECTION("bitwise shift operators left") {
     using data_type = binary_op_tuple<TestType, int, TestType>;
     // clang-format off
@@ -424,7 +440,11 @@ TEMPLATE_TEST_CASE("uint128 bitwise shift operators", "", trng::portable_impl::u
 }
 
 
+#if defined __SIZEOF_INT128__
 TEMPLATE_TEST_CASE("uint128 i/o operations", "", trng::portable_impl::uint128, trng::optimized_impl::uint128) {
+#else
+TEMPLATE_TEST_CASE("uint128 i/o operations", "", trng::portable_impl::uint128) {
+#endif
   SECTION("decimal output") {
     using data_type = unary_op_tuple<TestType, std::string>;
     // clang-format off
