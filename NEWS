@@ -1,5 +1,5 @@
-For version 4.0 Tina's Random Number Generators Library was rewitten
-from scatch and got a new interface. This interface was inspired by
+For version 4.0 Tina's Random Number Generators Library was rewritten
+from scratch and got a new interface. This interface was inspired by
 "Random Number Generation in C++0X: A Comprehensive Proposal" by
 Walter E. Brown, Mark Fischler, Jim Kowalkowski and Marc Paterno.
 This proposal describes an extensible pseudorandom number generator
