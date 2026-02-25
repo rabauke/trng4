@@ -1,6 +1,6 @@
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 
-find_package(Boost)
+find_package(Boost CONFIG)
 find_package(MPI)
 find_package(OpenMP)
 find_package(TBB)
