@@ -41,7 +41,7 @@
 #include <sstream>
 #include <algorithm>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include <trng/uniform_dist.hpp>
 #include <trng/uniform01_dist.hpp>

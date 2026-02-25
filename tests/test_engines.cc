@@ -38,7 +38,7 @@
 #include <ciso646>
 #endif
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include <trng/lcg64.hpp>
 #include <trng/lcg64_shift.hpp>

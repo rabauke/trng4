@@ -31,7 +31,7 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include <iostream>
 #include <iomanip>
 #include <sstream>

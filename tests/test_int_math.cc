@@ -40,7 +40,7 @@
 #include <ciso646>
 #endif
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include <trng/int_math.hpp>
 
