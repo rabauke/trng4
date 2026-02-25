@@ -45,7 +45,9 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
+#if defined _MSC_VER && __cpluplus <= 201703
 #include <ciso646>
+#endif
 
 namespace trng {
 

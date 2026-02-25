@@ -35,7 +35,9 @@
 #define TRNG_UINT128_HPP
 
 #include <cstdint>
+#if defined _MSC_VER && __cpluplus <= 201703
 #include <ciso646>
+#endif
 #include <ostream>
 #include <istream>
 #include <trng/int_types.hpp>

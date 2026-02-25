@@ -40,7 +40,9 @@
 #include <ostream>
 #include <istream>
 #include <cerrno>
+#if defined _MSC_VER && __cpluplus <= 201703
 #include <ciso646>
+#endif
 
 namespace trng {
 

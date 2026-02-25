@@ -37,7 +37,9 @@
 #include <sstream>
 #include <functional>
 #include <map>
+#if defined _MSC_VER && __cpluplus <= 201703
 #include <ciso646>
+#endif
 #include <trng/uniform01_dist.hpp>
 #include <trng/lcg64.hpp>
 #include <trng/lcg64_shift.hpp>

@@ -36,7 +36,9 @@
 
 #include <vector>
 #include <cstddef>
+#if defined _MSC_VER && __cpluplus <= 201703
 #include <ciso646>
+#endif
 #include <iostream>
 #include <type_traits>
 #include <trng/utility.hpp>

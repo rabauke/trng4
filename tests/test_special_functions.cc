@@ -38,7 +38,9 @@
 #include <cmath>
 #include <sstream>
 #include <iomanip>
+#if defined _MSC_VER && __cpluplus <= 201703
 #include <ciso646>
+#endif
 
 #include <catch2/catch.hpp>
 
