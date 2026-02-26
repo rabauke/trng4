@@ -38,7 +38,7 @@
 #include <trng/limits.hpp>
 #include <cstddef>
 #include <cfloat>
-#if defined _MSC_VER && __cpluplus <= 201703
+#if defined _MSC_VER && __cplusplus <= 201703
 #include <ciso646>
 #endif
 
