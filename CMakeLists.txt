@@ -14,6 +14,7 @@ endif()
 
 option(TRNG_ENABLE_TESTS "Enable/Disable the compilation of the TRNG tests" ON)
 option(TRNG_ENABLE_EXAMPLES "Enable/Disable the compilation of the TRNG examples" ON)
+option(USE_EXTERNAL_CATCH2 "Use system installed Catch2" OFF)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wmaybe-uninitialized")
@@ -42,7 +43,11 @@ configure_package_config_file("cmake/Config.cmake.in" "${project_pkg_config}" IN
 
 add_subdirectory(trng)
 if(TRNG_ENABLE_TESTS)
-  add_subdirectory(external/Catch2)
+  if(USE_EXTERNAL_CATCH)
+    find_package(Catch2 3 REQUIRED)
+  else()
+    add_subdirectory(external/Catch2)
+  endif()
   add_subdirectory(tests)
 endif()
 if(TRNG_ENABLE_EXAMPLES)
