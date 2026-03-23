@@ -41,6 +41,8 @@
 #include <trng/utility.hpp>
 #include <cerrno>
 #include <algorithm>
+#include <array>
+#include <utility>
 #if defined _MSC_VER && __cplusplus <= 201703
 #include <ciso646>
 #endif
@@ -255,7 +257,7 @@ namespace trng {
         const T itmax{numeric_limits<T>::digits};
         const T eps{4 * numeric_limits<T>::epsilon()};
         const T min{4 * numeric_limits<T>::min()};
-        // set up for evaluating continued fraction by modified Lentz's method
+        // set up for evaluating a continued fraction by modified Lentz's method
         T del, bi{x + 1 - a}, ci{1 / min}, di{1 / bi}, h{di}, i{0};
         do {  // iterate
           ++i;
@@ -284,11 +286,8 @@ namespace trng {
 
       template<typename T>
       class GammaPQ_asympt_coefficients {
-        static constexpr T abs(T x) { return x < 0 ? -x : x; }
-
-      public:
         // clang-format off
-        static constexpr T d[]{
+        static constexpr std::array<T, 50> d{
           T(1.l),                                          // 1
           T(-3.333333333333333333333333333333333333e-01l), // -1 / 3
           T(8.333333333333333333333333333333333333e-02l),  // 1 / 12
@@ -342,9 +341,19 @@ namespace trng {
         };
         // clang-format on
 
-        static constexpr std::size_t n = sizeof(d) / sizeof(d[0]);
+        static constexpr T abs(T x) { return x < 0 ? -x : x; }
 
-        static constexpr T get(std::size_t index) { return d[index]; }
+        static constexpr std::pair<T, std::size_t> get_impl(std::size_t index) {
+          return {index < d.size() ? d[index] : T(0), d.size()};
+        }
+
+
+      public:
+        static constexpr std::size_t n = get_impl(0).second;
+
+
+        static constexpr T get(std::size_t index) { return get_impl(index).first; }
+
 
         static constexpr std::size_t max_index(std::size_t index = n) {
           return index < 1 ? index
@@ -356,7 +365,7 @@ namespace trng {
 
 
       template<typename T>
-      constexpr T GammaPQ_asympt_coefficients<T>::d[];
+      constexpr std::array<T, 50> GammaPQ_asympt_coefficients<T>::d;
 
 
       template<typename T>
