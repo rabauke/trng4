@@ -4,10 +4,6 @@ project(trng4 VERSION 4.28 DESCRIPTION "pseudo random number generator library")
 include(GNUInstallDirs)
 enable_testing()
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()

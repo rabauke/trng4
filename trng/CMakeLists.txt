@@ -100,6 +100,7 @@ set(SOURCE_FILES
 add_library(trng4 ${SOURCE_FILES})
 add_library(trng4::trng4 ALIAS trng4)
 set_target_properties(trng4 PROPERTIES EXPORT_NAME trng4)
+target_compile_features(trng4 PUBLIC cxx_std_11)
 
 generate_export_header(trng4 EXPORT_FILE_NAME trng_export.hpp)
 target_include_directories(trng4 PUBLIC
