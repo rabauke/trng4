@@ -39,7 +39,6 @@
 #include <trng/utility.hpp>
 #include <trng/int_types.hpp>
 #include <trng/generate_canonical.hpp>
-#include <trng/linear_algebra.hpp>
 #include <climits>
 #include <stdexcept>
 #include <ostream>
@@ -74,21 +73,6 @@ namespace trng {
       explicit status_type(result_type r0, result_type r1, result_type r2, result_type r3)
           : r{r0, r1, r2, r3} {}
 
-    private:
-      struct eye {};
-      explicit status_type(int i, eye) : status_type() {
-        const result_type mask{result_type(1) << 63};
-        if (i < 64)
-          *this = status_type{mask >> i, 0, 0, 0};
-        else if (i < 2 * 64)
-          *this = status_type{0, mask >> (i - 64), 0, 0};
-        else if (i < 3 * 64)
-          *this = status_type{0, 0, mask >> (i - 2 * 64), 0};
-        else
-          *this = status_type{0, 0, 0, mask >> (i - 3 * 64)};
-      }
-
-    public:
       friend class xoshiro256plus;
 
       // Equality comparable concept
@@ -119,20 +103,6 @@ namespace trng {
           S = S_new;
         in.flags(flags);
         return in;
-      }
-
-      vector<GF2, 256> to_vector() const {
-        vector<GF2, 256> res;
-        const result_type mask{result_type(1) << 63};
-        for (int i{0}; i < 64; ++i)
-          res(i) = GF2(((r[0] << i) & mask) > 0);
-        for (int i{0}; i < 64; ++i)
-          res(i + 64) = GF2(((r[1] << i) & mask) > 0);
-        for (int i{0}; i < 64; ++i)
-          res(i + 2 * 64) = GF2(((r[2] << i) & mask) > 0);
-        for (int i{0}; i < 64; ++i)
-          res(i + 3 * 64) = GF2(((r[3] << i) & mask) > 0);
-        return res;
       }
     };
 
@@ -215,6 +185,16 @@ namespace trng {
 
     TRNG_CUDA_ENABLE
     void step();
+
+    // Jumps use arithmetic in F_2[x] / (p), where p is the characteristic polynomial of the
+    // transition map: a step multiplies the state by x, so a jump by n steps multiplies it by
+    // x^n mod p (see https://prng.di.unimi.it/f2x.c)
+    TRNG_CUDA_ENABLE
+    static void mul_x(result_type[4]);
+    TRNG_CUDA_ENABLE
+    static void mul_mod(result_type[4], const result_type[4]);
+    TRNG_CUDA_ENABLE
+    void jump_poly(const result_type[4]);
   };
 
   // Inline and template methods
@@ -243,62 +223,75 @@ namespace trng {
 
   // Parallel random number generator concept
 
+  // a <- a * x mod p
+  TRNG_CUDA_ENABLE
+  inline void xoshiro256plus::mul_x(result_type a[4]) {
+    // the 256 low-order coefficients of the characteristic polynomial of xoshiro256
+    const result_type p[4]{0x9d116f2bb0f0f001u, 0x0280002bcefd1a5eu, 0x04b4edcf26259f85u,
+                           0x0003c03c3f3ecb19u};
+    const result_type carry{a[3] >> 63u};
+    a[3] = (a[3] << 1u) | (a[2] >> 63u);
+    a[2] = (a[2] << 1u) | (a[1] >> 63u);
+    a[1] = (a[1] << 1u) | (a[0] >> 63u);
+    a[0] <<= 1u;
+    if (carry != 0)
+      for (int i{0}; i < 4; ++i)
+        a[i] ^= p[i];
+  }
+
+  // a <- a * b mod p, by Horner's rule on the coefficients of a
+  TRNG_CUDA_ENABLE
+  inline void xoshiro256plus::mul_mod(result_type a[4], const result_type b[4]) {
+    result_type r[4]{0, 0, 0, 0};
+    for (int k{255}; k >= 0; --k) {
+      mul_x(r);
+      if ((a[k / 64] >> (k % 64)) & 1u)
+        for (int i{0}; i < 4; ++i)
+          r[i] ^= b[i];
+    }
+    for (int i{0}; i < 4; ++i)
+      a[i] = r[i];
+  }
+
+  // applies the polynomial poly (x^n mod p for a jump by n steps) to the state
+  TRNG_CUDA_ENABLE
+  inline void xoshiro256plus::jump_poly(const result_type poly[4]) {
+    result_type t[4]{0, 0, 0, 0};
+    for (int k{0}; k < 256; ++k) {
+      if ((poly[k / 64] >> (k % 64)) & 1u)
+        for (int i{0}; i < 4; ++i)
+          t[i] ^= S.r[i];
+      step();
+    }
+    for (int i{0}; i < 4; ++i)
+      S.r[i] = t[i];
+  }
+
   TRNG_CUDA_ENABLE
   inline void xoshiro256plus::jump2(unsigned int s) {
-    matrix<GF2, 256> M;
-    for (int i{0}; i < 256; ++i) {
-      xoshiro256plus R;
-      R.S = status_type(i, status_type::eye{});
-      R.step();
-      const vector<GF2, 256> v{R.S.to_vector()};
-      for (int j{0}; j < 256; ++j)
-        M(j, i) = v(j);
-    }
-
+    result_type poly[4]{2, 0, 0, 0};  // x
     for (unsigned int i{0}; i < s; ++i)
-      M = power(M, 2);
-    const vector<GF2, 256> v0{S.to_vector()};
-    const vector<GF2, 256> v1{M * v0};
-
-    for (int j{0}; j < 4; ++j) {
-      result_type r_j{0};
-      for (int i{0}; i < 64; ++i) {
-        r_j <<= 1;
-        if (static_cast<bool>(v1(i + 64 * j)))
-          r_j |= 1;
-      }
-      S.r[j] = r_j;
-    }
+      mul_mod(poly, poly);
+    jump_poly(poly);
   }
 
   TRNG_CUDA_ENABLE
   inline void xoshiro256plus::jump(unsigned long long s) {
-    if (s < 16) {
-      for (unsigned int i{0}; i < s; ++i)
+    if (s < 8192) {  // stepping is faster for short distances
+      for (unsigned long long i{0}; i < s; ++i)
         step();
     } else {
-      matrix<GF2, 256> M;
-      for (int i{0}; i < 256; ++i) {
-        xoshiro256plus R;
-        R.S = status_type(i, status_type::eye{});
-        R.step();
-        const vector<GF2, 256> v{R.S.to_vector()};
-        for (int j{0}; j < 256; ++j)
-          M(j, i) = v(j);
+      // square-and-multiply on the bits of s
+      result_type poly[4]{1, 0, 0, 0};
+      int k{63};
+      while (((s >> k) & 1u) == 0)
+        --k;
+      for (; k >= 0; --k) {
+        mul_mod(poly, poly);
+        if ((s >> k) & 1u)
+          mul_x(poly);
       }
-
-      const vector<GF2, 256> v0{S.to_vector()};
-      const vector<GF2, 256> v1{power(M, s) * v0};
-
-      for (int j{0}; j < 4; ++j) {
-        result_type r_j{0};
-        for (int i{0}; i < 64; ++i) {
-          r_j <<= 1;
-          if (static_cast<bool>(v1(i + 64 * j)))
-            r_j |= 1;
-        }
-        S.r[j] = r_j;
-      }
+      jump_poly(poly);
     }
   }
 
