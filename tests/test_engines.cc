@@ -328,3 +328,21 @@ TEMPLATE_TEST_CASE("parallel engines", "",                                   //
     }
   }
 }
+
+
+TEMPLATE_TEST_CASE("block splitting engines", "", trng::xoshiro256plus) {
+  SECTION("jump2") {
+    // two engines with equal state
+    GIVEN("two engines with equal state") {
+      TestType r1, r2;
+      const long i{GENERATE(range(0l, 20l))};
+      const long n{1l << i};
+      WHEN("jump ahead one, advance other") {
+        r1.jump2(i);
+        for (long j{0l}; j < n; ++j)
+          r2();
+        THEN("both engines have equal state") { REQUIRE(r1 == r2); }
+      }
+    }
+  }
+}
