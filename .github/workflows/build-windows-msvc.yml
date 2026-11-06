@@ -6,15 +6,13 @@ jobs:
     strategy:
       matrix:
         build-type: [ Debug, Release ]
-    runs-on: windows-2022
+    runs-on: windows-2025-vs2026
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: recursive
-      - name: Install build dependencies
-        uses: seanmiddleditch/gha-setup-ninja@master
-      - name: Setup environment
+      - name: Set up MSVC environment
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: amd64
