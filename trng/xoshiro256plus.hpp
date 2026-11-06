@@ -186,15 +186,29 @@ namespace trng {
     TRNG_CUDA_ENABLE
     void step();
 
-    // Jumps use arithmetic in F_2[x] / (p), where p is the characteristic polynomial of the
-    // transition map: a step multiplies the state by x, so a jump by n steps multiplies it by
-    // x^n mod p (see https://prng.di.unimi.it/f2x.c)
+    // The state transition is a linear map over F_2. Its characteristic polynomial p lets us
+    // represent a jump by n steps with x^n mod p: evaluating that polynomial at the transition
+    // map gives the same result as applying the map n times (see
+    // https://prng.di.unimi.it/f2x.c).
+
+    struct polynomial {
+      result_type c[4]{0, 0, 0, 0};
+
+      TRNG_CUDA_ENABLE
+      result_type &operator[](const int i) { return c[i]; }
+
+      TRNG_CUDA_ENABLE
+      const result_type &operator[](const int i) const { return c[i]; }
+    };
+
     TRNG_CUDA_ENABLE
-    static void mul_x(result_type[4]);
+    static void mul_x(polynomial &);
+
     TRNG_CUDA_ENABLE
-    static void mul_mod(result_type[4], const result_type[4]);
+    static void mul_mod(polynomial &, const polynomial &);
+
     TRNG_CUDA_ENABLE
-    void jump_poly(const result_type[4]);
+    void jump_poly(const polynomial &);
   };
 
   // Inline and template methods
@@ -223,12 +237,13 @@ namespace trng {
 
   // Parallel random number generator concept
 
-  // a <- a * x mod p
+  // Multiply a by x modulo p. The four words store coefficients in increasing degree order;
+  // when the x^256 term appears, reduce it using the characteristic polynomial p.
   TRNG_CUDA_ENABLE
-  inline void xoshiro256plus::mul_x(result_type a[4]) {
-    // the 256 low-order coefficients of the characteristic polynomial of xoshiro256
-    const result_type p[4]{0x9d116f2bb0f0f001u, 0x0280002bcefd1a5eu, 0x04b4edcf26259f85u,
-                           0x0003c03c3f3ecb19u};
+  inline void xoshiro256plus::mul_x(polynomial &a) {
+    // The 256 low-order coefficients of the characteristic polynomial of xoshiro256.
+    const polynomial p{0x9d116f2bb0f0f001u, 0x0280002bcefd1a5eu, 0x04b4edcf26259f85u,
+                       0x0003c03c3f3ecb19u};
     const result_type carry{a[3] >> 63u};
     a[3] = (a[3] << 1u) | (a[2] >> 63u);
     a[2] = (a[2] << 1u) | (a[1] >> 63u);
@@ -239,10 +254,10 @@ namespace trng {
         a[i] ^= p[i];
   }
 
-  // a <- a * b mod p, by Horner's rule on the coefficients of a
+  // Multiply a by b modulo p using Horner's rule on a's coefficients. In F_2, addition is XOR.
   TRNG_CUDA_ENABLE
-  inline void xoshiro256plus::mul_mod(result_type a[4], const result_type b[4]) {
-    result_type r[4]{0, 0, 0, 0};
+  inline void xoshiro256plus::mul_mod(polynomial &a, const polynomial &b) {
+    polynomial r;
     for (int k{255}; k >= 0; --k) {
       mul_x(r);
       if ((a[k / 64] >> (k % 64)) & 1u)
@@ -253,10 +268,11 @@ namespace trng {
       a[i] = r[i];
   }
 
-  // applies the polynomial poly (x^n mod p for a jump by n steps) to the state
+  // Apply poly to the state: coefficient k selects the state after k transitions, and XOR
+  // combines the selected states. For a jump by n steps, poly is x^n mod p.
   TRNG_CUDA_ENABLE
-  inline void xoshiro256plus::jump_poly(const result_type poly[4]) {
-    result_type t[4]{0, 0, 0, 0};
+  inline void xoshiro256plus::jump_poly(const polynomial &poly) {
+    polynomial t;
     for (int k{0}; k < 256; ++k) {
       if ((poly[k / 64] >> (k % 64)) & 1u)
         for (int i{0}; i < 4; ++i)
@@ -268,8 +284,9 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  inline void xoshiro256plus::jump2(unsigned int s) {
-    result_type poly[4]{2, 0, 0, 0};  // x
+  inline void xoshiro256plus::jump2(const unsigned int s) {
+    // Repeated squaring gives x^(2^s) mod p, the polynomial for a jump of 2^s steps.
+    polynomial poly{2, 0, 0, 0};  // x
     for (unsigned int i{0}; i < s; ++i)
       mul_mod(poly, poly);
     jump_poly(poly);
@@ -281,8 +298,8 @@ namespace trng {
       for (unsigned long long i{0}; i < s; ++i)
         step();
     } else {
-      // square-and-multiply on the bits of s
-      result_type poly[4]{1, 0, 0, 0};
+      // Binary exponentiation computes x^s mod p, the polynomial for a jump of s steps.
+      polynomial poly{1, 0, 0, 0};
       int k{63};
       while (((s >> k) & 1u) == 0)
         --k;
@@ -296,7 +313,9 @@ namespace trng {
   }
 
   TRNG_CUDA_ENABLE
-  inline void xoshiro256plus::discard(unsigned long long s) { jump(s); }
+  inline void xoshiro256plus::discard(unsigned long long s) {
+    jump(s);
+  }
 
 }  // namespace trng
 
