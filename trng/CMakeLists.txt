@@ -45,6 +45,11 @@ set(HEADER_FILES
     mrg_status.hpp
     mt19937_64.hpp
     mt19937.hpp
+    mwc_detail.hpp
+    mwc128x.hpp
+    mwc192x.hpp
+    mwc128x32.hpp
+    mwc64x32.hpp
     negative_binomial_dist.hpp
     normal_dist.hpp
     pareto_dist.hpp
@@ -88,6 +93,10 @@ set(SOURCE_FILES
     mrg5s.cc
     mt19937_64.cc
     mt19937.cc
+    mwc128x.cc
+    mwc192x.cc
+    mwc128x32.cc
+    mwc64x32.cc
     xoshiro256plus.cc
     yarn2.cc
     yarn3.cc
