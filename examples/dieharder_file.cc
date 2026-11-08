@@ -56,9 +56,19 @@
 #include <trng/yarn4.hpp>
 #include <trng/yarn5.hpp>
 #include <trng/yarn5s.hpp>
-#include "trng/mt19937.hpp"
-#include "trng/mt19937_64.hpp"
-#include "trng/count128_lcg_shift.hpp"
+#include <trng/lagfib2xor.hpp>
+#include <trng/lagfib4xor.hpp>
+#include <trng/lagfib2plus.hpp>
+#include <trng/lagfib4plus.hpp>
+#include <trng/mt19937.hpp>
+#include <trng/mt19937_64.hpp>
+#include <trng/count128_lcg_shift.hpp>
+#include <trng/xoshiro256plus.hpp>
+#include <trng/minstd.hpp>
+#include <trng/mwc64x32.hpp>
+#include <trng/mwc128x32.hpp>
+#include <trng/mwc128x.hpp>
+#include <trng/mwc192x.hpp>
 
 
 template<typename T>
@@ -124,6 +134,16 @@ int main(int argc, char *argv[]) {
   add_generator<trng::mt19937>(func_map);
   add_generator<trng::mt19937_64>(func_map);
   add_generator<trng::count128_lcg_shift>(func_map);
+  add_generator<trng::lagfib2xor_521_64>(func_map);
+  add_generator<trng::lagfib4xor_521_32>(func_map);
+  add_generator<trng::lagfib2plus_521_32>(func_map);
+  add_generator<trng::lagfib4plus_521_64>(func_map);
+  add_generator<trng::xoshiro256plus>(func_map);
+  add_generator<trng::minstd>(func_map);
+  add_generator<trng::mwc64x32>(func_map);
+  add_generator<trng::mwc128x32>(func_map);
+  add_generator<trng::mwc128x>(func_map);
+  add_generator<trng::mwc192x>(func_map);
 
   try {
     if (argc != 3 and argc != 4)
