@@ -39,7 +39,7 @@ configure_package_config_file("cmake/Config.cmake.in" "${project_pkg_config}" IN
 
 add_subdirectory(trng)
 if(TRNG_ENABLE_TESTS)
-  if(USE_EXTERNAL_CATCH)
+  if(USE_EXTERNAL_CATCH2)
     find_package(Catch2 3 REQUIRED)
   else()
     add_subdirectory(external/Catch2)
