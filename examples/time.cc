@@ -42,12 +42,17 @@
 #include <trng/lcg64_shift.hpp>
 #include <trng/lcg64_count_shift.hpp>
 #include <trng/count128_lcg_shift.hpp>
+#include <trng/minstd.hpp>
 #include <trng/mrg2.hpp>
 #include <trng/mrg3.hpp>
 #include <trng/mrg3s.hpp>
 #include <trng/mrg4.hpp>
 #include <trng/mrg5.hpp>
 #include <trng/mrg5s.hpp>
+#include <trng/mwc128x.hpp>
+#include <trng/mwc128x32.hpp>
+#include <trng/mwc192x.hpp>
+#include <trng/mwc64x32.hpp>
 #include <trng/yarn2.hpp>
 #include <trng/yarn3.hpp>
 #include <trng/yarn3s.hpp>
@@ -235,6 +240,10 @@ int main() {
       time_main(r, "trng::count128_lcg_shift");
     }
     {
+      trng::minstd r;
+      time_main(r, "trng::minstd");
+    }
+    {
       trng::mrg2 r;
       time_main(r, "trng::mrg2");
     }
@@ -257,6 +266,22 @@ int main() {
     {
       trng::mrg5s r;
       time_main(r, "trng::mrg5s");
+    }
+    {
+      trng::mwc128x r;
+      time_main(r, "trng::mwc128x");
+    }
+    {
+      trng::mwc128x32 r;
+      time_main(r, "trng::mwc128x32");
+    }
+    {
+      trng::mwc192x r;
+      time_main(r, "trng::mwc192x");
+    }
+    {
+      trng::mwc64x32 r;
+      time_main(r, "trng::mwc64x32");
     }
     {
       trng::yarn2 r;
