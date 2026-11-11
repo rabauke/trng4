@@ -41,6 +41,8 @@
 #if defined _MSC_VER && __cplusplus <= 201703
 #include <ciso646>
 #endif
+#include <type_traits>
+
 
 namespace trng {
 
@@ -111,15 +113,15 @@ namespace trng {
         const result_type x{r() - prng_t::min()};
         if (int_ok)
           return static_cast<ret_t>(static_cast<int>(x));
-        else if (long_ok)
+        if (long_ok)
           return static_cast<ret_t>(static_cast<long>(x));
-        else if (long_long_ok)
+        if (long_long_ok)
           return static_cast<ret_t>(static_cast<long long>(x));
-        else if (use_ll_of_shifted)
+        if (use_ll_of_shifted)
           return static_cast<ret_t>(static_cast<long long>(x >> 1));
-        else
-          return static_cast<ret_t>(x);
+        return static_cast<ret_t>(x);
       }
+
       TRNG_CUDA_ENABLE
       static ret_t variate_max() {
         const ret_t scale_per_step{static_cast<ret_t>(domain_max) + 1};
@@ -129,9 +131,12 @@ namespace trng {
           ret = ret * scale_per_step + max_addin;
         return ret;
       }
+
       TRNG_CUDA_ENABLE
       static ret_t variate(prng_t &r) {
-        static_assert(prng_t::min() >= 0 and prng_t::max() > prng_t::min(),
+        static_assert(((std::is_signed<result_type>::value and prng_t::min() >= 0) or
+                       std::is_unsigned<result_type>::value) and
+                          prng_t::max() > prng_t::min(),
                       "min max out of range");  // min and/or max out of spec?
         static_assert(prng_t::max() - prng_t::min() <= ~0ull,
                       "min max have exotic values/types");  // Bits, Holes incorrect otherwise
@@ -143,12 +148,14 @@ namespace trng {
           ret = ret * scale_per_step + addin(r);
         return ret;
       }
+
       TRNG_CUDA_ENABLE
       static ret_t eps() {
         const ret_t native_eps{math::numeric_limits<ret_t>::epsilon()};
         const ret_t domain_eps{ret_t(1) / domain_max};
         return native_eps >= domain_eps or requested_bits != 1 ? native_eps : domain_eps;
       }
+
       TRNG_CUDA_ENABLE
       static ret_t cc_norm() { return ret_t(1) / variate_max(); }
       TRNG_CUDA_ENABLE

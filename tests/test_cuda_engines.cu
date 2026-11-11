@@ -35,6 +35,7 @@
 #include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <utility>
 
 #include <cuda_runtime.h>
 
@@ -65,16 +66,6 @@ namespace {
   constexpr unsigned int thread_count{32};
   constexpr unsigned int sequence_length{256};
 
-  template<typename Engine>
-  auto seed_if_supported(Engine &engine, int) -> decltype(engine.seed(12345ul), void()) {
-    engine.seed(12345ul);
-  }
-
-
-  template<typename Engine>
-  void seed_if_supported(Engine &, long) {
-  }
-
 
   template<typename Engine>
   __global__ void generate_sequences(Engine *engines, typename Engine::result_type *values) {
@@ -86,7 +77,7 @@ namespace {
   }
 
 
-  void check_cuda(cudaError_t status, const char *operation) {
+  void check_cuda(const cudaError_t status, const char *operation) {
     if (status != cudaSuccess)
       throw std::runtime_error(std::string(operation) + ": " + cudaGetErrorString(status));
   }
@@ -100,13 +91,13 @@ namespace {
 
     std::array<Engine, thread_count> host_engines;
     for (auto &engine : host_engines)
-      seed_if_supported(engine, 0);
+      engine.seed(0ul);
 
-    Engine reference{};
-    seed_if_supported(reference, 0);
+    Engine engine;
+    engine.seed(0ul);
     std::array<result_type, sequence_length> expected{};
     for (auto &value : expected)
-      value = reference();
+      value = engine();
 
     Engine *device_engines{};
     result_type *device_values{};

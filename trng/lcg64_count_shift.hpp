@@ -345,8 +345,11 @@ namespace trng {
   TRNG_CUDA_ENABLE
   inline lcg64_count_shift::result_type lcg64_count_shift::mult_modulo(
       lcg64_count_shift::result_type a, lcg64_count_shift::result_type b) {
-    if (a > b)
-      std::swap(a, b);
+    if (a > b) {
+      const lcg64_count_shift::result_type tmp{b};
+      b = a;
+      a = tmp;
+    }
     lcg64_count_shift::result_type result{0}, x{b};
     while (a > 0) {
       if ((a & 1u) == 1u) {
