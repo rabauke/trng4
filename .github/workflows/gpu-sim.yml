@@ -40,7 +40,7 @@ jobs:
         run: |
           cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CUDA_COMPILER=/usr/local/cuda-13.0/bin/nvcc \
+            -DCMAKE_CUDA_COMPILER=/usr/local/cuda-13.5/bin/nvcc \
             -DCMAKE_CUDA_ARCHITECTURES=90-virtual \
             -DCMAKE_CUDA_RUNTIME_LIBRARY=Shared
 
