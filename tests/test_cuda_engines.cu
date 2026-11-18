@@ -84,7 +84,7 @@ namespace {
 
 
   template<typename Engine>
-  void test_engine(const char *name) {
+  void test_engine() {
     static_assert(std::is_trivially_copyable<Engine>::value,
                   "CUDA tests require trivially copyable engine state");
     using result_type = typename Engine::result_type;
@@ -123,11 +123,11 @@ namespace {
     for (unsigned int thread{0}; thread < thread_count; ++thread) {
       for (unsigned int i{0}; i < sequence_length; ++i) {
         if (actual[thread * sequence_length + i] != expected[i])
-          throw std::runtime_error(std::string(name) + " differs at thread " +
+          throw std::runtime_error(std::string(engine.name()) + " differs at thread " +
                                    std::to_string(thread) + ", output " + std::to_string(i));
       }
     }
-    std::cout << name << ": passed\n";
+    std::cout << engine.name() << ": passed\n";
   }
 
 }  // namespace
@@ -144,26 +144,26 @@ int main() {
 
   try {
     check_cuda(device_status, "cudaGetDeviceCount");
-    test_engine<trng::lcg64>("lcg64");
-    test_engine<trng::lcg64_shift>("lcg64_shift");
-    test_engine<trng::lcg64_count_shift>("lcg64_count_shift");
-    test_engine<trng::mrg2>("mrg2");
-    test_engine<trng::mrg3>("mrg3");
-    test_engine<trng::mrg3s>("mrg3s");
-    test_engine<trng::mrg4>("mrg4");
-    test_engine<trng::mrg5>("mrg5");
-    test_engine<trng::mrg5s>("mrg5s");
-    test_engine<trng::yarn2>("yarn2");
-    test_engine<trng::yarn3>("yarn3");
-    test_engine<trng::yarn3s>("yarn3s");
-    test_engine<trng::yarn4>("yarn4");
-    test_engine<trng::yarn5>("yarn5");
-    test_engine<trng::yarn5s>("yarn5s");
-    test_engine<trng::xoshiro256plus>("xoshiro256plus");
-    test_engine<trng::mwc64x32>("mwc64x32");
-    test_engine<trng::mwc128x32>("mwc128x32");
-    test_engine<trng::mwc128x>("mwc128x");
-    test_engine<trng::mwc192x>("mwc192x");
+    test_engine<trng::lcg64>();
+    test_engine<trng::lcg64_shift>();
+    test_engine<trng::lcg64_count_shift>();
+    test_engine<trng::mrg2>();
+    test_engine<trng::mrg3>();
+    test_engine<trng::mrg3s>();
+    test_engine<trng::mrg4>();
+    test_engine<trng::mrg5>();
+    test_engine<trng::mrg5s>();
+    test_engine<trng::yarn2>();
+    test_engine<trng::yarn3>();
+    test_engine<trng::yarn3s>();
+    test_engine<trng::yarn4>();
+    test_engine<trng::yarn5>();
+    test_engine<trng::yarn5s>();
+    test_engine<trng::xoshiro256plus>();
+    test_engine<trng::mwc64x32>();
+    test_engine<trng::mwc128x32>();
+    test_engine<trng::mwc128x>();
+    test_engine<trng::mwc192x>();
   } catch (const std::exception &error) {
     std::cerr << "CUDA engine test failed: " << error.what() << '\n';
     return 1;
