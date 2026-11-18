@@ -1,6 +1,6 @@
 name: build-ubuntu-clang
 run-name: Build TRNG4 with Clang on Ubuntu
-on: [ push, workflow_dispatch ]
+on: [ push, pull_request, workflow_dispatch ]
 jobs:
   compile-trng4:
     strategy:

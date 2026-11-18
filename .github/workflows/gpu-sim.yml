@@ -7,18 +7,7 @@ name: CUDA tests (simulated H100)
 # simulator cannot reproduce hardware-specific behavior or timing, so it
 # complements real-GPU testing and does not replace it.
 
-on:
-  workflow_dispatch:
-  pull_request:
-    branches: [ master ]
-    paths:
-      - "trng/**"
-      - "tests/**"
-      - "examples/**"
-      - "cmake/**"
-      - "external/**"
-      - "CMakeLists.txt"
-      - ".github/workflows/gpu-sim.yml"
+on: [ push, pull_request, workflow_dispatch ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -30,7 +19,7 @@ permissions:
 jobs:
   cuda-sim:
     name: CUDA 13.0 on simulated H100
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
 
     steps:
