@@ -1,0 +1,81 @@
+name: CUDA tests (simulated H100)
+
+# The hosted runners have no GPU and the other workflows install no CUDA
+# toolkit, so test_cuda_engines is never built there. This job builds TRNG
+# with CUDA and runs the whole test suite, including cuda_engines, on a
+# simulated NVIDIA H100 (https://github.com/pantheongpu/pantheonsim). A
+# simulator cannot reproduce hardware-specific behavior or timing, so it
+# complements real-GPU testing and does not replace it.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ master ]
+    paths:
+      - "trng/**"
+      - "tests/**"
+      - "examples/**"
+      - "cmake/**"
+      - "external/**"
+      - "CMakeLists.txt"
+      - ".github/workflows/gpu-sim.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  cuda-sim:
+    name: CUDA 13.0 on simulated H100
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Set up the simulated GPU and CUDA toolkit
+        uses: pantheongpu/setup-pantheonsim@ab71a07326835be678918901c340d53a83358067 # v0.1.6
+        with:
+          gpu: nvidia/h100
+          cuda-toolkit: "13.0"
+
+      # 90-virtual embeds PTX only, which the simulator runs, and the
+      # simulator needs a shared CUDA runtime (CMake defaults to static).
+      - name: Configure
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CUDA_COMPILER=/usr/local/cuda-13.0/bin/nvcc \
+            -DCMAKE_CUDA_ARCHITECTURES=90-virtual \
+            -DCMAKE_CUDA_RUNTIME_LIBRARY=Shared
+
+      - name: Build
+        run: cmake --build build -j3
+
+      # cuda_engines returns 77 (reported by ctest as skipped) when it finds
+      # no GPU, so fail the job unless it actually ran and passed.
+      - name: Test
+        shell: bash
+        working-directory: build
+        run: |
+          vgpu run --gpu nvidia/h100 ctest --output-on-failure 2>&1 | tee ctest.log
+          if grep -qE 'Skipped|Not Run' ctest.log; then
+            echo "::error::Some tests did not run (no GPU found)"
+            exit 1
+          fi
+          if ! grep -qE 'cuda_engines \.+ +Passed' ctest.log; then
+            echo "::error::cuda_engines did not pass"
+            exit 1
+          fi
+
+      - name: Run CUDA examples
+        working-directory: build/examples
+        run: |
+          vgpu run --gpu nvidia/h100 ./pi_block_cuda
+          vgpu run --gpu nvidia/h100 ./pi_leap_cuda
