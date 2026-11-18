@@ -18,8 +18,8 @@ permissions:
 
 jobs:
   cuda-sim:
-    name: CUDA 13.5 on simulated H100
-    runs-on: ubuntu-26.04
+    name: CUDA 13.0 on simulated H100
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
 
     steps:
@@ -32,7 +32,7 @@ jobs:
         uses: pantheongpu/setup-pantheonsim@ab71a07326835be678918901c340d53a83358067 # v0.1.6
         with:
           gpu: nvidia/h100
-          cuda-toolkit: "13.5"
+          cuda-toolkit: "13.0"
 
       # 90-virtual embeds PTX only, which the simulator runs, and the
       # simulator needs a shared CUDA runtime (CMake defaults to static).
@@ -40,7 +40,7 @@ jobs:
         run: |
           cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CUDA_COMPILER=/usr/local/cuda-13.5/bin/nvcc \
+            -DCMAKE_CUDA_COMPILER=/usr/local/cuda-13.0/bin/nvcc \
             -DCMAKE_CUDA_ARCHITECTURES=90-virtual \
             -DCMAKE_CUDA_RUNTIME_LIBRARY=Shared
 
